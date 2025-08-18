@@ -1,0 +1,112 @@
+/* ===== Diseño principal ===== */
+body {
+    height: 100%;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f2f5;
+}
+
+/* Sidebar */
+.sidebar {
+    height: 100vh;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--color-primario); /* color sólido */
+    color: white;
+    padding-top: 2rem;
+    box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    z-index: 1040;
+}
+
+.sidebar h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.sidebar a.fs-4 {
+    color: white;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-weight: bold;
+}
+
+.sidebar a.fs-4:hover {
+    color: var(--color-secundario);
+}
+
+/* Links principales */
+.sidebar .nav-link {
+    color: white;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: var(--color-secundario);
+    color: white;
+}
+
+/* Submenu */
+.sidebar .btn-toggle-nav a.nav-link {
+    color: #e0e0e0;
+    padding-left: 2rem;
+    font-weight: 400;
+    transition: all 0.3s ease;
+}
+
+.sidebar .btn-toggle-nav a.nav-link:hover {
+    color: white;
+    background-color: var(--color-secundario);
+    border-radius: 0.5rem;
+}
+
+/* Iconos de dropdown */
+.sidebar .bi-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+.sidebar .collapse.show + .bi-chevron-down,
+.sidebar .d-flex[aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+/* Contenido principal */
+.content {
+    margin-left: 250px;
+    padding: 2rem;
+    transition: margin-left 0.3s ease;
+}
+
+/* Header fijo */
+.header {
+    height: 60px;
+    background-color: #fff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0 1rem;
+    position: fixed;
+    top: 0;
+    left: 250px;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 1030;
+}
+
+/* Cuerpo del contenido */
+.content-body {
+    margin-top: 60px;
+}
+
+/* Hover efecto flotante para sidebar */
+.sidebar:hover {
+    box-shadow: 10px 0 20px rgba(0,0,0,0.2);
+}

@@ -1,0 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&family=Teko:wght@500&display=swap');
+
+:root{
+    --color-primario: #05564f;
+    --color-secundario: #ff6a00;
+    --color-fondo: #f8f9fa;
+    --color-texto-principal: #212529;
+
+    --fuente-principal: 'Teko', sans-serif;
+    --fuente-secundaria: 'Open Sans', sans-serif;
+}
