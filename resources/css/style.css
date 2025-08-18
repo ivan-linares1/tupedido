@@ -1,18 +1,18 @@
-/* ===== Diseño principal ===== */
+/***************************** Diseño principal *****************************/
 body {
     height: 100%;
     font-family: 'Arial', sans-serif;
     background-color: #f0f2f5;
 }
 
-/* Sidebar */
+/***************************** Sidebar *****************************/
 .sidebar {
     height: 100vh;
     width: 250px;
     position: fixed;
     top: 0;
     left: 0;
-    background-color: var(--color-primario); /* color sólido */
+    background-color: var(--color-primario); 
     color: white;
     padding-top: 2rem;
     box-shadow: 5px 0 15px rgba(0,0,0,0.1);
@@ -55,17 +55,30 @@ body {
 }
 
 /* Submenu */
+.sidebar .btn-toggle-nav {
+    border-left: 2px solid rgba(255, 255, 255, 0.2); /* línea guía lateral */
+    margin-left: 1rem;
+    padding-left: 0.5rem;
+}
+
 .sidebar .btn-toggle-nav a.nav-link {
     color: #e0e0e0;
-    padding-left: 2rem;
+    font-size: 0.9rem;
+    padding: 0.4rem 1rem;
     font-weight: 400;
     transition: all 0.3s ease;
+    border-radius: 0.4rem;
+    position: relative;
+}
+
+/* Líneas guía horizontales entre items */
+.sidebar .btn-toggle-nav a.nav-link:not(:last-child) {
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
 .sidebar .btn-toggle-nav a.nav-link:hover {
     color: white;
     background-color: var(--color-secundario);
-    border-radius: 0.5rem;
 }
 
 /* Iconos de dropdown */
@@ -73,19 +86,17 @@ body {
     transition: transform 0.3s ease;
 }
 
-.sidebar .collapse.show + .bi-chevron-down,
 .sidebar .d-flex[aria-expanded="true"] .bi-chevron-down {
     transform: rotate(180deg);
 }
 
-/* Contenido principal */
-.content {
-    margin-left: 250px;
-    padding: 2rem;
-    transition: margin-left 0.3s ease;
+/* Hover efecto flotante para sidebar */
+.sidebar:hover {
+    box-shadow: 10px 0 20px rgba(0,0,0,0.2);
 }
 
-/* Header fijo */
+
+/***************************** Header *****************************/
 .header {
     height: 60px;
     background-color: #fff;
@@ -101,12 +112,14 @@ body {
     z-index: 1030;
 }
 
+/***************************** Contenido principal *****************************/
+.content {
+    margin-left: 250px;
+    padding: 2rem;
+    transition: margin-left 0.3s ease;
+}
+
 /* Cuerpo del contenido */
 .content-body {
     margin-top: 60px;
-}
-
-/* Hover efecto flotante para sidebar */
-.sidebar:hover {
-    box-shadow: 10px 0 20px rgba(0,0,0,0.2);
 }

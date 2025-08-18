@@ -13,27 +13,70 @@
                 Ventas
                 <i class="bi bi-chevron-down"></i>
             </a>
-            <div class="collapse" id="submenuVentas">
+            <div class="collapse" id="submenuVentas" data-bs-parent=".sidebar">
                 <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                     <li><a href="#" class="nav-link">Seguimiento</a></li>
                     <li><a href="#" class="nav-link">Clientes</a></li>
+                    <li><a href="#" class="nav-link">Cotizaciones</a></li>
+                    <li><a href="#" class="nav-link">Pedidos</a></li>
+                    <li>
+                        <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionVentas" role="button" aria-expanded="false" aria-controls="submenuConfiguracionVentas">
+                        Configuración
+                        <i class="bi bi-chevron-down"></i>
+                        </a>
+                        <div class="collapse" id="submenuConfiguracionVentas" data-bs-parent="#submenuVentas">
+                            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
+                                <li><a href="#" class="nav-link">Zonas de venta</a></li>
+                                <li><a href="#" class="nav-link">Etapas de Seguimiento</a></li>
+                                <li><a href="#" class="nav-link">Tipos de Actividades de Seguimiento</a></li>
+                                <li><a href="#" class="nav-link">Catalogo de vendedores</a></li>
+                            </ul>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </li>
 
         {{-- Productos/Servicios con submenu --}}
         <li class="nav-item">
-            <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuProductos" role="button" aria-expanded="false" aria-controls="submenuProductos"> Productos/Servicios <i class="bi bi-chevron-down"></i>
+            <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuProductos" role="button" aria-expanded="false" aria-controls="submenuProductos">
+            Productos/Servicios
+            <i class="bi bi-chevron-down"></i>
             </a>
-            <div class="collapse" id="submenuProductos">
-                <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                    <li><a href="#" class="nav-link">Productos</a></li>
-                    <li><a href="#" class="nav-link">Lista de Precios</a></li>
-                </ul>
+            <div class="collapse" id="submenuProductos" data-bs-parent=".sidebar">
+            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
+                <li><a href="#" class="nav-link">Productos</a></li>
+                <li><a href="#" class="nav-link">Lista de Precios</a></li>
+                <li>
+                    <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionProductos" role="button" aria-expanded="false" aria-controls="submenuConfiguracionProductos">
+                    Configuración
+                    <i class="bi bi-chevron-down"></i>
+                    </a>
+                    <div class="collapse" id="submenuConfiguracionProductos" data-bs-parent="#submenuProductos">
+                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
+                            <li><a href="#" class="nav-link">Grupos de Productos</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
             </div>
         </li>
 
-        <li class="nav-item"><a href="#" class="nav-link">Configuración General</a></li>
-
+        {{-- Configuracion general --}}
+        <li class="nav-item">
+            <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionGeneral" role="button" aria-expanded="false" aria-controls="submenuConfiguracionGeneral">
+            Configuración General   
+            <i class="bi bi-chevron-down"></i>
+            </a>
+            <div class="collapse" id="submenuConfiguracionGeneral" data-bs-parent=".sidebar">
+            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
+                <li><a href="#" class="nav-link">Configurar Sistema</a></li>
+                <li><a href="#" class="nav-link">Configurar Multimoneda</a></li>
+                <li><a href="#" class="nav-link">Reporte de Sincronizacion ERP</a></li>
+                <li><a href="{{ route('usuarios') }}" class="nav-link">Usuarios</a></li>
+                <li><a href="#" class="nav-link">Perfiles</a></li>
+            </ul>
+            </div>
+        </li>
     </ul>
 </nav>
