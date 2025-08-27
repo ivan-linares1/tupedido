@@ -40,10 +40,10 @@
         <div class="col-sm-12">
             <label class="form-label">Volver a calcular manualmente fecha de vencimiento:</label>
             <div class="input-group" >
-                <input type="number" id="pendiente" class="form-control"  min="0" style="max-width: 200px;" readonly>
-                <input type="number" id="meses" class="form-control" value="0" min="0" style="max-width: 50px;">
+                <input type="text" id="pendiente" class="form-control" style="max-width: 200px;" readonly>
+                <input type="number" id="meses" class="form-control" value="0" min="0" style="max-width: 60px;">
                 <span class="input-group-text" style="max-width: 80px;">Meses +</span>
-                <input type="number" id="dias" class="form-control" value="30" min="0" style="max-width: 50px;">
+                <input type="number" id="dias" class="form-control" value="30" min="0" max="31" style="max-width: 60px;">
                 <span class="input-group-text" style="max-width: 60px;">Días</span>
             </div>
         </div>

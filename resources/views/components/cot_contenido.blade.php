@@ -66,6 +66,10 @@
                     <td id="totalAntesDescuento">$0.00</td>
                 </tr>
                 <tr>
+                    <th>Total con el descuento</th>
+                    <td id="totalConDescuento">$0.00</td>
+                </tr>
+                <tr>
                     <th>
                         <div class="d-flex align-items-center gap-2">
                             Descuento
@@ -225,6 +229,7 @@ function agregarArticulo(index) {
 function calcularTotales() {
     const filas = document.querySelectorAll("#tablaArticulos tbody tr");
     let totalAntesDescuento = 0;
+    let totalConDescuento = 0;
 
     filas.forEach(fila => {
         const cantidad = parseFloat(fila.querySelector(".cantidad")?.value || 0);
@@ -240,16 +245,16 @@ function calcularTotales() {
         if (fila.querySelector('.totalLinea')) {
             fila.querySelector('.totalLinea').textContent = totalLinea.toFixed(2);
         }
-
+        totalConDescuento += precioConDesc;
         totalAntesDescuento += cantidad * precio;
     });
 
     const descuentoInput = parseFloat(document.getElementById('descuentoInput').value || 0);
-    const totalConDescuento = totalAntesDescuento * (1 - descuentoInput / 100);
     const iva = totalConDescuento * 0.16;
     const totalFinal = totalConDescuento + iva;
 
     document.getElementById('totalAntesDescuento').textContent = `$${totalAntesDescuento.toFixed(2)}`;
+    document.getElementById('totalConDescuento').textContent = `$${totalConDescuento.toFixed(2)}`;
     document.getElementById('descuento').textContent = `${descuentoInput}%`;
     document.getElementById('iva').textContent = `$${iva.toFixed(2)}`;
     document.getElementById('total').textContent = `$${totalFinal.toFixed(2)}`;

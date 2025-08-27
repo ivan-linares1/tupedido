@@ -1,0 +1,677 @@
+-- =============================
+-- Catálogo y Configuración
+-- =============================
+
+CREATE TABLE OCRN (
+    CurrCode VARCHAR(20) PRIMARY KEY,
+    CurrName VARCHAR(100),
+    DocCurr VARCHAR(20)
+);
+
+CREATE TABLE OITB (
+    ItmsGrpCod INT PRIMARY KEY,
+    ItmsGrpNam VARCHAR(100)
+);
+
+CREATE TABLE OPLN (
+    ListNum INT PRIMARY KEY,
+    ListName VARCHAR(100),
+    PrimCurr VARCHAR(20),
+    ValidFor CHAR(1),
+    FOREIGN KEY (PrimCurr) REFERENCES OCRN(CurrCode)
+);
+
+CREATE TABLE OCRD (
+    CardCode VARCHAR(20) PRIMARY KEY,
+    CardName VARCHAR(100),
+    CardType CHAR(1),
+    GroupCode INT,
+    ListNum INT,
+    Currency VARCHAR(20),
+    Phone1 VARCHAR(20),
+    Phone2 VARCHAR(20),
+    E_Mail VARCHAR(100),
+    LicTradNum VARCHAR(50),
+    ValidFor CHAR(1),
+    FOREIGN KEY (ListNum) REFERENCES OPLN(ListNum),
+    FOREIGN KEY (Currency) REFERENCES OCRN(CurrCode)
+);
+
+CREATE TABLE CRD1 (
+    CardCode VARCHAR(20),
+    AdresType CHAR(1),
+    Address VARCHAR(200),
+    Street VARCHAR(100),
+    StreetNo VARCHAR(20),
+    Block VARCHAR(50),
+    City VARCHAR(50),
+    State VARCHAR(50),
+    Country VARCHAR(50),
+    ZipCode VARCHAR(20),
+    PRIMARY KEY (CardCode, AdresType, Address),
+    FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode)
+);
+
+CREATE TABLE OCPR (
+    CntctCode INT PRIMARY KEY,
+    CardCode VARCHAR(20),
+    Name VARCHAR(100),
+    E_MailL VARCHAR(100),
+    Tel1 VARCHAR(20),
+    Tel2 VARCHAR(20),
+    Position VARCHAR(50),
+    FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode)
+);
+
+CREATE TABLE OITM (
+    ItemCode VARCHAR(20) PRIMARY KEY,
+    ItemName VARCHAR(100),
+    FrgnName VARCHAR(100),
+    ItmsGrpCod INT,
+    CodeBars VARCHAR(50),
+    OnHand DECIMAL(18,2),
+    IsCommited DECIMAL(18,2),
+    OnOrder DECIMAL(18,2),
+    CardCode VARCHAR(20),
+    Canceled CHAR(1),
+    U_Marca VARCHAR(50),
+    FOREIGN KEY (ItmsGrpCod) REFERENCES OITB(ItmsGrpCod),
+    FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode)
+);
+
+CREATE TABLE ITM1 (
+    ItemCode VARCHAR(20),
+    PriceList INT,
+    Price DECIMAL(18,2),
+    Currency VARCHAR(20),
+    ValidFrom DATE,
+    ValidTo DATE,
+    UoMEntry INT,
+    PRIMARY KEY (ItemCode, PriceList),
+    FOREIGN KEY (ItemCode) REFERENCES OITM(ItemCode),
+    FOREIGN KEY (PriceList) REFERENCES OPLN(ListNum),
+    FOREIGN KEY (Currency) REFERENCES OCRN(CurrCode)
+);
+
+CREATE TABLE ORTT (
+    RateDate DATE,
+    Currency VARCHAR(20),
+    Rate DECIMAL(18,4),
+    PRIMARY KEY (RateDate, Currency),
+    FOREIGN KEY (Currency) REFERENCES OCRN(CurrCode)
+);
+
+CREATE TABLE zonas_venta (
+    id INT PRIMARY KEY,
+    nombre VARCHAR(100),
+    descripcion TEXT
+);
+
+CREATE TABLE OSLP (
+    SlpCode INT PRIMARY KEY,
+    SlpName VARCHAR(100),
+    Email VARCHAR(100),
+    Tel VARCHAR(20),
+    U_Zona INT,
+    FOREIGN KEY (U_Zona) REFERENCES zonas_venta(id)
+);
+
+-- =============================
+-- Operaciones y Transacciones
+-- =============================
+
+CREATE TABLE OQUT (
+    DocEntry INT PRIMARY KEY,
+    DocNum INT,
+    CardCode VARCHAR(20),
+    Cancelled CHAR(1),
+    DocDate DATE,
+    DocDueDate DATE,
+    Comments VARCHAR(200),
+    DocTotal DECIMAL(18,2),
+    CardName VARCHAR(100),
+    Series INT,
+    TaxDate DATE,
+    SlpCode INT,
+    U_B1SYS_MainUsage VARCHAR(50),
+    DocType CHAR(1),
+    DocStatus CHAR(1),
+    InvntSttus CHAR(1),
+    VatPercent DECIMAL(5,2),
+    VatSum DECIMAL(18,2),
+    VatSumFC DECIMAL(18,2),
+    DiscPrcnt DECIMAL(5,2),
+    DiscSum DECIMAL(18,2),
+    DiscSumFC DECIMAL(18,2),
+    DocCur VARCHAR(20),
+    DocRate DECIMAL(18,4),
+    DocTotalFC DECIMAL(18,2),
+    PaidToDate DECIMAL(18,2),
+    PaidFC DECIMAL(18,2),
+    FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
+    FOREIGN KEY (SlpCode) REFERENCES OSLP(SlpCode),
+    FOREIGN KEY (DocCur) REFERENCES OCRN(CurrCode)
+);
+
+CREATE TABLE QUT1 (
+    DocEntry INT,
+    LineNum INT,
+    ItemCode VARCHAR(20),
+    SerialNum VARCHAR(50),
+    Dscription VARCHAR(200),
+    Quantity DECIMAL(18,2),
+    Price DECIMAL(18,2),
+    LineTotal DECIMAL(18,2),
+    U_Dscr VARCHAR(200),
+    U_EnStok VARCHAR(50),
+    DiscPrcnt DECIMAL(5,2),
+    TaxCode VARCHAR(20),
+    WhsCode VARCHAR(20),
+    U_EnStock7 VARCHAR(50),
+    U_CP_materialPeligroso VARCHAR(50),
+    U_PMX_ISLC VARCHAR(50),
+    U_PMX_ISWA VARCHAR(50),
+    U_PMX_EX3P VARCHAR(50),
+    U_PMX_AMBA VARCHAR(50),
+    U_PMX_MQU2 VARCHAR(50),
+    U_KBT_BackOrder VARCHAR(50),
+    U_SPPG_GeneraBO VARCHAR(50),
+    TargetType INT,
+    TrgetEntry INT,
+    BaseRef VARCHAR(50),
+    BaseType INT,
+    BaseEntry INT,
+    BaseLine INT,
+    LineStatus CHAR(1),
+    PRIMARY KEY (DocEntry, LineNum),
+    FOREIGN KEY (DocEntry) REFERENCES OQUT(DocEntry),
+    FOREIGN KEY (ItemCode) REFERENCES OITM(ItemCode)
+);
+
+CREATE TABLE ORDR (
+    DocEntry INT PRIMARY KEY,
+    CardCode VARCHAR(20),
+    SlpCode INT,
+    DocDate DATE,
+    DocTotal DECIMAL(18,2),
+    DocStatus CHAR(1),
+    FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
+    FOREIGN KEY (SlpCode) REFERENCES OSLP(SlpCode)
+);
+
+CREATE TABLE RDR1 (
+    DocEntry INT,
+    LineNum INT,
+    ItemCode VARCHAR(20),
+    Quantity DECIMAL(18,2),
+    Price DECIMAL(18,2),
+    PRIMARY KEY (DocEntry, LineNum),
+    FOREIGN KEY (DocEntry) REFERENCES ORDR(DocEntry),
+    FOREIGN KEY (ItemCode) REFERENCES OITM(ItemCode)
+);
+
+CREATE TABLE OINV (
+    DocEntry INT PRIMARY KEY,
+    DocNum INT,
+    DocDate DATE,
+    CardCode VARCHAR(20),
+    CardName VARCHAR(100),
+    OwnerCode INT,
+    DocTotal DECIMAL(18,2),
+    DocCurr VARCHAR(20),
+    DocStatus CHAR(1),
+    FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
+    FOREIGN KEY (DocCurr) REFERENCES OCRN(CurrCode)
+);
+
+CREATE TABLE INV1 (
+    DocEntry INT,
+    LineNum INT,
+    ItemCode VARCHAR(20),
+    Quantity DECIMAL(18,2),
+    Price DECIMAL(18,2),
+    PRIMARY KEY (DocEntry, LineNum),
+    FOREIGN KEY (DocEntry) REFERENCES OINV(DocEntry),
+    FOREIGN KEY (ItemCode) REFERENCES OITM(ItemCode)
+);
+
+CREATE TABLE ODLN (
+    DocEntry INT PRIMARY KEY,
+    CardCode VARCHAR(20),
+    DocDate DATE,
+    DocStatus CHAR(1),
+    FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode)
+);
+
+CREATE TABLE DLN1 (
+    DocEntry INT,
+    LineNum INT,
+    ItemCode VARCHAR(20),
+    Quantity DECIMAL(18,2),
+    PRIMARY KEY (DocEntry, LineNum),
+    FOREIGN KEY (DocEntry) REFERENCES ODLN(DocEntry),
+    FOREIGN KEY (ItemCode) REFERENCES OITM(ItemCode)
+);
+
+-- =============================
+-- Usuarios y Seguridad
+-- =============================
+
+CREATE TABLE users (
+    id INT PRIMARY KEY,
+    nombre VARCHAR(100),
+    email VARCHAR(100),
+    password VARCHAR(255),
+    activo BOOLEAN
+);
+
+CREATE TABLE roles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50)
+);
+
+CREATE TABLE permisos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50)
+);
+
+CREATE TABLE roles_permisos (
+    rol_id INT,
+    permiso_id INT,
+    PRIMARY KEY (rol_id, permiso_id),
+    FOREIGN KEY (rol_id) REFERENCES roles(id),
+    FOREIGN KEY (permiso_id) REFERENCES permisos(id)
+);
+
+CREATE TABLE usuarios_roles (
+    usuario_id INT,
+    rol_id INT,
+    PRIMARY KEY (usuario_id, rol_id),
+    FOREIGN KEY (usuario_id) REFERENCES users(id),
+    FOREIGN KEY (rol_id) REFERENCES roles(id)
+);
+
+-- =============================
+-- Configuración del Sistema
+-- =============================
+
+CREATE TABLE config_parametros (
+    id INT PRIMARY KEY,
+    nombre VARCHAR(50),
+    valor VARCHAR(255)
+);
+
+CREATE TABLE config_sincronizacion_sap (
+    id INT PRIMARY KEY,
+    endpoint VARCHAR(255),
+    usuario VARCHAR(50),
+    password VARCHAR(50),
+    ultima_sync DATETIME
+);
+
+CREATE TABLE config_registros_auditoria (
+    id INT PRIMARY KEY,
+    usuario_id INT,
+    accion VARCHAR(255),
+    fecha DATETIME,
+    FOREIGN KEY (usuario_id) REFERENCES users(id)
+);
+
+
+**********************************************************************************************************************************************
+@startuml
+hide circle
+hide methods
+hide stereotypes
+
+skinparam class {
+    BackgroundColor #f5f5f5
+    ArrowColor #555555
+    BorderColor #333333
+    FontSize 11
+}
+
+' =============================
+' Catálogo y Configuración
+' =============================
+
+entity "OCRN (Monedas)" as OCRN #ccccff {
+  *CurrCode : varchar <<PK>>
+  --
+  CurrName : varchar
+  DocCurr : varchar
+}
+
+entity "OITB (Grupos de Artículos)" as OITB #ccffcc {
+  *ItmsGrpCod : int <<PK>>
+  --
+  ItmsGrpNam : varchar
+}
+
+entity "OPLN (Listas de Precios)" as OPLN #ffffcc {
+  *ListNum : int <<PK>>
+  --
+  ListName : varchar
+  PrimCurr : varchar <<FK>> → OCRN.CurrCode
+  ValidFor : char(1)
+}
+
+entity "OCRD (Socios de Negocio)" as OCRD #ffcccc {
+  *CardCode : varchar <<PK>>
+  --
+  CardName : varchar
+  CardType : char(1)
+  GroupCode : int
+  ListNum : int <<FK>> → OPLN.ListNum
+  Currency : varchar <<FK>> → OCRN.CurrCode
+  Phone1 : varchar
+  Phone2 : varchar
+  E_Mail : varchar
+  LicTradNum : varchar
+  ValidFor : char(1)
+}
+
+entity "CRD1 (Direcciones SN)" as CRD1 #ffd9cc {
+  *CardCode : varchar <<FK>> → OCRD.CardCode
+  *AdresType : char(1) <<PK>>
+  *Address : varchar <<PK>>
+  --
+  Street : varchar
+  StreetNo : varchar
+  Block : varchar
+  City : varchar
+  State : varchar
+  Country : varchar
+  ZipCode : varchar
+}
+
+entity "OCPR (Contactos SN)" as OCPR #ffcc99 {
+  *CntctCode : int <<PK>>
+  --
+  CardCode : varchar <<FK>> → OCRD.CardCode
+  Name : varchar
+  E_MailL : varchar
+  Tel1 : varchar
+  Tel2 : varchar
+  Position : varchar
+}
+
+entity "OITM (Artículos)" as OITM #ccffff {
+  *ItemCode : varchar <<PK>>
+  --
+  ItemName : varchar
+  FrgnName : varchar
+  ItmsGrpCod : int <<FK>> → OITB.ItmsGrpCod
+  CodeBars : varchar
+  OnHand : decimal
+  IsCommited : decimal
+  OnOrder : decimal
+  CardCode : varchar <<FK>> → OCRD.CardCode
+  Canceled : char(1)
+  U_Marca : varchar
+}
+
+entity "ITM1 (Precios Artículos por Lista)" as ITM1 #ffe5cc {
+  *ItemCode : varchar <<FK>> → OITM.ItemCode
+  *PriceList : int <<FK>> → OPLN.ListNum
+  --
+  Price : decimal
+  Currency : varchar <<FK>> → OCRN.CurrCode
+  ValidFrom : date
+  ValidTo : date
+  UoMEntry : int
+}
+
+entity "ORTT (Tipos de Cambio)" as ORTT #e0ccff {
+  *RateDate : date <<PK>>
+  *Currency : varchar <<FK>> → OCRN.CurrCode
+  --
+  Rate : decimal
+}
+
+entity "zonas_venta" as zonas_venta #d9f2e6 {
+  *id : int <<PK>>
+  --
+  nombre : varchar
+  descripcion : text
+}
+
+entity "OSLP (Vendedores)" as OSLP #e6ffe6 {
+  *SlpCode : int <<PK>>
+  --
+  SlpName : varchar
+  Email : varchar
+  Tel : varchar
+  U_Zona : int <<FK>> → zonas_venta.id
+}
+
+' =============================
+' Operaciones y Transacciones
+' =============================
+
+entity "OQUT (Cotizaciones)" as OQUT #e6f0ff {
+  *DocEntry : int <<PK>>
+  --
+  DocNum : int
+  CardCode : varchar <<FK>> → OCRD.CardCode
+  Cancelled : char(1)
+  DocDate : date
+  DocDueDate : date
+  Comments : varchar
+  DocTotal : decimal
+  CardName : varchar
+  Series : int
+  TaxDate : date
+  SlpCode : int <<FK>> → OSLP.SlpCode
+  U_B1SYS_MainUsage : varchar
+  DocType : char(1)
+  DocStatus : char(1)
+  InvntSttus : char(1)
+  VatPercent : decimal
+  VatSum : decimal
+  VatSumFC : decimal
+  DiscPrcnt : decimal
+  DiscSum : decimal
+  DiscSumFC : decimal
+  DocCur : varchar <<FK>> → OCRN.CurrCode
+  DocRate : decimal
+  DocTotalFC : decimal
+  PaidToDate : decimal
+  PaidFC : decimal
+}
+
+entity "QUT1 (Detalle Cotización)" as QUT1 #f2e6ff {
+  *DocEntry : int <<FK>> → OQUT.DocEntry
+  *LineNum : int <<PK>>
+  --
+  ItemCode : varchar <<FK>> → OITM.ItemCode
+  SerialNum : varchar
+  Dscription : varchar
+  Quantity : decimal
+  Price : decimal
+  LineTotal : decimal
+  U_Dscr : varchar
+  U_EnStok : varchar
+  DiscPrcnt : decimal
+  TaxCode : varchar
+  WhsCode : varchar
+  U_EnStock7 : varchar
+  U_CP_materialPeligroso : varchar
+  U_PMX_ISLC : varchar
+  U_PMX_ISWA : varchar
+  U_PMX_EX3P : varchar
+  U_PMX_AMBA : varchar
+  U_PMX_MQU2 : varchar
+  U_KBT_BackOrder : varchar
+  U_SPPG_GeneraBO : varchar
+  TargetType : int
+  TrgetEntry : int
+  BaseRef : varchar
+  BaseType : int
+  BaseEntry : int
+  BaseLine : int
+  LineStatus : char(1)
+}
+
+entity "ORDR (Pedidos)" as ORDR #f0fff0 {
+  *DocEntry : int <<PK>>
+  --
+  CardCode : varchar <<FK>> → OCRD.CardCode
+  SlpCode : int <<FK>> → OSLP.SlpCode
+  DocDate : date
+  DocTotal : decimal
+  DocStatus : char(1)
+}
+
+entity "RDR1 (Detalle Pedido)" as RDR1 #e0fff0 {
+  *DocEntry : int <<FK>> → ORDR.DocEntry
+  *LineNum : int <<PK>>
+  --
+  ItemCode : varchar <<FK>> → OITM.ItemCode
+  Quantity : decimal
+  Price : decimal
+}
+
+entity "OINV (Facturas)" as OINV #fff0cc {
+  *DocEntry : int <<PK>>
+  --
+  DocNum : int
+  DocDate : date
+  CardCode : varchar <<FK>> → OCRD.CardCode
+  CardName : varchar
+  OwnerCode : int
+  DocTotal : decimal
+  DocCurr : varchar <<FK>> → OCRN.CurrCode
+  DocStatus : char(1)
+}
+
+entity "INV1 (Detalle Factura)" as INV1 #ffe6e6 {
+  *DocEntry : int <<FK>> → OINV.DocEntry
+  *LineNum : int <<PK>>
+  --
+  ItemCode : varchar <<FK>> → OITM.ItemCode
+  Quantity : decimal
+  Price : decimal
+}
+
+entity "ODLN (Entregas)" as ODLN #d9f2ff {
+  *DocEntry : int <<PK>>
+  --
+  CardCode : varchar <<FK>> → OCRD.CardCode
+  DocDate : date
+  DocStatus : char(1)
+}
+
+entity "DLN1 (Detalle Entrega)" as DLN1 #e6f9ff {
+  *DocEntry : int <<FK>> → ODLN.DocEntry
+  *LineNum : int <<PK>>
+  --
+  ItemCode : varchar <<FK>> → OITM.ItemCode
+  Quantity : decimal
+}
+
+' =============================
+' Usuarios y Seguridad
+' =============================
+
+entity "usuarios" as usuarios #f9f2ec {
+  *id : int <<PK>>
+  --
+  nombre : varchar
+  email : varchar
+  password : varchar
+  activo : boolean
+}
+
+entity "roles" as roles #f2e6f9 {
+  *id : int <<PK>>
+  --
+  nombre : varchar
+}
+
+entity "permisos" as permisos #f2f9e6 {
+  *id : int <<PK>>
+  --
+  nombre : varchar
+}
+
+entity "roles_permisos" as roles_permisos #f9f9e6 {
+  *rol_id : int <<FK>> → roles.id
+  *permiso_id : int <<FK>> → permisos.id
+}
+
+entity "usuarios_roles" as usuarios_roles #e6f2f9 {
+  *usuario_id : int <<FK>> → usuarios.id
+  *rol_id : int <<FK>> → roles.id
+}
+
+' =============================
+' Configuración del Sistema
+' =============================
+
+entity "config_parametros" as config_parametros #fff2cc {
+  *id : int <<PK>>
+  --
+  nombre : varchar
+  valor : varchar
+}
+
+entity "config_sincronizacion_sap" as config_sincronizacion_sap #f0e6ff {
+  *id : int <<PK>>
+  --
+  endpoint : varchar
+  usuario : varchar
+  password : varchar
+  ultima_sync : datetime
+}
+
+entity "config_registros_auditoria" as config_registros_auditoria #ffe6f2 {
+  *id : int <<PK>>
+  --
+  usuario_id : int <<FK>> → usuarios.id
+  accion : varchar
+  fecha : datetime
+}
+
+' =============================
+' RELACIONES
+' =============================
+
+OPLN::PrimCurr "1" --> "N" OCRN
+OCRD::ListNum "N" --> "1" OPLN
+OCRD::Currency "N" --> "1" OCRN
+CRD1::CardCode "N" --> "1" OCRD
+OCPR::CardCode "N" --> "1" OCRD
+OITM::ItmsGrpCod "N" --> "1" OITB
+OITM::CardCode "N" --> "1" OCRD
+ITM1::ItemCode "N" --> "1" OITM
+ITM1::PriceList "N" --> "1" OPLN
+ITM1::Currency "N" --> "1" OCRN
+ORTT::Currency "N" --> "1" OCRN
+OSLP::U_Zona "N" --> "1" zonas_venta
+OQUT::CardCode "N" --> "1" OCRD
+OQUT::SlpCode "N" --> "1" OSLP
+OQUT::DocCur "N" --> "1" OCRN
+QUT1::DocEntry "N" --> "1" OQUT
+QUT1::ItemCode "N" --> "1" OITM
+ORDR::CardCode "N" --> "1" OCRD
+ORDR::SlpCode "N" --> "1" OSLP
+RDR1::DocEntry "N" --> "1" ORDR
+RDR1::ItemCode "N" --> "1" OITM
+ORDR "1" -- "0..*" OINV
+OINV::CardCode "N" --> "1" OCRD
+OINV::DocCurr "N" --> "1" OCRN
+INV1::DocEntry "N" --> "1" OINV
+INV1::ItemCode "N" --> "1" OITM
+ORDR "1" -- "0..*" ODLN
+ODLN::CardCode "N" --> "1" OCRD
+DLN1::DocEntry "N" --> "1" ODLN
+DLN1::ItemCode "N" --> "1" OITM
+roles_permisos::rol_id "N" --> "1" roles
+roles_permisos::permiso_id "N" --> "1" permisos
+usuarios_roles::usuario_id "N" --> "1" usuarios
+usuarios_roles::rol_id "N" --> "1" roles
+config_registros_auditoria::usuario_id "N" --> "1" usuarios
+
+@enduml
+
