@@ -1,29 +1,24 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UsuarioController;
 
 Route::get('/', function () {
-    $user=Auth::user();
-    if($user)
-        return redirect()->route('dashboard');
-    else
-        return view('auth.login');
+    return redirect()->route('dashboard');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios');
 
-    //TEMPORAL*********************************************
-    Route::get('/nueva-cotizacion', function () {
-        return view('cotizacion'); // crea un archivo nueva-cotizacion.blade.php
+    //RUTAS PARA EL ADMIN
+    Route::middleware(['auth', 'role:1,2'])->group(function () {
+        Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
+        Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios');
+        Route::get('/nueva-cotizacion', function () { return view('admin.cotizacion'); });//TEMPORAL*********************************************
     });
+
+    //RUTAS PARA USUARIOS
+    Route::middleware(['auth', 'role:3,4'])->group(function () { Route::get('/work', function () { return view('work'); });});//TEMPORAL*********************************************
 });
 
 require __DIR__.'/auth.php';

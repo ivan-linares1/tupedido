@@ -12,8 +12,6 @@
 
     <!--importacion de css-->
     @vite(['resources/css/variables.css', 'resources/css/style.css'])
-
-
 </head>
 
 <body>

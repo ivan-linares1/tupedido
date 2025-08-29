@@ -45,19 +45,19 @@
                     <tr>
                         <th scope="col">Usuario</th>
                         <th scope="col">Nombre</th>
+                        <th scope="col">Rol</th>
+                        <th scope="col">Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($usuarios as $usuario)
+                    @foreach ($usuarios as $usuario)
                         <tr>
                             <td>{{ $usuario->email }}</td>
                             <td>{{ $usuario->nombre }}</td>
+                            <td>{{ $usuario->rol?->nombre }}</td>
+                            <td>{{$usuario->activo ? 'activo' : 'inactivo'}}</td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="2" class="text-center">No hay usuarios registrados</td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>

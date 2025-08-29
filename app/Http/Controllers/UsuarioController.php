@@ -14,6 +14,6 @@ class UsuarioController extends Controller
         $usuarios = User::all();
 
         // Retornar la vista y pasar los usuarios
-        return view('user', compact('usuarios'));
+        return view('admin.user', compact('usuarios'));
     }
 }

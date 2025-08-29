@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'activo',
+        'rol_id',
     ];
 
     /**
@@ -40,4 +41,11 @@ class User extends Authenticatable
         'password' => 'hashed',
         'activo' => 'boolean',
     ];
+
+    /**
+     * relacion de usuario con rol
+     */
+    public function rol(){
+         return $this->belongsTo(Rol::class, 'rol_id', 'id');
+    }
 }

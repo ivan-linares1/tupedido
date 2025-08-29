@@ -20,13 +20,15 @@
 <body class="bg-gradient-custom d-flex align-items-center justify-content-center min-vh-100">
 
     <div class="card-login p-5 col-11 col-sm-8 col-md-6 col-lg-5 col-xl-4">
-        <h2 class="text-center mb-2">TuPedido</h2>
-        <p class="text-center mb-4">Bienvenido a la plataforma de pedidos de Kombitec</p>
+        <h2 class="text-center mb-4">Bienvenido a la plataforma de pedidos de Kombitec</h2>
 
-        @if (session('status'))
-            <div class="alert alert-success">{{ session('status') }}</div>
+        {{-- Mensajes de error --}}
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <p class="mb-0"> Correo y/o Contraseña invalidas</p>
+            </div>
         @endif
-
+        
         <form method="POST" action="{{ route('login') }}">
             @csrf
 
@@ -34,7 +36,7 @@
                 <label for="email" class="form-label">Correo electrónico</label>
                 <div class="input-group">
                     <span class="input-group-text">
-                        <i class="bi bi-envelope-fill"></i>
+                        <i class="bi bi-envelope-fill"></i> {{--icono del carta email --}}
                     </span>
                     <input id="email" type="email" name="email" class="form-control input-custom" value="{{ old('email') }}" required autofocus>
                 </div>
@@ -44,11 +46,11 @@
                 <label for="password" class="form-label">Contraseña</label>
                 <div class="input-group">
                     <span class="input-group-text">
-                        <i class="bi bi-lock-fill"></i>
+                        <i class="bi bi-lock-fill" ></i>{{--icono del candado password--}}
                     </span>
                     <input id="password" type="password" name="password" class="form-control input-custom" required>
-                    <span class="input-group-text password-toggle" onclick="togglePassword()">
-                        <i id="eye-icon" class="bi bi-eye-fill"></i>
+                    <span class="input-group-text password-toggle" onclick="togglePassword()" style="cursor: pointer">
+                        <i id="eye-icon" class="bi bi-eye-fill"></i> {{--icono del ojo abierto --}}
                     </span>
                 </div>
             </div>
@@ -77,12 +79,12 @@ function togglePassword() {
 
     if (password.type === 'password') {
         password.type = 'text';
-        eyeIcon.classList.remove('bi-eye-fill');
-        eyeIcon.classList.add('bi-eye-slash-fill');
+        eyeIcon.classList.remove('bi-eye-fill'); //icono del ojo abierto
+        eyeIcon.classList.add('bi-eye-slash-fill');//icono del ojo cerrado
     } else {
         password.type = 'password';
-        eyeIcon.classList.remove('bi-eye-slash-fill');
-        eyeIcon.classList.add('bi-eye-fill');
+        eyeIcon.classList.remove('bi-eye-slash-fill');//icono del ojo cerrado
+        eyeIcon.classList.add('bi-eye-fill');//icono del ojo abierto
     }
 }
 </script>

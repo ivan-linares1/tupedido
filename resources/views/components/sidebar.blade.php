@@ -15,8 +15,8 @@
             </a>
             <div class="collapse" id="submenuVentas" data-bs-parent=".sidebar">
                 <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                    <li><a href="#" class="nav-link">Seguimiento</a></li>
-                    <li><a href="#" class="nav-link">Clientes</a></li>
+                    {{--<li><a href="#" class="nav-link">Seguimiento</a></li>--}}
+                    <li><a href="{{ url('/work') }}" class="nav-link">Clientes</a></li>
                     <li><a href="#" class="nav-link">Cotizaciones</a></li>
                     <li><a href="#" class="nav-link">Pedidos</a></li>
                     <li>
@@ -27,8 +27,8 @@
                         <div class="collapse" id="submenuConfiguracionVentas" data-bs-parent="#submenuVentas">
                             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                                 <li><a href="#" class="nav-link">Zonas de venta</a></li>
-                                <li><a href="#" class="nav-link">Etapas de Seguimiento</a></li>
-                                <li><a href="#" class="nav-link">Tipos de Actividades de Seguimiento</a></li>
+                               {{-- <li><a href="#" class="nav-link">Etapas de Seguimiento</a></li>
+                                <li><a href="#" class="nav-link">Tipos de Actividades de Seguimiento</a></li>--}}
                                 <li><a href="#" class="nav-link">Catalogo de vendedores</a></li>
                             </ul>
                         </div>
