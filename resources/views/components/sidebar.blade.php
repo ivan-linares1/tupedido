@@ -1,8 +1,13 @@
 <nav class="sidebar d-flex flex-column">
-    <h1>Tu pedido</h1>
-    <a href="https://www.kombitec.com.mx/" target="_blank" class="fs-4 fw-bold mb-4 px-3">KOMBITEC</a>
-    <ul class="nav flex-column px-2">
+    <!-- Botón cerrar sidebar (icono flecha) -->
+    <button id="sidebarClose" class="d-md-none">
+        <i class="bi bi-arrow-left"></i>
+    </button>
 
+    <h1>Tu pedido</h1>
+    <a href="https://www.kombitec.com.mx/" target="_blank" class="fs-4">KOMBITEC</a>
+
+    <ul class="nav flex-column px-2">
         <li class="nav-item">
             <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
         </li>

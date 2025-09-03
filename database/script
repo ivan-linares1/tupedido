@@ -1,0 +1,182 @@
+/* =============================
+   Control de trabajo en SAP
+   ============================= */
+   Tipos OEDG_EDG1_OITB
+   Datos OCRD_CRD1
+
+/* Clientes */
+CREATE TABLE OCRD(
+  CardCode VARCHAR(15) PRIMARY KEY,
+  CardName VARCHAR(100),
+  GroupNum INT
+);
+
+CREATE TABLE OITB(
+  ItmsGrpCod INT PRIMARY KEY,
+  ItmsGrpNam VARCHAR(100),
+  Locked CHAR(1),
+  Object VARCHAR(20)
+);
+
+CREATE TABLE OEDG(
+  AbsEntry INT PRIMARY KEY,
+  Type CHAR(1),
+  ObjType VARCHAR(20),
+  ObjCode VARCHAR(15),
+  FOREIGN KEY(ObjCode) REFERENCES OCRD(CardCode)
+);
+
+CREATE TABLE EDG1(
+  AbsEntry INT NOT NULL,
+  ObjType VARCHAR(20) NOT NULL,
+  ObjKey VARCHAR(50) NOT NULL,
+  Disctype CHAR(1),
+  Discount DECIMAL(19,6),
+  PRIMARY KEY(AbsEntry, ObjType, ObjKey),
+  FOREIGN KEY(AbsEntry) REFERENCES OEDG(AbsEntry),
+  FOREIGN KEY(ObjKey) REFERENCES OITB(ItmsGrpCod)******
+);
+
+/* Vendedores */
+CREATE TABLE OSLP(
+  SlpCode INT PRIMARY KEY,
+  SlpName VARCHAR(155) NOT NULL,
+  Active CHAR(1)
+);
+
+/* Direcciones de clientes */
+CREATE TABLE CRD1(
+  CardCode VARCHAR(15) NOT NULL,
+  Address VARCHAR(254) NOT NULL,
+  Street VARCHAR(100),
+  Block VARCHAR(100),
+  ZipCode VARCHAR(20),
+  City VARCHAR(100),
+  Country VARCHAR(3),
+  County VARCHAR(100),
+  State VARCHAR(3),
+  AdresType VARCHAR(100) NOT NULL,
+  PRIMARY KEY (CardCode, Address, AdresType),
+  FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode)
+);
+
+/*Monedas*/
+CREATE TABLE OCRN(
+  Currency_ID INT AUTO_INCREMENT PRIMARY KEY,
+  Currency VARCHAR(3) UNIQUE NOT NULL
+);
+
+/* Listas de precios */
+CREATE TABLE OPLN(
+  ListNum INT PRIMARY KEY,
+  ListName VARCHAR(32)
+);
+
+/* Tipos de cambio */
+CREATE TABLE ORTT(
+  RateDate DATE,
+  /*Currency VARCHAR(3),*/
+  Currency_ID INT NOT NULL,
+  Rate DECIMAL(19,6),
+  /*PRIMARY KEY(RateDate, Currency),*/
+  PRIMARY KEY(RateDate, Currency_ID),
+  FOREIGN KEY(Currency_ID) REFERENCES OCRN(Currency_ID)
+);
+
+/* Imagenes de productos */
+CREATE TABLE Imagenes(
+  Id_imagen BIGINT PRIMARY KEY AUTO_INCREMENT,
+  Ruta_imagen VARCHAR(254)
+);
+
+/* Productos */
+CREATE TABLE OITM(
+  ItemCode VARCHAR(50) PRIMARY KEY,
+  ItemName VARCHAR(100),
+  FrgnName VARCHAR(100),
+  SalUnitMsr VARCHAR(100),
+  Id_imagen BIGINT NOT NULL,
+  FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
+);
+
+/* Precios de productos */
+CREATE TABLE ITM1(
+  ItemCode VARCHAR(50) NOT NULL,
+  PriceList INT NOT NULL,
+  Price DECIMAL(19,6),
+  /*Currency VARCHAR(3) NOT NULL,*/
+  Currency_ID INT NOT NULL,
+  PRIMARY KEY(ItemCode, PriceList),
+  FOREIGN KEY(ItemCode) REFERENCES OITM(ItemCode),
+  FOREIGN KEY(PriceList) REFERENCES OPLN(ListNum),
+  FOREIGN KEY(Currency_ID) REFERENCES OCRN(Currency_ID)
+  /*FOREIGN KEY(Currency) REFERENCES ORTT(Currency) */
+);
+
+/* Cotizaciones */
+CREATE TABLE OQUT(
+    DocEntry INT PRIMARY KEY,
+    CardCode VARCHAR(15) NOT NULL,
+    DocDate TIMESTAMP,
+    DocDueDate TIMESTAMP,
+    CardName VARCHAR(100),
+    SlpCode INT NOT NULL,
+    CntctCode INT,
+    Phone1 VARCHAR(20),
+    E_Mail VARCHAR(100),
+    DocCur VARCHAR(3),
+    ShipToCode VARCHAR(50),
+    PayToCode VARCHAR(50),
+    Address VARCHAR(254),
+    Address2 VARCHAR(254),
+    TotalSinPromo DECIMAL(19,6),
+    Descuento DECIMAL(19,6),
+    Subtotal DECIMAL(19,6),
+    IVA DECIMAL(19,6),
+    Total DECIMAL(19,6),
+    FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
+    FOREIGN KEY (SlpCode) REFERENCES OSLP(SlpCode)
+);
+
+/* Líneas de cotización */
+CREATE TABLE QUT1(
+  DocEntry INT NOT NULL,
+  LineNum INT NOT NULL,
+  ObjType VARCHAR(20),
+  ItemCode VARCHAR(50) NOT NULL,
+  U_Dscr VARCHAR(250),
+  unitMsr2 VARCHAR(100),
+  Price DECIMAL(19,6),
+  DiscPrcnt DECIMAL(19,6),
+  Quantity DECIMAL(19,6),
+  Id_imagen BIGINT,
+  PRIMARY KEY (DocEntry, LineNum),
+  FOREIGN KEY (DocEntry) REFERENCES OQUT(DocEntry),
+  FOREIGN KEY (ItemCode) REFERENCES OITM(ItemCode),
+  FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
+);
+
+/* =============================
+   Usuarios
+   ============================= */
+CREATE TABLE roles (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50)
+);
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    email VARCHAR(100),
+    password VARCHAR(255),
+    activo BOOLEAN,
+    rol_id BIGINT UNSIGNED NOT NULL,                  
+    FOREIGN KEY (rol_id) REFERENCES roles(id)
+);
+
+/* Insertar roles */
+INSERT INTO roles (nombre) VALUES
+  ('Super Administrador'),
+  ('Administrador'),
+  ('Cliente'),
+  ('Vendedor');
