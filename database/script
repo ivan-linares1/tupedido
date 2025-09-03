@@ -12,7 +12,7 @@ CREATE TABLE OCRD(
 );
 
 CREATE TABLE OITB(
-  ItmsGrpCod INT PRIMARY KEY,
+  ItmsGrpCod VARCHAR(50) PRIMARY KEY,
   ItmsGrpNam VARCHAR(100),
   Locked CHAR(1),
   Object VARCHAR(20)
@@ -34,7 +34,7 @@ CREATE TABLE EDG1(
   Discount DECIMAL(19,6),
   PRIMARY KEY(AbsEntry, ObjType, ObjKey),
   FOREIGN KEY(AbsEntry) REFERENCES OEDG(AbsEntry),
-  FOREIGN KEY(ObjKey) REFERENCES OITB(ItmsGrpCod)******
+  FOREIGN KEY(ObjKey) REFERENCES OITB(ItmsGrpCod)
 );
 
 /* Vendedores */
