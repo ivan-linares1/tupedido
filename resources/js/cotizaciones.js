@@ -54,11 +54,11 @@ window.agregarArticulo = function(art) {
     const PrecioMXM = precioUnitario * cantidadInicial;
 
     fila.innerHTML = `
-        <td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();calcularTotales()">X</button></td>
+        <td><button class="btn btn-sm btn-danger">X</button></td>
         <td>${art.ItemCode}</td>
         <td>${art.FrgnName}</td>
         <td>Unidad de medida</td>
-        <td class="precio">${PrecioMXM}</td>
+        <td class="precio">${PrecioMXM.toFixed(2)}</td>
         <td>Moneda</td>
         <td>Impuesto</td>
         <td><input type="number" value="${cantidadInicial}" min="1" class="form-control form-control-sm cantidad"></td>
@@ -76,6 +76,11 @@ window.agregarArticulo = function(art) {
 
     // Recalcular al cambiar la cantidad
     fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
+    
+    // Asignar eventosde eliminar
+    fila.querySelector('button').addEventListener('click', function() {
+        eliminarFila(this);
+    });
 
     calcularTotales();
 
@@ -86,16 +91,26 @@ window.agregarArticulo = function(art) {
 // Calcular totales generales
 function calcularTotales() {
     const filas = document.querySelectorAll("#tablaArticulos tbody tr");
-
+    let TotalAntesDescuento = 0;
+    
     filas.forEach(fila => {
         const cantidad = parseFloat(fila.querySelector(".cantidad")?.value || 0);
         const precio = parseFloat(fila.querySelector(".precio")?.textContent || 0);
         let total = cantidad * precio;
+        TotalAntesDescuento += total;
         
         if (fila.querySelector('.total')) {
             fila.querySelector('.total').textContent = total.toFixed(2);
         }
     });
+
+    document.getElementById('totalAntesDescuento').textContent = `$${TotalAntesDescuento.toFixed(2)}`;//cambiar el valor del total antes del descuento por el nuevo total
+}
+
+// Función global para eliminar fila
+function eliminarFila(boton) {
+    boton.closest("tr").remove();
+    calcularTotales();
 }
 
 
