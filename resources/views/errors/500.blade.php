@@ -26,6 +26,14 @@
     .container {
       text-align: center;
       z-index: 2;
+      max-width: 800px;
+    }
+
+    /* Imagen de advertencia */
+    .warning-img {
+      width: 120px;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
     }
 
     h1 {
@@ -67,10 +75,22 @@
       background: #e60000;
     }
 
+    .error-details {
+      background: rgba(0,0,0,0.6);
+      color: #ffcccc;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      text-align: left;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      max-height: 200px;
+    }
+
     /* Animaciones */
     @keyframes pulse {
       0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
+      50% { transform: scale(1.05); }
       100% { transform: scale(1); }
     }
 
@@ -103,53 +123,36 @@
       bottom: -150px;
     }
 
-    .bubbles span:nth-child(1) {
-      left: 10%;
-      animation-duration: 8s;
-      animation-delay: 0s;
-    }
-    .bubbles span:nth-child(2) {
-      left: 20%;
-      animation-duration: 10s;
-      animation-delay: 2s;
-    }
-    .bubbles span:nth-child(3) {
-      left: 35%;
-      animation-duration: 12s;
-      animation-delay: 4s;
-    }
-    .bubbles span:nth-child(4) {
-      left: 50%;
-      animation-duration: 15s;
-      animation-delay: 3s;
-    }
-    .bubbles span:nth-child(5) {
-      left: 70%;
-      animation-duration: 8s;
-      animation-delay: 5s;
-    }
-    .bubbles span:nth-child(6) {
-      left: 85%;
-      animation-duration: 12s;
-      animation-delay: 1s;
-    }
+    .bubbles span:nth-child(1) { left: 10%; animation-duration: 8s; animation-delay: 0s; }
+    .bubbles span:nth-child(2) { left: 20%; animation-duration: 10s; animation-delay: 2s; }
+    .bubbles span:nth-child(3) { left: 35%; animation-duration: 12s; animation-delay: 4s; }
+    .bubbles span:nth-child(4) { left: 50%; animation-duration: 15s; animation-delay: 3s; }
+    .bubbles span:nth-child(5) { left: 70%; animation-duration: 8s; animation-delay: 5s; }
+    .bubbles span:nth-child(6) { left: 85%; animation-duration: 12s; animation-delay: 1s; }
 
     @keyframes rise {
-      0% {
-        transform: translateY(0) scale(0);
-      }
-      100% {
-        transform: translateY(-1000px) scale(1);
-      }
+      0% { transform: translateY(0) scale(0); }
+      100% { transform: translateY(-1000px) scale(1); }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Imagen de advertencia -->
+    <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" alt="Advertencia" class="warning-img">
+
     <h1><i class="fas fa-bug"></i> 500</h1>
     <h2>¡Ups! Algo salió mal en el servidor</h2>
     <p>No es tu culpa, estamos trabajando para solucionarlo.</p>
     <a href="{{ url('/') }}">Volver al inicio</a>
+
+    {{-- Mostrar detalles SOLO en desarrollo --}}
+    @if(isset($exception))
+      <div class="error-details">
+        <strong>Detalles del error:</strong><br>
+        {{ $exception->getMessage() }}
+      </div>
+    @endif
   </div>
 
   <div class="bubbles">

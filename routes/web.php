@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\ArticuloController;
+use App\Http\Controllers\ArticuloControlles;
+use App\Http\Controllers\CotizacionesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 
@@ -12,13 +15,17 @@ Route::middleware('auth')->group(function () {
 
     //RUTAS PARA EL ADMIN
     Route::middleware(['auth', 'role:1,2'])->group(function () {
-        Route::get('/dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
-        Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios');
-        Route::get('/nueva-cotizacion', function () { return view('admin.cotizacion'); });//TEMPORAL*********************************************
+        Route::get('/Dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
+        Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
+        Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
+        Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
+        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');
     });
 
     //RUTAS PARA USUARIOS
-    Route::middleware(['auth', 'role:3,4'])->group(function () { Route::get('/work', function () { return view('work'); });});//TEMPORAL*********************************************
+    Route::middleware(['auth', 'role:3,4'])->group(function () { 
+    });
+    
 });
 
 require __DIR__.'/auth.php';

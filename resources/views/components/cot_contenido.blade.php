@@ -12,10 +12,128 @@
 }
 </style>
 
+<!-- Scripts necesarios -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+
 <div class="table-responsive table-scroll">
-            <table class="table table-bordered" id="tablaArticulos">
-                <thead>
-                    <tr>
+    <table class="table table-bordered" id="tablaArticulos">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Clave</th>
+                <th>Producto</th>
+                <th>Unidad de medida</th>
+                <th>Precio</th>
+                <th>Moneda</th>
+                <th>Impuesto</th>
+                <th>Cantidad</th>
+                <th>Promociones</th>
+                <th>Total</th>
+                <th>% Descuento</th>
+                <th>Presion tras el descuento</th>
+                <th>Total Extranjero</th>
+                <th>Precio Unit.Doc</th>
+                <th>Total (doc)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalArticulos">+</button>
+                </td>
+                <td colspan="26"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Totales -->
+<div class="row mt-3">
+    <div class="col-md-8"></div>
+    <div class="col-md-4">
+        <table class="table">
+            <tr>
+                <th>Total antes del descuento</th>
+                <td id="totalAntesDescuento">$0.00</td>
+            </tr>
+            <tr>
+                <th>Total con el descuento</th>
+                <td id="totalConDescuento">$0.00</td>
+            </tr>
+            <tr>
+                <th>
+                    <div class="d-flex align-items-center gap-2">
+                        Descuento
+                        <input type="number" id="descuentoInput" class="form-control form-control-sm w-auto" value="0" min="0" max="100" style="width:70px;">
+                    </div>
+                </th>
+                <td id="descuento">0%</td>
+            </tr>
+            <tr>
+                <th>Gaston Adicionales</th>
+                <td id="gastosAdicionales">$0.00</td>
+            </tr>
+            <tr>
+                <th>Impuesto (IVA 16%)</th>
+                <td id="iva">$0.00</td>
+            </tr>
+            <tr>
+                <th>Total del documento</th>
+                <td id="total">$0.00</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+<!-- Modal Artículos -->
+<div class="modal fade" id="modalArticulos" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Seleccionar Artículo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Tabla -->
+                <table class="table table-hover" id="tablaModalArticulos">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th>Precio</th>
+                            <th>Imagen</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($articulos as $articulo)
+                            <tr>
+                                <td>{{ $articulo->ItemCode }}</td>
+                                <td>{{ $articulo->FrgnName }}</td>
+                                <td>Precio Pendiente</td>
+                                <td> {{$articulo->imagen->Ruta_imagen}}
+                                    {{--<img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px;height:auto;">--}}
+                                </td>
+                                <td>
+                                    <button class="btn" style="background-color: blue; color: white; border: none; padding: 10px 20px; border-radius: 5px;" onclick='agregarArticulo(@json($articulo))'>Agregar</button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{{--
+
+<tr>
                         <th></th>
                         <th>Código</th>
                         <th>Modelo</th>
@@ -44,137 +162,13 @@
                         <th>Demanda Perdida</th>
                         <th>BackOrder</th>
                     </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalArticulos">+</button>
-                        </td>
-                        <td colspan="26"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
 
-        <!-- Totales -->
-    <div class="row mt-3">
-        <div class="col-md-8"></div>
-        <div class="col-md-4">
-            <table class="table">
-                <tr>
-                    <th>Total antes del descuento</th>
-                    <td id="totalAntesDescuento">$0.00</td>
-                </tr>
-                <tr>
-                    <th>Total con el descuento</th>
-                    <td id="totalConDescuento">$0.00</td>
-                </tr>
-                <tr>
-                    <th>
-                        <div class="d-flex align-items-center gap-2">
-                            Descuento
-                            <input type="number" id="descuentoInput" class="form-control form-control-sm w-auto" value="0" min="0" max="100" style="width:70px;">
-                        </div>
-                    </th>
-                    <td id="descuento">0%</td>
-                </tr>
-                <tr>
-                    <th>Gaston Adicionales</th>
-                    <td id="gastosAdicionales">$0.00</td>
-                </tr>
-                <tr>
-                    <th>Impuesto (IVA 16%)</th>
-                    <td id="iva">$0.00</td>
-                </tr>
-                <tr>
-                    <th>Total del documento</th>
-                    <td id="total">$0.00</td>
-                </tr>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Clientes -->
-<div class="modal fade" id="modalClientes" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Seleccionar Cliente</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <table class="table table-hover" id="tablaClientes">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Nombre</th>
-                            <th>Descuento</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Se llena dinámicamente -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Artículos -->
-<div class="modal fade" id="modalArticulos" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Seleccionar Artículo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <table class="table table-hover" id="tablaModalArticulos">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Descripción</th>
-                            <th>Precio</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Se llena dinámicamente -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Scripts dinámicos -->
 @push('scripts')
 <script>
-const articulos = [
-    {codigo: 'ART-001', descripcion: 'Producto Ejemplo', precio: 100, modelo: 'MOD-001', stock: 50, stockK001: 30, stockK007: 3, almacen: 'WMS'},
-    {codigo: 'ART-002', descripcion: 'Producto Premium', precio: 250, modelo: 'MOD-002', stock: 20, stockK001: 10, stockK007: 1, almacen: 'WMS'},
-    {codigo: 'ART-003', descripcion: 'Producto Económico', precio: 50, modelo: 'MOD-003', stock: 100, stockK001: 80, stockK007: 8, almacen: 'WMS'}
-];
-
 let descuentoCliente = 0;
 
-// Cargar artículos en el modal
-function cargarArticulos() {
-    const tbody = document.querySelector('#tablaModalArticulos tbody');
-    tbody.innerHTML = '';
-    articulos.forEach((a, index) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${a.codigo}</td>
-            <td>${a.descripcion}</td>
-            <td>${a.precio.toFixed(2)}</td>
-            <td><button class="btn btn-sm btn-success" onclick="agregarArticulo(${index})">Agregar</button></td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
 
 // Agregar artículo a la tabla principal
 function agregarArticulo(index) {
@@ -267,3 +261,4 @@ document.getElementById('descuentoInput').addEventListener('input', calcularTota
 document.getElementById('modalArticulos').addEventListener('show.bs.modal', cargarArticulos);
 </script>
 @endpush
+--}}

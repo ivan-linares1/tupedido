@@ -1,15 +1,13 @@
 /* =============================
    Control de trabajo en SAP
    ============================= */
-   Tipos OEDG_EDG1_OITB
-   Datos OCRD_CRD1
-
 /* Clientes */
 CREATE TABLE OCRD(
   CardCode VARCHAR(15) PRIMARY KEY,
   CardName VARCHAR(100),
   GroupNum INT
 );
+
 
 CREATE TABLE OITB(
   ItmsGrpCod VARCHAR(50) PRIMARY KEY,
@@ -18,6 +16,7 @@ CREATE TABLE OITB(
   Object VARCHAR(20)
 );
 
+/*Descuentos por cliente*/
 CREATE TABLE OEDG(
   AbsEntry INT PRIMARY KEY,
   Type CHAR(1),
@@ -26,6 +25,7 @@ CREATE TABLE OEDG(
   FOREIGN KEY(ObjCode) REFERENCES OCRD(CardCode)
 );
 
+/*Detalle de descuentos por grupo de artículos*/
 CREATE TABLE EDG1(
   AbsEntry INT NOT NULL,
   ObjType VARCHAR(20) NOT NULL,
@@ -96,6 +96,7 @@ CREATE TABLE OITM(
   FrgnName VARCHAR(100),
   SalUnitMsr VARCHAR(100),
   Id_imagen BIGINT NOT NULL,
+  Active CHAR(1) NOT NULL DEFAULT 'Y',
   FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
 );
 

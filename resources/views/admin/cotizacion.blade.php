@@ -3,120 +3,91 @@
 @section('title', 'Cotizaciones')
 
 @section('contenido')
+
+ <!-- Importación de JS -->
+@vite(['resources/js/cotizaciones.js'])
+
 <div class="container my-4">
-    <h3>COTIZACIONES</h3>
-    <div class="container my-4">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <div class="row mb-2">
-                    <div class="col-md-4">
-                        <label>Código Cliente</label>
-                        <div class="input-group">
-                            <input type="text" id="codigoCliente" class="form-control" placeholder="Código Cliente" readonly>
-                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalClientes">...</button>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <label>Nombre</label>
-                        <input type="text" id="nombreCliente" class="form-control" placeholder="Nombre Cliente" readonly>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <label>Moneda</label>
-                        <select class="form-select">
-                            <option>MXN</option>
-                            <option>USD</option>
-                        </select>
-                    </div>
-                </div>
+    <h3 class="mb-4">Nueva Cotización</h3>
+
+    <div class="row">
+        <!-- COLUMNA IZQUIERDA: Datos del Cliente -->
+        <div class="col-md-6">
+            <h5>CLIENTES</h5>
+            <div class="mb-3">
+                <label>Cliente</label>
+                <select class="form-select" name="cliente" id="selectCliente">
+                    <option value="" selected disabled>Selecciona un cliente</option>
+                    @foreach($clientes as $cliente)
+                        <option value="{{ $cliente->CardCode }}">{{ $cliente->CardCode.' - '.$cliente->CardName }}</option>
+                    @endforeach
+                </select>
             </div>
 
-            <div class="col-md-6">
-                <div class="row mb-2">
-                    <div class="col-md-4">
-                        <label>Fecha de contabilización</label>
-                        <input type="date" id="fechaContabilizacion" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label>Válido hasta</label>
-                        <input type="date" id="fechaValidoHasta" class="form-control">
-                    </div>
-                    <div class="col-md-4">
-                        <label>Fecha del documento</label>
-                        <input type="date" id="fechaDocumento" class="form-control">
-                    </div>
-                </div>
+            <div class="mb-3">
+                <label>Dirección Fiscal</label>
+                <span id="direccionFiscal" class="form-control" style="white-space: pre-wrap; display: block;"></span>
+            </div>
+
+            <div class="mb-3">
+                <label>Dirección de Entrega</label>
+                <span id="direccionEntrega" class="form-control" style="white-space: pre-wrap; display: block;"></span>
             </div>
         </div>
-    </div>
 
-    <ul class="nav nav-tabs mb-3">
-        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#contenido">Contenido</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#logistica">Logistica</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#finanzas">Finanzas</a></li>
-        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#">Anexos</a></li>
-    </ul>
+        <!-- COLUMNA DERECHA: Datos Generales -->
+        <div class="col-md-6">
+            <h5>GENERALES</h5>
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label>Fecha de Creacion</label>
+                    <input type="date" id="fechaCreacion" class="form-control" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label>Válido Entrega</label>
+                    <input type="date" id="fechaEntrega" class="form-control" >
+                </div>
+            </div>
 
-
-<div class="tab-content">
-    <div class="tab-pane fade show active" id="contenido">
-        @include('components.cot_contenido')
-    </div>
-    <div class="tab-pane fade" id="finanzas">
-        @include('components.Finanzas')
+            <div class="mb-3">
+                <label>Moneda</label>
+                <select class="form-select" name="currency_id">
+                    <option value="" selected disabled>Selecciona una moneda</option>
+                    @foreach($monedas as $moneda)
+                        <option value="{{ $moneda->Currency_ID }}">{{ $moneda->Currency }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
     </div>
 </div>
 
 
 
-@push('scripts')
-<script>
-    const hoy = new Date().toISOString().split('T')[0];
-    document.getElementById('fechaContabilizacion').value = hoy;
-    document.getElementById('fechaValidoHasta').value = hoy;
-    document.getElementById('fechaDocumento').value = hoy;
+<div class="container my-4">
+    <!-- TABS -->
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#contenido">Contenido</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#">Logística</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#finanzas">Finanzas</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#">Anexos</a>
+        </li>
+    </ul>
 
-    const clientes = [
-        {codigo: 'CLI-001', nombre: 'Empresa Ejemplo S.A. de C.V.', descuento: 10},
-        {codigo: 'CLI-002', nombre: 'Comercializadora Demo', descuento: 0},
-        {codigo: 'CLI-003', nombre: 'Cliente Premium', descuento: 15}
-    ];
-
-    // Funciones para manejar la selección de cliente dentro del modal
-    function seleccionarCliente(codigo, nombre, descuento) {
-        document.getElementById("codigoCliente").value = codigo;
-        document.getElementById("nombreCliente").value = nombre;
-        descuentoCliente = descuento;
-
-        document.querySelectorAll("#tablaArticulos tbody tr").forEach(tr => {
-            if (tr.querySelector(".descuento")) {
-                tr.querySelector(".descuento").textContent = descuentoCliente;
-            }
-        });
-
-        calcularTotales();
-        bootstrap.Modal.getInstance(document.getElementById('modalClientes')).hide();
-    }
-
-    // Función para cargar los datos del los clientes en el modal
-    function cargarClientes() {
-        const tbody = document.querySelector('#tablaClientes tbody');
-        tbody.innerHTML = '';
-        clientes.forEach(c => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${c.codigo}</td>
-                <td>${c.nombre}</td>
-                <td>${c.descuento}%</td>
-                <td><button class="btn btn-sm btn-success" onclick="seleccionarCliente('${c.codigo}','${c.nombre}',${c.descuento})">Seleccionar</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    document.getElementById('modalClientes').addEventListener('show.bs.modal', cargarClientes);
-</script>
-@endpush
-
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="contenido">
+            @include('components.cot_contenido', ['articulos' => $articulos])
+        </div>
+        <div class="tab-pane fade" id="finanzas">
+            @include('components.Finanzas')
+        </div>
+    </div>
+</div>
 @endsection

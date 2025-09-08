@@ -1,0 +1,86 @@
+@extends('layouts.app')
+
+@section('title', 'Productos')
+
+@section('contenido')
+
+<div class="container mt-4">
+    <h4 class="mb-3 fw-bold">Catálogo de Productos / Servicios</h4>
+
+    <!-- Filtros -->
+    <form method="GET" action="{{ route('articulos') }}">
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-2">
+                <label class="form-label">Mostrar</label>
+                <select class="form-select form-select-sm" name="mostrar" onchange="this.form.submit()">
+                    <option {{ request('mostrar') == 25 ? 'selected' : '' }}>25</option>
+                    <option {{ request('mostrar') == 50 ? 'selected' : '' }}>50</option>
+                    <option {{ request('mostrar') == 100 ? 'selected' : '' }}>100</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Estatus</label>
+                <select class="form-select form-select-sm" name="estatus" onchange="this.form.submit()">
+                    <option value="Activos" {{ request('estatus') == 'Activos' ? 'selected' : '' }}>Activos</option>
+                    <option value="Inactivos" {{ request('estatus') == 'Inactivos' ? 'selected' : '' }}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Grupo de Productos</label>
+                <select class="form-select form-select-sm" name="grupo" onchange="this.form.submit()">
+                    <option>-Todos-</option>
+                    {{-- Aquí después cargamos dinámicamente los grupos --}}
+                </select>
+            </div>
+            <div class="col-md-3 offset-md-2">
+                <label class="form-label">Buscar</label>
+                <div class="input-group input-group-sm">
+                    <input type="text" name="buscar" class="form-control" value="{{ request('buscar') }}" placeholder="Buscar...">
+                    <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Tabla -->
+    <div class="table-responsive ">
+        <table class="table table-bordered align-middle">
+            <thead class="table-info  text-center">
+                <tr>
+                    <th>Clave</th>
+                    <th>Producto / Servicio</th>
+                    <th>Descripción</th>
+                    <th>Grupo de Productos</th>
+                    <th>Imagen</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($articulos as $articulo)
+                <tr>
+                    <td>{{ $articulo->ItemCode }}</td>
+                    <td class="text-primary">
+                        <a href="#" class="text-decoration-none fw-semibold">
+                            {{ $articulo->ItemName }}
+                        </a>
+                    </td>
+                    <td>{{ $articulo->FrgnName }}</td>
+                    <td><!-- Por ahora vacío --></td>
+                    <td>{{ $articulo->imagen->Ruta_imagen }}</td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No se encontraron resultados</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación Bootstrap -->
+    <div class="d-flex justify-content-center">
+        {{ $articulos->appends(request()->query())->links('pagination::bootstrap-5') }}
+    </div>
+
+</div>
+
+@endsection

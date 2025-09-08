@@ -50,7 +50,7 @@
             </a>
             <div class="collapse" id="submenuProductos" data-bs-parent=".sidebar">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                <li><a href="#" class="nav-link">Productos</a></li>
+                <li><a href="{{ route('articulos') }}" class="nav-link">Productos</a></li>
                 <li><a href="#" class="nav-link">Lista de Precios</a></li>
                 <li>
                     <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionProductos" role="button" aria-expanded="false" aria-controls="submenuConfiguracionProductos">
