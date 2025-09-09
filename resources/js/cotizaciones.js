@@ -4,6 +4,11 @@ document.getElementById('fechaCreacion').value = hoy;
 document.getElementById('fechaEntrega').value = hoy;
 //Evitar que el calendario permita escojer dias pasados
 document.getElementById('fechaEntrega').setAttribute('min', hoy);
+//Recibe el dato de monedas desde el controlador-vista-json-js
+const monedas = JSON.parse(selectMoneda.dataset.monedas);
+//Recibe el dato de monedas desde el controlador-vista-json-js
+const IVA = JSON.parse(selectMoneda.dataset.iva);
+console.log(monedas);
 
 //Hace que el imput del cliente permita realizar la busqueda con el mismo imput y select
 $(document).ready(function() {
@@ -36,48 +41,70 @@ $(document).ready(function () {
     });
 });
 
+//cada que cambiamos la moneda en el selector recalcula las monedas
+document.getElementById('selectMoneda').addEventListener('change', function() {
+    const monedaCambioID = parseInt(this.value);
+    const monedaCambio = monedas.find(m => m.Currency_ID == monedaCambioID);
+
+    // Recorremos todas las filas de la tabla y actualizamos el precio y la moneda
+    const filas = document.querySelectorAll("#tablaArticulos tbody tr");
+    filas.forEach(fila => {
+        if (!fila.dataset.precioOriginal || !fila.dataset.monedaOriginal) {
+            return; // saltamos filas que no tienen los atributos sino maerca error en la ultima fila dondo solo esta el boton agregar articulo
+        }
+        const precioOriginal = parseFloat(fila.dataset.precioOriginal); // Guardamos el precio original en un data attribute
+        const monedaOriginal = JSON.parse(fila.dataset.monedaOriginal); // Igual, guardamos el objeto moneda original
+
+        // Calculamos el precio convertido
+        const precioConvertido = conversionesMonedas(precioOriginal, monedaOriginal, monedaCambio);
+        fila.querySelector('.precio').textContent = precioConvertido.toFixed(2);
+
+        // Actualizamos la columna de moneda
+        fila.querySelector('td:nth-child(6)').textContent = monedaCambio ? monedaCambio.Currency : monedaOriginal.Currency;
+    });
+
+    // Recalculamos totales
+    calcularTotales();
+});
+
+//funcion que agrega los articulos al la tabla
 window.agregarArticulo = function(art) {
     const tabla = document.querySelector("#tablaArticulos tbody");
     const fila = document.createElement("tr");
 
-    const cantidadInicial = 1;
+    // Guardamos el precio original y el objeto de moneda original en data attributes
+    fila.dataset.precioOriginal = art.precio.Price;
+    fila.dataset.monedaOriginal = JSON.stringify(art.precio.moneda);
 
-    // Suponemos que quieres el cambio de hoy
-    const fechaHoy = new Date().toISOString().slice(0, 10);
-
-    // Buscamos el cambio en la relación
-    const cambio = art.precios[0].moneda.cambios.find(c => c.RateDate === fechaHoy); //consultando la base de datos 
-    const rate = cambio ? parseFloat(cambio.Rate) : 1; //obteniendo el valor de rate de cambio
-
-    // Calculamos el precio convertido
-    const precioUnitario = parseFloat(art.precios[0].Price) * rate;
-    const PrecioMXM = precioUnitario * cantidadInicial;
+    const monedaCambioID = parseInt(document.querySelector('select[name="currency_id"]').value);//guarda el id de la moneda seleccionada
+    const monedaCambio =  monedas.find(m => m.Currency_ID == monedaCambioID);//obtiene el arrglo de la moneda escojida completo con su relacion de cambios
+                                        //precio decimal,  arreglo de moneda, arreglo de moneda
+    const precio = conversionesMonedas( art.precio.Price, art.precio.moneda, monedaCambio);//se envian los arreglos compeltos para poder realizar las consultas 
 
     fila.innerHTML = `
         <td><button class="btn btn-sm btn-danger">X</button></td>
         <td>${art.ItemCode}</td>
         <td>${art.FrgnName}</td>
         <td>Unidad de medida</td>
-        <td class="precio">${PrecioMXM.toFixed(2)}</td>
-        <td>Moneda</td>
-        <td>Impuesto</td>
-        <td><input type="number" value="${cantidadInicial}" min="1" class="form-control form-control-sm cantidad"></td>
+        <td class="precio">${precio}</td>
+        <td class="moneda">${monedaCambio ? monedaCambio.Currency : art.precio.moneda.Currency}</td>
+        <td>IVA ${IVA}%</td>
+        <td><input type="number" value="1" min="1" class="form-control form-control-sm cantidad"></td>
         <td>Promociones</td>
         <td class="total"></td>
-        <td>% Descuento</td>
-        <td>Presion tras el descuento</td>
-        <td>Total Extranjero</td>
-        <td>Precio Unit.Doc</td>
+        <td>0 %</td>
+        <td>Presion tras<br> el descuento</td>
         <td>Total (doc)</td>
     `;
 
+    //EVENTOS
     // Inserta la fila antes de la última fila de la tabla (si la tienes)
     tabla.insertBefore(fila, tabla.lastElementChild);
 
     // Recalcular al cambiar la cantidad
     fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
     
-    // Asignar eventosde eliminar
+    // eliminar fila al presionar el boton
     fila.querySelector('button').addEventListener('click', function() {
         eliminarFila(this);
     });
@@ -88,11 +115,30 @@ window.agregarArticulo = function(art) {
     bootstrap.Modal.getInstance(document.getElementById('modalArticulos')).hide();
 }
 
+
+//Funcion para hacer las conversiones de monedas
+function conversionesMonedas(precioOriginal, monedaOriginal, monedaConvertir)
+{
+    //si no se llega una moneda a convertir 
+    if(!monedaConvertir)
+        return precioOriginal;
+
+    let rate = monedaOriginal.cambios[0]?.Rate ?? 1; //obteniendo el valor de rate de cambio
+
+    // Calculamos el precio base para los proximos calculos
+    const precioBase = parseFloat(precioOriginal) * rate;
+
+    //buscamos el nuevo tipo de cambio
+    rate = monedaConvertir.cambios[0]?.Rate ?? 1;
+    //Realizamos el cambio de moneda en precio
+    return precioBase / rate;
+}
+
 // Calcular totales generales
 function calcularTotales() {
     const filas = document.querySelectorAll("#tablaArticulos tbody tr");
     let TotalAntesDescuento = 0;
-    
+
     filas.forEach(fila => {
         const cantidad = parseFloat(fila.querySelector(".cantidad")?.value || 0);
         const precio = parseFloat(fila.querySelector(".precio")?.textContent || 0);
@@ -100,11 +146,11 @@ function calcularTotales() {
         TotalAntesDescuento += total;
         
         if (fila.querySelector('.total')) {
-            fila.querySelector('.total').textContent = total.toFixed(2);
+            fila.querySelector('.total').textContent = total.toFixed(2); //cambia el total de la fila
         }
-    });
+    }); 
 
-    document.getElementById('totalAntesDescuento').textContent = `$${TotalAntesDescuento.toFixed(2)}`;//cambiar el valor del total antes del descuento por el nuevo total
+   document.getElementById('totalAntesDescuento').textContent = `$${TotalAntesDescuento.toFixed(2)} ${filas[0]?.querySelector('td.moneda')?.textContent || ''}`;//cambiar el valor del total antes del descuento por el nuevo total
 }
 
 // Función global para eliminar fila
@@ -114,7 +160,8 @@ function eliminarFila(boton) {
 }
 
 
- $(document).ready(function() {
+//jquery que se encarga de los filtros en el modal de articulos
+$(document).ready(function() {
     var tablaModal = $('#tablaModalArticulos').DataTable({
         pageLength: 25, // por defecto
         language: {

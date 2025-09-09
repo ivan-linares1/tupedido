@@ -31,11 +31,9 @@
                 <th>Impuesto</th>
                 <th>Cantidad</th>
                 <th>Promociones</th>
-                <th>Total</th>
+                <th>SubTotal</th>
                 <th>% Descuento</th>
-                <th>Presion tras el descuento</th>
-                <th>Total Extranjero</th>
-                <th>Precio Unit.Doc</th>
+                <th>Presion tras<br> el descuento</th>
                 <th>Total (doc)</th>
             </tr>
         </thead>
@@ -64,24 +62,11 @@
                 <td id="totalConDescuento">$0.00</td>
             </tr>
             <tr>
-                <th>
-                    <div class="d-flex align-items-center gap-2">
-                        Descuento
-                        <input type="number" id="descuentoInput" class="form-control form-control-sm w-auto" value="0" min="0" max="100" style="width:70px;">
-                    </div>
-                </th>
-                <td id="descuento">0%</td>
-            </tr>
-            <tr>
-                <th>Gaston Adicionales</th>
-                <td id="gastosAdicionales">$0.00</td>
-            </tr>
-            <tr>
-                <th>Impuesto (IVA 16%)</th>
+                <th>Impuesto (IVA {{ $IVA }}%)</th>
                 <td id="iva">$0.00</td>
             </tr>
             <tr>
-                <th>Total del documento</th>
+                <th>Total</th>
                 <td id="total">$0.00</td>
             </tr>
         </table>

@@ -51,7 +51,7 @@
 
             <div class="mb-3">
                 <label>Moneda</label>
-                <select class="form-select" name="currency_id">
+                <select class="form-select" name="currency_id" id="selectMoneda" data-monedas='@json($monedas)' data-iva='@json($IVA)'>
                     <option value="" selected disabled>Selecciona una moneda</option>
                     @foreach($monedas as $moneda)
                         <option value="{{ $moneda->Currency_ID }}">{{ $moneda->Currency }}</option>
@@ -68,25 +68,13 @@
     <!-- TABS -->
     <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
-            <a class="nav-link active" data-bs-toggle="tab" href="#contenido">Contenido</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#">Logística</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#finanzas">Finanzas</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#">Anexos</a>
+            <a class="nav-link active" data-bs-toggle="tab" href="#contenido">Cotizacion</a>
         </li>
     </ul>
 
     <div class="tab-content">
         <div class="tab-pane fade show active" id="contenido">
             @include('components.cot_contenido', ['articulos' => $articulos])
-        </div>
-        <div class="tab-pane fade" id="finanzas">
-            @include('components.Finanzas')
         </div>
     </div>
 </div>

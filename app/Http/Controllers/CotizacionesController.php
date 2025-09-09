@@ -6,18 +6,25 @@ use App\Models\Articulo;
 use App\Models\Clientes;
 use App\Models\DireccionesClientes;
 use App\Models\Moneda;
-use Illuminate\Support\Facades\Artisan;
-use PhpParser\Node\Stmt\Break_;
+use Carbon\Carbon;
 
 class CotizacionesController extends Controller
 {
     public function index ()
     {
+        $IVA = 16;
+        $hoy = Carbon::today()->toDateString(); // Obtiene la fecha de hoy en formato YYYY-MM-DD
         $clientes = Clientes::all();
-        $monedas = Moneda::all();
-        $articulos = Articulo::with('precios.moneda.cambios')->where('Active', 'Y')->get();        
 
-        return view('admin.cotizacion', compact('clientes', 'monedas', 'articulos'));
+        $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
+            $query->whereDate('RateDate', $hoy);
+        }])->get();
+
+        $articulos = Articulo::with(['precio.moneda.cambios' => function($query) use ($hoy) {
+            $query->whereDate('RateDate', $hoy);
+        }])->where('Active', 'Y')->get();        
+
+        return view('admin.cotizacion', compact('clientes', 'monedas', 'articulos', 'IVA'));
     }
 
     public function ObtenerDirecciones($CardCode){

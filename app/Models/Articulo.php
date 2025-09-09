@@ -28,8 +28,8 @@ class Articulo extends Model
     }
 
     // Relación: un artículo tiene muchos precios (itm1)
-    public function precios()
+    public function precio()
     {
-        return $this->hasMany(Precios::class, 'ItemCode', 'ItemCode');
+        return $this->hasOne(Precios::class, 'ItemCode', 'ItemCode');
     }
 }
