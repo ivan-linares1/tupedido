@@ -31,4 +31,16 @@ Route::middleware('auth')->group(function () {
     
 });
 
+
+// Grupo admin
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+    Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+
+    // Ruta para obtener datos del cliente (AJAX)
+    Route::get('/ocrd/show', [UsuarioController::class, 'getCliente'])->name('ocrd.show');
+});
+
+
+
 require __DIR__.'/auth.php';
