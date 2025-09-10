@@ -8,7 +8,6 @@ document.getElementById('fechaEntrega').setAttribute('min', hoy);
 const monedas = JSON.parse(selectMoneda.dataset.monedas);
 //Recibe el dato de monedas desde el controlador-vista-json-js
 const IVA = JSON.parse(selectMoneda.dataset.iva);
-console.log(monedas);
 
 //Hace que el imput del cliente permita realizar la busqueda con el mismo imput y select
 $(document).ready(function() {
@@ -79,12 +78,13 @@ window.agregarArticulo = function(art) {
     const monedaCambioID = parseInt(document.querySelector('select[name="currency_id"]').value);//guarda el id de la moneda seleccionada
     const monedaCambio =  monedas.find(m => m.Currency_ID == monedaCambioID);//obtiene el arrglo de la moneda escojida completo con su relacion de cambios
                                         //precio decimal,  arreglo de moneda, arreglo de moneda
-    const precio = conversionesMonedas( art.precio.Price, art.precio.moneda, monedaCambio);//se envian los arreglos compeltos para poder realizar las consultas 
-
+    const precio = conversionesMonedas( art.precio.Price, art.precio.moneda, monedaCambio);//se envian los arreglos compeltos para poder realizar las consultas  
+    
     fila.innerHTML = `
         <td><button class="btn btn-sm btn-danger">X</button></td>
         <td>${art.ItemCode}</td>
         <td>${art.FrgnName}</td>
+        <td><img src="${art.imagen?.Ruta_imagen}" alt="Imagen del artículo" style="width: 50px; height: auto;"></td>
         <td>Unidad de medida</td>
         <td class="precio">${precio}</td>
         <td class="moneda">${monedaCambio ? monedaCambio.Currency : art.precio.moneda.Currency}</td>
@@ -115,13 +115,12 @@ window.agregarArticulo = function(art) {
     bootstrap.Modal.getInstance(document.getElementById('modalArticulos')).hide();
 }
 
-
 //Funcion para hacer las conversiones de monedas
 function conversionesMonedas(precioOriginal, monedaOriginal, monedaConvertir)
 {
     //si no se llega una moneda a convertir 
     if(!monedaConvertir)
-        return precioOriginal;
+        return parseFloat(precioOriginal).toFixed(2);
 
     let rate = monedaOriginal.cambios[0]?.Rate ?? 1; //obteniendo el valor de rate de cambio
 

@@ -54,7 +54,10 @@
                 <select class="form-select" name="currency_id" id="selectMoneda" data-monedas='@json($monedas)' data-iva='@json($IVA)'>
                     <option value="" selected disabled>Selecciona una moneda</option>
                     @foreach($monedas as $moneda)
-                        <option value="{{ $moneda->Currency_ID }}">{{ $moneda->Currency }}</option>
+                        <option value="{{ $moneda->Currency_ID }}" @if($moneda->cambios->isEmpty()) disabled @endif> {{--Si no hay cambios del dia deshabilita el selector--}}
+                            {{ $moneda->Currency }}
+                            @if($moneda->cambios->isEmpty()) (Sin tipo de cambio) @endif{{--Si no hay cambios del dia agrega la leyenda sin tipo de cambio--}}
+                        </option>
                     @endforeach
                 </select>
             </div>

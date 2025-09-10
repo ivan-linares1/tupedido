@@ -25,6 +25,7 @@
                 <th></th>
                 <th>Clave</th>
                 <th>Producto</th>
+                <th>Imagen</th>
                 <th>Unidad de medida</th>
                 <th>Precio</th>
                 <th>Moneda</th>
@@ -100,9 +101,7 @@
                                 <td>{{ $articulo->ItemCode }}</td>
                                 <td>{{ $articulo->FrgnName }}</td>
                                 <td>Precio Pendiente</td>
-                                <td> {{$articulo->imagen->Ruta_imagen}}
-                                    {{--<img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px;height:auto;">--}}
-                                </td>
+                                <td><img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px;height:auto;"></td>
                                 <td>
                                     <button class="btn" style="background-color: blue; color: white; border: none; padding: 10px 20px; border-radius: 5px;" onclick='agregarArticulo(@json($articulo))'>Agregar</button>
                                 </td>
