@@ -1,3 +1,10 @@
+@if(session('success'))
+    <script>alert("{{ session('success') }}");</script>
+@endif
+@if(session('error'))
+    <script>alert("{{ session('error') }}");</script>
+@endif
+
 <nav class="sidebar d-flex flex-column">
     <!-- Botón cerrar sidebar (icono flecha) -->
     <button id="sidebarClose" class="d-md-none">
@@ -82,6 +89,10 @@
                 <li><a href="#" class="nav-link">Perfiles</a></li>
             </ul>
             </div>
+        </li>
+        {{--Boton auxiliar para mandar las monedas a la base del dia de hoy //borrar cuando este en produccion*****************--}}
+        <li>
+            <a href="{{ route ('insertar.monedas') }}"  class="nav-link">Insertar monedas</a>
         </li>
     </ul>
 </nav>

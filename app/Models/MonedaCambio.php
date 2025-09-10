@@ -12,6 +12,8 @@ class MonedaCambio extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'Currency_ID',
+        'RateDate',
         'Rate',
     ];
 

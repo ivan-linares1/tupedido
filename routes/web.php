@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticuloController;
-use App\Http\Controllers\ArticuloControlles;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\CotizacionesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
@@ -20,6 +20,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
         Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
         Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');
+        
+        //borrar cuando este en produccion*****************
+        Route::get('/insertar-monedas', [UsuarioController::class, 'insertarMonedas'])->name('insertar.monedas');
     });
 
     //RUTAS PARA USUARIOS
