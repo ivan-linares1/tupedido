@@ -59,7 +59,7 @@ document.getElementById('selectMoneda').addEventListener('change', function() {
         fila.querySelector('.precio').textContent = precioConvertido.toFixed(2);
 
         // Actualizamos la columna de moneda
-        fila.querySelector('td:nth-child(6)').textContent = monedaCambio ? monedaCambio.Currency : monedaOriginal.Currency;
+        fila.querySelector('.moneda').textContent = monedaCambio ? monedaCambio.Currency : monedaOriginal.Currency;
     });
 
     // Recalculamos totales
