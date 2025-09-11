@@ -16,6 +16,8 @@ class Clientes extends Model
         'CardCode',
         'CardName',
         'GroupNum',
+        'phone1',
+        'e-mail',
     ];
 
     // Relación: un cliente tiene muchas direcciones
