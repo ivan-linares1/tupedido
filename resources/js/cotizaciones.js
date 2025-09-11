@@ -28,7 +28,6 @@ $(document).ready(function () {
                 url: `/cliente/${cardCode}/direcciones`,
                 type: 'GET',
                 success: function (data) {
-                    console.log(data);
                     $('#direccionFiscal').text(data.fiscal);
                     $('#direccionEntrega').text(data.entrega);
                 },
@@ -39,6 +38,26 @@ $(document).ready(function () {
         }
     });
 });
+
+//se encarga de mostrar los datos de contacto del usuario
+$(document).ready(function () {
+    $('#selectCliente').on('change', function () {
+        let selected = $(this).find('option:selected');
+        let phone = selected.data('phone') || 'Sin teléfono';
+        let email = selected.data('email') || 'Sin correo';
+
+        let emailFormatted = email.split(',').join('<br>');
+
+        if (email !== 'Sin correo') {
+            // Convertir cada correo en <li>
+            let emails = email.split(',').map(e => `<li>${e.trim()}</li>`).join('');
+            emailFormatted = `<ul style="padding-left: 20px; margin: 0;">${emails}</ul>`;
+        }
+
+        $('#telefono').text("Telefono " + phone);
+        $('#correo').html("Correos:<br>" + emailFormatted);
+    });
+})
 
 //cada que cambiamos la moneda en el selector recalcula las monedas
 document.getElementById('selectMoneda').addEventListener('change', function() {
@@ -80,21 +99,22 @@ window.agregarArticulo = function(art) {
                                         //precio decimal,  arreglo de moneda, arreglo de moneda
     const precio = conversionesMonedas( art.precio.Price, art.precio.moneda, monedaCambio);//se envian los arreglos compeltos para poder realizar las consultas  
     
+    //<td class="imagen"><img src="${art.imagen?.Ruta_imagen}" alt="Imagen del artículo" style="width: 50px; height: auto;"></td>
     fila.innerHTML = `
         <td><button class="btn btn-sm btn-danger">X</button></td>
-        <td>${art.ItemCode}</td>
-        <td>${art.FrgnName}</td>
-        <td><img src="${art.imagen?.Ruta_imagen}" alt="Imagen del artículo" style="width: 50px; height: auto;"></td>
-        <td>Unidad de medida</td>
+        <td class="itemcode">${art.ItemCode}</td>
+        <td class="frgnName">${art.FrgnName}</td>
+        <td class="imagen">Imagen</td>
+        <td class="medida">Unidad de medida</td>
         <td class="precio">${precio}</td>
         <td class="moneda">${monedaCambio ? monedaCambio.Currency : art.precio.moneda.Currency}</td>
-        <td>IVA ${IVA}%</td>
+        <td class="iva">IVA ${IVA}%</td>
         <td><input type="number" value="1" min="1" class="form-control form-control-sm cantidad"></td>
-        <td>Promociones</td>
+        <td class="promocion">Promociones</td>
         <td class="total"></td>
-        <td>0 %</td>
-        <td>Presion tras<br> el descuento</td>
-        <td>Total (doc)</td>
+        <td class="descuentoporcentaje">0 %</td>
+        <td class="desMoney">descuento$</td>
+        <td class="total" >Total (doc)</td>
     `;
 
     //EVENTOS
@@ -193,4 +213,46 @@ $(document).ready(function() {
         // volver a la primera página
         tablaModal.page('first').draw('page');
     });
+});
+
+
+//Funcion para guardar los datos en un form oculto y mandarlos alcontrolador 
+$("#guardarCotizacion").on("click", function() {
+    // Llenamos los inputs con los valores actuales de tu página
+    $("#cliente").val($("#selectCliente").val());
+    $("#telefono").val($("#telefono").text());
+    $("#correo").val($("#correo").text());
+    $("#direccionFiscal").val($("#direccionFiscal").text());
+    $("#direccionEntrega").val($("#direccionEntrega").text());
+
+    $("#fechaCreacionInput").val($("#fechaCreacion").val());
+    $("#fechaEntregaInput").val($("#fechaEntrega").val());
+    $("#monedaInput").val($("#selectMoneda").val());
+
+    $("#totalAntesDescuentoInput").val($("#totalAntesDescuento").text());
+    $("#totalConDescuentoInput").val($("#totalConDescuento").text());
+    $("#ivaInput").val($("#iva").text());
+    $("#totalInput").val($("#total").text());
+
+    // Recopilar artículos de la tabla
+    let articulos = [];
+    $("#tablaArticulos tbody tr").each(function() {
+        articulos.push({
+            itemCode: $(this).find(".itemcode").text(),
+            descripcion: $(this).find(".frgnName").text(),
+            precio: $(this).find(".precio").text(),
+            cantidad: $(this).find(".cantidad").val(),
+            moneda: $(this).find(".moneda").text(),
+            total: $(this).find(".total").text(),
+            iva: $(this).find(".iva").text(),
+            descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
+            descuentoMoney: $(this).find(".desMoney").text(),
+            totalDoc: $(this).find(".totalDoc").text()
+        });
+    });
+
+    $("#articulosInput").val(JSON.stringify(articulos));
+
+    // Enviar el form
+    $("#formCotizacion").submit();
 });

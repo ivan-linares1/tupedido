@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
         Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
         Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');
+        Route::post('/CotizacionesGuardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
         
         //borrar cuando este en produccion*****************
         Route::get('/insertar-monedas', [UsuarioController::class, 'insertarMonedas'])->name('insertar.monedas');
