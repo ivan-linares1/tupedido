@@ -5,7 +5,7 @@
 @section('contenido')
 
  <!-- Importación de JS -->
-@vite(['resources/js/cotizaciones.js'])
+@vite(['resources/js/validaciones.js', 'resources/js/cotizaciones.js'])
 
 <div class="container my-4">
     <h3 class="mb-4">Nueva Cotización</h3>
@@ -17,11 +17,19 @@
             <div class="mb-3">
                 <label>Cliente</label>
                 <select class="form-select" name="cliente" id="selectCliente">
-                    <option value="" selected disabled>Selecciona un cliente</option>
-                    @foreach($clientes as $cliente)
-                        <option value="{{ $cliente->CardCode }}">{{ $cliente->CardCode.' - '.$cliente->CardName }}</option>
+                   
+                    <option value="" selected disabled > Selecciona un cliente... </option>
+                     @foreach($clientes as $cliente)
+                        <option value="{{ $cliente->CardCode }}"  data-phone="{{ $cliente->phone1 }}" data-email="{{ $cliente->{'e-mail'} }}">
+                            {{ $cliente->CardCode.' - '.$cliente->CardName }}
+                        </option>
                     @endforeach
                 </select>
+            </div>
+            <!-- Aquí se mostrarán los datos -->
+            <div id="infoCliente" class="mt-2" style="font-size: 14px;">
+                <span id="telefono"></span><br>
+                <span id="correo"></span><br>
             </div>
 
             <div class="mb-3">
@@ -81,4 +89,49 @@
         </div>
     </div>
 </div>
+
+
+<!-- Form para enviar la cotización -->
+<form id="formCotizacion" action="{{ route('cotizacionSave') }}" method="POST">
+    @csrf
+    <!-- Datos del cliente -->
+    <input type="hidden" name="cliente" id="cliente">
+    <input type="hidden" name="telefono" id="telefono">
+    <input type="hidden" name="correo" id="correo">
+    <input type="hidden" name="direccionFiscal" id="direccionFiscal">
+    <input type="hidden" name="direccionEntrega" id="direccionEntrega">
+
+    <!-- Fechas y moneda -->
+    <input type="hidden" name="fechaCreacion" id="fechaCreacionInput">
+    <input type="hidden" name="fechaEntrega" id="fechaEntregaInput">
+    <input type="hidden" name="moneda" id="monedaInput">
+
+    <!-- Totales -->
+    <input type="hidden" name="totalAntesDescuento" id="totalAntesDescuentoInput">
+    <input type="hidden" name="totalConDescuento" id="totalConDescuentoInput">
+    <input type="hidden" name="iva" id="ivaInput">
+    <input type="hidden" name="total" id="totalInput">
+
+    <!-- Artículos -->
+    <input type="hidden" name="articulos" id="articulosInput">
+</form>
+
+<div class="container my-4 d-flex justify-content-start gap-2">
+    <!-- Botón Cancelar -->
+    <button type="button" class="btn btn-danger" onclick="window.location='{{ url('/') }}'">
+        <i class="bi bi-x-circle"></i> Cancelar
+    </button>
+
+    <!-- Botón Guardar -->
+    <button type="button" id="guardarCotizacion" class="btn btn-primary">
+        <i class="bi bi-save"></i> Guardar
+    </button>
+
+    <!-- Botón Pedido -->
+    <button type="button" class="btn btn-success">
+        <i class="bi bi-bag"></i> Pedido
+    </button>
+</div>
+
+
 @endsection

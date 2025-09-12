@@ -34,7 +34,7 @@
                 <th>Promociones</th>
                 <th>SubTotal</th>
                 <th>% Descuento</th>
-                <th>Presion tras<br> el descuento</th>
+                <th>Descuento del</th>
                 <th>Total (doc)</th>
             </tr>
         </thead>
@@ -101,7 +101,7 @@
                                 <td>{{ $articulo->ItemCode }}</td>
                                 <td>{{ $articulo->FrgnName }}</td>
                                 <td>Precio Pendiente</td>
-                                <td><img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px;height:auto;"></td>
+                                <td>{{--<img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px;height:auto;">--}}</td>
                                 <td>
                                     <button class="btn" style="background-color: blue; color: white; border: none; padding: 10px 20px; border-radius: 5px;" onclick='agregarArticulo(@json($articulo))'>Agregar</button>
                                 </td>
@@ -114,135 +114,3 @@
         </div>
     </div>
 </div>
-
-{{--
-
-<tr>
-                        <th></th>
-                        <th>Código</th>
-                        <th>Modelo</th>
-                        <th>Descripción</th>
-                        <th>En stock</th>
-                        <th>Stock K001</th>
-                        <th>Comprometido</th>
-                        <th>Factor</th>
-                        <th>Cantidad</th>
-                        <th>Precio por unidad</th>
-                        <th>% Descuento</th>
-                        <th>Presion tras el descuento</th>
-                        <th>Impuestos</th>
-                        <th>Total (ML)</th>
-                        <th>Total Extranjero</th>
-                        <th>Precio Unit.Doc</th>
-                        <th>Total (doc)</th>
-                        <th>Almacen</th>
-                        <th>Pais/Region de origen</th>
-                        <th>Precio base segun</th>
-                        <th>Fecha de Entregas de Producto</th>
-                        <th>Precio Cliente</th>
-                        <th>Clave del Producto/Servicio</th>
-                        <th>Clave de la Unidad</th>
-                        <th>Stock K007</th>
-                        <th>Demanda Perdida</th>
-                        <th>BackOrder</th>
-                    </tr>
-
-
-<!-- Scripts dinámicos -->
-@push('scripts')
-<script>
-let descuentoCliente = 0;
-
-
-// Agregar artículo a la tabla principal
-function agregarArticulo(index) {
-    const art = articulos[index];
-    const tabla = document.querySelector("#tablaArticulos tbody");
-    const fila = document.createElement("tr");
-
-    const cantidadInicial = 1;
-    const precioConDesc = art.precio * cantidadInicial * (1 - descuentoCliente / 100);
-    const totalLinea = precioConDesc * 1.16; // incluye IVA 16%
-
-    fila.innerHTML = `
-        <td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();calcularTotales()">X</button></td>
-        <td>${art.codigo}</td>
-        <td>${art.modelo}</td>
-        <td>${art.descripcion}</td>
-        <td>${art.stock}</td>
-        <td>${art.stockK001}</td>
-        <td><!-- comprometido --></td>
-        <td><!-- factor --></td>
-        <td><input type="number" value="${cantidadInicial}" min="1" class="form-control form-control-sm cantidad"></td>
-        <td class="precio">${art.precio.toFixed(2)}</td>
-        <td class="descuento">${descuentoCliente}</td>
-        <td class="precioConDescuento">${precioConDesc.toFixed(2)}</td>
-        <td>IVAP16</td>
-        <td class="totalLinea">${totalLinea.toFixed(2)}</td>
-        <td><!-- totalExtranjero --></td>
-        <td><!-- precioUnitDoc --></td>
-        <td><!-- totalDoc --></td>
-        <td>${art.almacen}</td>
-        <td><!-- paisOrigen --></td>
-        <td><!-- precioBase --></td>
-        <td><!-- fechaEntrega --></td>
-        <td><!-- precioCliente --></td>
-        <td><!-- claveProducto --></td>
-        <td><!-- claveUnidad --></td>
-        <td>${art.stockK007}</td>
-        <td><!-- demandaPerdida --></td>
-        <td><!-- backOrder --></td>
-    `;
-
-    tabla.insertBefore(fila, tabla.lastElementChild);
-
-    // Recalcular al cambiar la cantidad
-    fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
-
-    calcularTotales();
-    bootstrap.Modal.getInstance(document.getElementById('modalArticulos')).hide();
-}
-
-// Calcular totales generales
-function calcularTotales() {
-    const filas = document.querySelectorAll("#tablaArticulos tbody tr");
-    let totalAntesDescuento = 0;
-    let totalConDescuento = 0;
-
-    filas.forEach(fila => {
-        const cantidad = parseFloat(fila.querySelector(".cantidad")?.value || 0);
-        const precio = parseFloat(fila.querySelector(".precio")?.textContent || 0);
-        const descuento = parseFloat(fila.querySelector(".descuento")?.textContent || 0);
-
-        const precioConDesc = cantidad * precio * (1 - descuento / 100);
-        const totalLinea = precioConDesc * 1.16; // incluye IVA
-
-        if (fila.querySelector('.precioConDescuento')) {
-            fila.querySelector('.precioConDescuento').textContent = precioConDesc.toFixed(2);
-        }
-        if (fila.querySelector('.totalLinea')) {
-            fila.querySelector('.totalLinea').textContent = totalLinea.toFixed(2);
-        }
-        totalConDescuento += precioConDesc;
-        totalAntesDescuento += cantidad * precio;
-    });
-
-    const descuentoInput = parseFloat(document.getElementById('descuentoInput').value || 0);
-    const iva = totalConDescuento * 0.16;
-    const totalFinal = totalConDescuento + iva;
-
-    document.getElementById('totalAntesDescuento').textContent = `$${totalAntesDescuento.toFixed(2)}`;
-    document.getElementById('totalConDescuento').textContent = `$${totalConDescuento.toFixed(2)}`;
-    document.getElementById('descuento').textContent = `${descuentoInput}%`;
-    document.getElementById('iva').textContent = `$${iva.toFixed(2)}`;
-    document.getElementById('total').textContent = `$${totalFinal.toFixed(2)}`;
-}
-
-// Recalcular al cambiar el descuento global
-document.getElementById('descuentoInput').addEventListener('input', calcularTotales);
-
-// Cargar artículos cuando se abre el modal
-document.getElementById('modalArticulos').addEventListener('show.bs.modal', cargarArticulos);
-</script>
-@endpush
---}}

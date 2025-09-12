@@ -7,6 +7,8 @@ use App\Models\Clientes;
 use App\Models\DireccionesClientes;
 use App\Models\Moneda;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+
 
 class CotizacionesController extends Controller
 {
@@ -61,5 +63,10 @@ class CotizacionesController extends Controller
             'fiscal' =>$fiscal,
             'entrega' => $entrega,
         ]);
+    }
+
+
+    public function GuardarCotizacion(Request $request)  {
+        dd($request->all());
     }
 }
