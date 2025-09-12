@@ -219,14 +219,14 @@ $(document).ready(function() {
 //Funcion para guardar los datos en un form oculto y mandarlos alcontrolador 
 $("#guardarCotizacion").on("click", function() {
     // Llenamos los inputs con los valores actuales de tu página
-    $("#cliente").val($("#selectCliente").val());
+    $("#cliente").val($("#selectCliente").val());//CardCode
     $("#telefono").val($("#telefono").text());
     $("#correo").val($("#correo").text());
-    $("#direccionFiscal").val($("#direccionFiscal").text());
-    $("#direccionEntrega").val($("#direccionEntrega").text());
+    $("#direccionFiscal").val($("#direccionFiscal").text());//address
+    $("#direccionEntrega").val($("#direccionEntrega").text());//address2
 
-    $("#fechaCreacionInput").val($("#fechaCreacion").val());
-    $("#fechaEntregaInput").val($("#fechaEntrega").val());
+    $("#fechaCreacionInput").val($("#fechaCreacion").val());//docDate
+    $("#fechaEntregaInput").val($("#fechaEntrega").val());//docDueDate
     $("#monedaInput").val($("#selectMoneda").val());
 
     $("#totalAntesDescuentoInput").val($("#totalAntesDescuento").text());
