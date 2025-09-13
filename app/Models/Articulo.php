@@ -32,4 +32,10 @@ class Articulo extends Model
     {
         return $this->hasOne(Precios::class, 'ItemCode', 'ItemCode');
     }
+
+     // Relación: un artículo pertenece a un grupo de artículos (oitb)
+    public function marca()
+    {
+        return $this->belongsTo(Marcas::class, 'ItmsGrpCod', 'ItmsGrpCod');
+    }
 }

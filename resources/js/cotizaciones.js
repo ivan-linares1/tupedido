@@ -98,6 +98,17 @@ window.agregarArticulo = function(art) {
     const monedaCambio =  monedas.find(m => m.Currency_ID == monedaCambioID);//obtiene el arrglo de la moneda escojida completo con su relacion de cambios
                                         //precio decimal,  arreglo de moneda, arreglo de moneda
     const precio = conversionesMonedas( art.precio.Price, art.precio.moneda, monedaCambio);//se envian los arreglos compeltos para poder realizar las consultas  
+
+    // Cliente seleccionado
+    const clienteSelect = document.getElementById('selectCliente');
+    const clienteOption = clienteSelect.options[clienteSelect.selectedIndex];
+    const descuentosCliente = clienteOption ? JSON.parse(clienteOption.dataset.descuentos || '[]') : [];
+    console.log(descuentosCliente);
+    // Descuento según grupo de artículo
+    const detalle = descuentosCliente.find(det => String(det.ObjKey) === String(art.ItmsGrpCod));
+    const descuento = detalle ? parseFloat(detalle.Discount) : 0;
+    console.log(detalle, descuento);
+
     
     //<td class="imagen"><img src="${art.imagen?.Ruta_imagen}" alt="Imagen del artículo" style="width: 50px; height: auto;"></td>
     fila.innerHTML = `
@@ -112,7 +123,7 @@ window.agregarArticulo = function(art) {
         <td><input type="number" value="1" min="1" class="form-control form-control-sm cantidad"></td>
         <td class="promocion">Promociones</td>
         <td class="total"></td>
-        <td class="descuentoporcentaje">0 %</td>
+        <td class="descuentoporcentaje">${descuento} %</td>
         <td class="desMoney">descuento$</td>
         <td class="total" >Total (doc)</td>
     `;

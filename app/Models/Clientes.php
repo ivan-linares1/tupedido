@@ -25,4 +25,10 @@ class Clientes extends Model
     {
         return $this->hasMany(DireccionesClientes::class, 'CardCode', 'CardCode');
     }
+
+    // Un cliente tiene muchos descuentos
+    public function descuentos()
+    {
+        return $this->hasMany(Descuento::class, 'ObjCode', 'CardCode');
+    }
 }

@@ -17,10 +17,20 @@
             <div class="mb-3">
                 <label>Cliente</label>
                 <select class="form-select" name="cliente" id="selectCliente">
-                   
-                    <option value="" selected disabled > Selecciona un cliente... </option>
-                     @foreach($clientes as $cliente)
-                        <option value="{{ $cliente->CardCode }}"  data-phone="{{ $cliente->phone1 }}" data-email="{{ $cliente->{'e-mail'} }}">
+                    <option value="" selected disabled>Selecciona un cliente...</option>
+                    @foreach($clientes as $cliente)
+                        <option 
+                            value="{{ $cliente->CardCode }}"  
+                            data-phone="{{ $cliente->phone1 }}" 
+                            data-email="{{ $cliente->{'e-mail'} }}"
+                            data-descuentos='@json($cliente->descuentos->flatMap(function($d) {
+                                return $d->detalles->map(function($dd) {
+                                    return [
+                                        "ObjKey" => $dd->ObjKey,
+                                        "Discount" => $dd->Discount
+                                    ];
+                                });
+                            }))'>
                             {{ $cliente->CardCode.' - '.$cliente->CardName }}
                         </option>
                     @endforeach
