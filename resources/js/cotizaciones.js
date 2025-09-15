@@ -229,11 +229,12 @@ function calcularTotales() {
     // Función para actualizar texto de los totales
     const setTotal = (id, value) => {
         const el = document.getElementById(id);
-        if (el) el.textContent = `${value} ${moneda}`;
+        if (el) el.textContent = `$${value} ${moneda}`;
     };
 
     setTotal('totalAntesDescuento', totalAntesDescuento.toFixed(2));
-    setTotal('totalConDescuento', totalDescuento.toFixed(2));
+    setTotal('DescuentoD', totalDescuento.toFixed(2));
+    setTotal('totalConDescuento', totalFinalGeneral.toFixed(2));
     setTotal('iva', iva.toFixed(2));
     setTotal('total', totalConIva.toFixed(2));
 }

@@ -59,6 +59,10 @@
                 <td id="totalAntesDescuento">$0.00</td>
             </tr>
             <tr>
+                <th>Descuento del:</th>
+                <td id="DescuentoD">$0.00</td>
+            </tr>
+            <tr>
                 <th>Total con el descuento</th>
                 <td id="totalConDescuento">$0.00</td>
             </tr>
