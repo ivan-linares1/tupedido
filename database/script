@@ -13,7 +13,7 @@ CREATE TABLE OITB(
   ItmsGrpCod VARCHAR(50) PRIMARY KEY,
   ItmsGrpNam VARCHAR(100),
   Locked CHAR(1),
-  Object VARCHAR(20)
+  Object VARCHAR(20) DEFAULT '52'
 );
 
 /*Descuentos por cliente*/
@@ -75,10 +75,8 @@ CREATE TABLE OPLN(
 /* Tipos de cambio */
 CREATE TABLE ORTT(
   RateDate DATE,
-  /*Currency VARCHAR(3),*/
   Currency_ID INT NOT NULL,
   Rate DECIMAL(19,6),
-  /*PRIMARY KEY(RateDate, Currency),*/
   PRIMARY KEY(RateDate, Currency_ID),
   FOREIGN KEY(Currency_ID) REFERENCES OCRN(Currency_ID)
 );
@@ -94,9 +92,11 @@ CREATE TABLE OITM(
   ItemCode VARCHAR(50) PRIMARY KEY,
   ItemName VARCHAR(100),
   FrgnName VARCHAR(100),
+  ItmsGrpCod VARCHAR(50),
   SalUnitMsr VARCHAR(100),
   Id_imagen BIGINT NOT NULL,
   Active CHAR(1) NOT NULL DEFAULT 'Y',
+  FOREIGN KEY (ItmsGrpCod) REFERENCES OITB(ItmsGrpCod),
   FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
 );
 
@@ -105,13 +105,11 @@ CREATE TABLE ITM1(
   ItemCode VARCHAR(50) NOT NULL,
   PriceList INT NOT NULL,
   Price DECIMAL(19,6),
-  /*Currency VARCHAR(3) NOT NULL,*/
   Currency_ID INT NOT NULL,
   PRIMARY KEY(ItemCode, PriceList),
   FOREIGN KEY(ItemCode) REFERENCES OITM(ItemCode),
   FOREIGN KEY(PriceList) REFERENCES OPLN(ListNum),
   FOREIGN KEY(Currency_ID) REFERENCES OCRN(Currency_ID)
-  /*FOREIGN KEY(Currency) REFERENCES ORTT(Currency) */
 );
 
 /* Cotizaciones */

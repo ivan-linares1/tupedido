@@ -16,7 +16,7 @@ class CotizacionesController extends Controller
     {
         $IVA = 16;
         $hoy = Carbon::today()->toDateString(); // Obtiene la fecha de hoy en formato YYYY-MM-DD
-        $clientes = Clientes::all();
+        $clientes = Clientes::with('descuentos.detalles.marca')->get();
 
         $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
             $query->whereDate('RateDate', $hoy);
