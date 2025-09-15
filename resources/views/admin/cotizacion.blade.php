@@ -105,25 +105,25 @@
 <form id="formCotizacion" action="{{ route('cotizacionSave') }}" method="POST">
     @csrf
     <!-- Datos del cliente -->
-    <input type="hidden" name="cliente" id="cliente">
-    <input type="hidden" name="telefono" id="telefono">
-    <input type="hidden" name="correo" id="correo">
-    <input type="hidden" name="direccionFiscal" id="direccionFiscal">
-    <input type="hidden" name="direccionEntrega" id="direccionEntrega">
+    <input type="hidden" name="cliente" id="clienteH">
+    <input type="hidden" name="telefono" id="telefonoH">
+    <input type="hidden" name="correo" id="correoH">
+    <input type="hidden" name="direccionFiscal" id="direccionFiscalH">
+    <input type="hidden" name="direccionEntrega" id="direccionEntregaH">
 
     <!-- Fechas y moneda -->
-    <input type="hidden" name="fechaCreacion" id="fechaCreacionInput">
-    <input type="hidden" name="fechaEntrega" id="fechaEntregaInput">
+    <input type="hidden" name="fechaCreacion" id="fechaCreacionInputH">
+    <input type="hidden" name="fechaEntrega" id="fechaEntregaInputH">
     <input type="hidden" name="moneda" id="monedaInput">
 
     <!-- Totales -->
-    <input type="hidden" name="totalAntesDescuento" id="totalAntesDescuentoInput">
-    <input type="hidden" name="totalConDescuento" id="totalConDescuentoInput">
-    <input type="hidden" name="iva" id="ivaInput">
-    <input type="hidden" name="total" id="totalInput">
+    <input type="hidden" name="totalAntesDescuento" id="totalAntesDescuentoInputH">
+    <input type="hidden" name="totalConDescuento" id="totalConDescuentoInputH">
+    <input type="hidden" name="iva" id="ivaInputH">
+    <input type="hidden" name="total" id="totalInputH">
 
     <!-- Artículos -->
-    <input type="hidden" name="articulos" id="articulosInput">
+    <input type="hidden" name="articulos" id="articulosInputH">
 </form>
 
 <div class="container my-4 d-flex justify-content-start gap-2">

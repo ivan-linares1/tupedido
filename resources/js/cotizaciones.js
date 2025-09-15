@@ -18,7 +18,6 @@ $(document).ready(function() {
     });
 });
 
-
 //realiza la consulta de las direcciones que correspondan al cliente seleccionado
 $(document).ready(function () {
     $('#selectCliente').change(function () {
@@ -85,14 +84,38 @@ document.getElementById('selectMoneda').addEventListener('change', function() {
     calcularTotales();
 });
 
+// Cuando cambia el cliente, actualizar los descuentos en todas las filas
+$('#selectCliente').on('change', function() {
+    const clienteOption = this.options[this.selectedIndex];
+    const descuentosCliente = clienteOption ? JSON.parse(clienteOption.dataset.descuentos || '[]') : [];
+
+    // Recorremos las filas de artículos
+    const filas = document.querySelectorAll("#tablaArticulos tbody tr");
+    filas.forEach(fila => {
+        const itmsGrpCod = fila.dataset.itmsGrpCod; // lo guardamos al agregarArticulo
+        if (!itmsGrpCod) return;
+
+        // Buscar descuento por grupo
+        const detalle = descuentosCliente.find(det => String(det.ObjKey) === String(itmsGrpCod));
+        const descuento = detalle ? parseFloat(detalle.Discount) : 0;
+
+        // Actualizar columna de porcentaje
+        fila.querySelector('.descuentoporcentaje').textContent = `${descuento} %`;
+        // Forzar recalcular totales
+        calcularTotales();
+    });
+});
+
 //funcion que agrega los articulos al la tabla
 window.agregarArticulo = function(art) {
     const tabla = document.querySelector("#tablaArticulos tbody");
     const fila = document.createElement("tr");
 
-    // Guardamos el precio original y el objeto de moneda original en data attributes
-    fila.dataset.precioOriginal = art.precio.Price;
-    fila.dataset.monedaOriginal = JSON.stringify(art.precio.moneda);
+    // Guardamos info útil
+    fila.dataset.precioOriginal = art.precio.Price; //precio original del articulo
+    fila.dataset.monedaOriginal = JSON.stringify(art.precio.moneda); //Guarda en formato JSON string toda la información del objeto de la moneda original en la que está expresado el precio del artículo.
+    fila.dataset.itmsGrpCod = art.ItmsGrpCod; //Guarda el código de grupo del artículo
+
 
     const monedaCambioID = parseInt(document.querySelector('select[name="currency_id"]').value);//guarda el id de la moneda seleccionada
     const monedaCambio =  monedas.find(m => m.Currency_ID == monedaCambioID);//obtiene el arrglo de la moneda escojida completo con su relacion de cambios
@@ -103,11 +126,9 @@ window.agregarArticulo = function(art) {
     const clienteSelect = document.getElementById('selectCliente');
     const clienteOption = clienteSelect.options[clienteSelect.selectedIndex];
     const descuentosCliente = clienteOption ? JSON.parse(clienteOption.dataset.descuentos || '[]') : [];
-    console.log(descuentosCliente);
     // Descuento según grupo de artículo
     const detalle = descuentosCliente.find(det => String(det.ObjKey) === String(art.ItmsGrpCod));
     const descuento = detalle ? parseFloat(detalle.Discount) : 0;
-    console.log(detalle, descuento);
 
     
     //<td class="imagen"><img src="${art.imagen?.Ruta_imagen}" alt="Imagen del artículo" style="width: 50px; height: auto;"></td>
@@ -117,15 +138,15 @@ window.agregarArticulo = function(art) {
         <td class="frgnName">${art.FrgnName}</td>
         <td class="imagen">Imagen</td>
         <td class="medida">Unidad de medida</td>
-        <td class="precio">${precio}</td>
+        <td class="precio">${Number(precio || 0).toFixed(2)}</td>
         <td class="moneda">${monedaCambio ? monedaCambio.Currency : art.precio.moneda.Currency}</td>
         <td class="iva">IVA ${IVA}%</td>
         <td><input type="number" value="1" min="1" class="form-control form-control-sm cantidad"></td>
         <td class="promocion">Promociones</td>
-        <td class="total"></td>
+        <td class="subtotal"></td>
         <td class="descuentoporcentaje">${descuento} %</td>
-        <td class="desMoney">descuento$</td>
-        <td class="total" >Total (doc)</td>
+        <td class="desMoney"></td>
+        <td class="totalFinal">Total (doc)</td>
     `;
 
     //EVENTOS
@@ -167,20 +188,54 @@ function conversionesMonedas(precioOriginal, monedaOriginal, monedaConvertir)
 // Calcular totales generales
 function calcularTotales() {
     const filas = document.querySelectorAll("#tablaArticulos tbody tr");
-    let TotalAntesDescuento = 0;
+    let totalAntesDescuento = 0;
+    let totalDescuento = 0;
+    let totalFinalGeneral = 0;
+
+    // Tomamos la moneda de la primera fila, si existe
+    const moneda = filas[0]?.querySelector('td.moneda')?.textContent || '';
 
     filas.forEach(fila => {
-        const cantidad = parseFloat(fila.querySelector(".cantidad")?.value || 0);
-        const precio = parseFloat(fila.querySelector(".precio")?.textContent || 0);
-        let total = cantidad * precio;
-        TotalAntesDescuento += total;
-        
-        if (fila.querySelector('.total')) {
-            fila.querySelector('.total').textContent = total.toFixed(2); //cambia el total de la fila
-        }
-    }); 
+        const cantidad = parseFloat(fila.querySelector(".cantidad")?.value) || 0;
+        const precio = parseFloat(fila.querySelector(".precio")?.textContent) || 0;
+        const descuentoP = parseFloat(fila.querySelector(".descuentoporcentaje")?.textContent.replace('%', '')) || 0;
 
-   document.getElementById('totalAntesDescuento').textContent = `$${TotalAntesDescuento.toFixed(2)} ${filas[0]?.querySelector('td.moneda')?.textContent || ''}`;//cambiar el valor del total antes del descuento por el nuevo total
+        // Subtotal y descuento
+        const subtotal = cantidad * precio;
+        const descuentoMoney = subtotal * (descuentoP / 100);
+        const totalConDescuento = subtotal - descuentoMoney;
+
+        // Acumulamos totales generales
+        totalAntesDescuento += subtotal;
+        totalDescuento += descuentoMoney;
+        totalFinalGeneral += totalConDescuento;
+
+        // Actualizamos celdas de la fila
+        const cells = {
+            subtotal: fila.querySelector('.subtotal'),
+            desMoney: fila.querySelector('.desMoney'),
+            totalFinal: fila.querySelector('.totalFinal')
+        };
+
+        if (cells.subtotal) cells.subtotal.textContent = subtotal.toFixed(2);
+        if (cells.desMoney) cells.desMoney.textContent = descuentoMoney.toFixed(2);
+        if (cells.totalFinal) cells.totalFinal.textContent = totalConDescuento.toFixed(2);
+    });
+
+    // Calculamos IVA y total con IVA
+    const iva = totalFinalGeneral * (IVA / 100);
+    const totalConIva = totalFinalGeneral + iva;
+
+    // Función para actualizar texto de los totales
+    const setTotal = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = `${value} ${moneda}`;
+    };
+
+    setTotal('totalAntesDescuento', totalAntesDescuento.toFixed(2));
+    setTotal('totalConDescuento', totalDescuento.toFixed(2));
+    setTotal('iva', iva.toFixed(2));
+    setTotal('total', totalConIva.toFixed(2));
 }
 
 // Función global para eliminar fila
@@ -189,11 +244,9 @@ function eliminarFila(boton) {
     calcularTotales();
 }
 
-
-//jquery que se encarga de los filtros en el modal de articulos
 $(document).ready(function() {
     var tablaModal = $('#tablaModalArticulos').DataTable({
-        pageLength: 25, // por defecto
+        pageLength: 25,
         language: {
             url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
         },
@@ -201,28 +254,44 @@ $(document).ready(function() {
         searching: true
     });
 
+    function scrollModalAlInicio() {
+        setTimeout(() => {
+            $('#modalArticulos .modal-body').scrollTop(0);
+        }, 50); // espera a que DataTable renderice la nueva página
+    }
+
     // Buscar en la tabla
     $('#buscadorModal').on('keyup', function() {
         tablaModal.search(this.value).draw();
+        scrollModalAlInicio();
     });
 
     // Cambiar cantidad de filas por página
     $('#filtroMostrar').on('change', function() {
         tablaModal.page.len($(this).val()).draw();
+        scrollModalAlInicio();
     });
 
-    // Reiniciar filtros al cerrar el modal
+    // Cambiar página
+    $('#tablaModalArticulos').on('page.dt', function() {
+        scrollModalAlInicio();
+    });
+
+    // Abrir el modal
+    $('#modalArticulos').on('shown.bs.modal', function() {
+        scrollModalAlInicio();
+    });
+
+    // Cerrar el modal: reinicia filtros y scroll
     $('#modalArticulos').on('hidden.bs.modal', function () {
-        // resetear buscador
         $('#buscadorModal').val('');
         tablaModal.search('').draw();
 
-        // resetear select a 25
         $('#filtroMostrar').val('25');
         tablaModal.page.len(25).draw();
 
-        // volver a la primera página
         tablaModal.page('first').draw('page');
+        scrollModalAlInicio();
     });
 });
 
@@ -230,20 +299,20 @@ $(document).ready(function() {
 //Funcion para guardar los datos en un form oculto y mandarlos alcontrolador 
 $("#guardarCotizacion").on("click", function() {
     // Llenamos los inputs con los valores actuales de tu página
-    $("#cliente").val($("#selectCliente").val());//CardCode
-    $("#telefono").val($("#telefono").text());
-    $("#correo").val($("#correo").text());
-    $("#direccionFiscal").val($("#direccionFiscal").text());//address
-    $("#direccionEntrega").val($("#direccionEntrega").text());//address2
+    $("#clienteH").val($("#selectCliente").val());//CardCode
+    $("#telefonoH").val($("#telefono").text());
+    $("#correoH").val($("#correo").text());
+    $("#direccionFiscalH").val($("#direccionFiscal").text());//address
+    $("#direccionEntregaH").val($("#direccionEntrega").text());//address2
 
-    $("#fechaCreacionInput").val($("#fechaCreacion").val());//docDate
-    $("#fechaEntregaInput").val($("#fechaEntrega").val());//docDueDate
-    $("#monedaInput").val($("#selectMoneda").val());
+    $("#fechaCreacionInputH").val($("#fechaCreacion").val());//docDate
+    $("#fechaEntregaInputH").val($("#fechaEntrega").val());//docDueDate
+    $("#monedaInputH").val($("#selectMoneda").val());
 
-    $("#totalAntesDescuentoInput").val($("#totalAntesDescuento").text());
-    $("#totalConDescuentoInput").val($("#totalConDescuento").text());
-    $("#ivaInput").val($("#iva").text());
-    $("#totalInput").val($("#total").text());
+    $("#totalAntesDescuentoInputH").val($("#totalAntesDescuento").text());
+    $("#totalConDescuentoInputH").val($("#totalConDescuento").text());
+    $("#ivaInputH").val($("#iva").text());
+    $("#totalInputH").val($("#total").text());
 
     // Recopilar artículos de la tabla
     let articulos = [];
