@@ -131,12 +131,11 @@ window.agregarArticulo = function(art) {
     const descuento = detalle ? parseFloat(detalle.Discount) : 0;
 
     
-    //<td class="imagen"><img src="${art.imagen?.Ruta_imagen}" alt="Imagen del artículo" style="width: 50px; height: auto;"></td>
     fila.innerHTML = `
         <td><button class="btn btn-sm btn-danger">X</button></td>
         <td class="itemcode">${art.ItemCode}</td>
         <td class="frgnName">${art.FrgnName}</td>
-        <td class="imagen">Imagen</td>
+        <td class="imagen" data-imagen="${art.Id_imagen}"><img src="${art.imagen?.Ruta_imagen}" alt="Imagen" style="width: 50px; height: auto;"></td>
         <td class="medida">Unidad de medida</td>
         <td class="precio">${Number(precio || 0).toFixed(2)}</td>
         <td class="moneda">${monedaCambio ? monedaCambio.Currency : art.precio.moneda.Currency}</td>
@@ -245,6 +244,7 @@ function eliminarFila(boton) {
     calcularTotales();
 }
 
+//se encarga de los filtros del modal de articulos
 $(document).ready(function() {
     var tablaModal = $('#tablaModalArticulos').DataTable({
         pageLength: 25,
@@ -300,39 +300,40 @@ $(document).ready(function() {
 //Funcion para guardar los datos en un form oculto y mandarlos alcontrolador 
 $("#guardarCotizacion").on("click", function() {
     // Llenamos los inputs con los valores actuales de tu página
-    $("#clienteH").val($("#selectCliente").val());//CardCode
-    $("#telefonoH").val($("#telefono").text());
-    $("#correoH").val($("#correo").text());
-    $("#direccionFiscalH").val($("#direccionFiscal").text());//address
-    $("#direccionEntregaH").val($("#direccionEntrega").text());//address2
-
-    $("#fechaCreacionInputH").val($("#fechaCreacion").val());//docDate
-    $("#fechaEntregaInputH").val($("#fechaEntrega").val());//docDueDate
-    $("#monedaInputH").val($("#selectMoneda").val());
-
-    $("#totalAntesDescuentoInputH").val($("#totalAntesDescuento").text());
-    $("#totalConDescuentoInputH").val($("#totalConDescuento").text());
-    $("#ivaInputH").val($("#iva").text());
-    $("#totalInputH").val($("#total").text());
+    $("#clienteH").val($("#selectCliente").val()); // CardCode
+    $("#fechaCreacionH").val($("#fechaCreacion").val()); // DocDate
+    $("#fechaEntregaH").val($("#fechaEntrega").val()); // DocDueDate
+    $("#CardNameH").val($("#selectCliente option:selected").data("cardname")); // nombre cliente
+    $("#SlpCodeH").val($("#selectVendedor").val());  //vendedor codigo
+    $("#phone1H").val($("#selectCliente option:selected").data("phone")); // teléfono
+    $("#emailH").val($("#selectCliente option:selected").data("email")); // correo
+    $("#DocCurH").val($("#selectMoneda").val());  //moneda
+    //obtener en el controlador $("#ShipToCodeH").val($("#ShipToCode").text());  //a dónde se enviará (dirección de entrega).*
+    //obtener en el controlador $("#PayToCodeH").val($("#PayToCode").text());  //a qué dirección fiscal se factura/paga.*
+    $("#direccionFiscalH").val($("#direccionFiscal").text()); // Dirección fiscal
+    $("#direccionEntregaH").val($("#direccionEntrega").text()); // Dirección de entrega
+    // Totales
+    $("#TotalSinPromoH").val($("#totalAntesDescuento").text().replace('$',''));
+    $("#DescuentoH").val($("#DescuentoD").text().replace('$',''));
+    $("#SubtotalH").val($("#totalConDescuento").text().replace('$',''));
+    $("#ivaH").val($("#iva").text().replace('$',''));
+    $("#totalH").val($("#total").text().replace('$',''));
 
     // Recopilar artículos de la tabla
     let articulos = [];
-    $("#tablaArticulos tbody tr").each(function() {
+    $("#tablaArticulos tbody tr:not(:last)").each(function() {
         articulos.push({
             itemCode: $(this).find(".itemcode").text(),
             descripcion: $(this).find(".frgnName").text(),
+            unidad: $(this).find(".medida").text(),
             precio: $(this).find(".precio").text(),
-            cantidad: $(this).find(".cantidad").val(),
-            moneda: $(this).find(".moneda").text(),
-            total: $(this).find(".total").text(),
-            iva: $(this).find(".iva").text(),
             descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
-            descuentoMoney: $(this).find(".desMoney").text(),
-            totalDoc: $(this).find(".totalDoc").text()
+            cantidad: $(this).find(".cantidad").val(),
+            imagen: $(this).find(".imagen").data("imagen") 
         });
     });
 
-    $("#articulosInput").val(JSON.stringify(articulos));
+    $("#articulosH").val(JSON.stringify(articulos));
 
     // Enviar el form
     $("#formCotizacion").submit();

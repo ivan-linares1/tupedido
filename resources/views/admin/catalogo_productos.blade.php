@@ -64,8 +64,8 @@
                         </a>
                     </td>
                     <td>{{ $articulo->FrgnName }}</td>
-                    <td><!-- Por ahora vacío --></td>
-                    <td>{{ $articulo->imagen->Ruta_imagen }}</td>
+                    <td>{{ $articulo->marca->ItmsGrpNam}}</td>
+                    <td><img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:70px;height:auto;"></td>
                 </tr>
                 @empty
                 <tr>

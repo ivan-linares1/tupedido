@@ -41,7 +41,7 @@ CREATE TABLE EDG1(
 CREATE TABLE OSLP(
   SlpCode INT PRIMARY KEY,
   SlpName VARCHAR(155) NOT NULL,
-  Active CHAR(1)
+  Active CHAR(1) DEFAULT 'Y'
 );
 
 /* Direcciones de clientes */
@@ -114,13 +114,13 @@ CREATE TABLE ITM1(
 
 /* Cotizaciones */
 CREATE TABLE OQUT(
-    DocEntry INT PRIMARY KEY,
+    DocEntry INT AUTO_INCREMENT PRIMARY KEY,
     CardCode VARCHAR(15) NOT NULL,
-    DocDate TIMESTAMP,
-    DocDueDate TIMESTAMP,
+    DocDate DATE,
+    DocDueDate DATE,
     CardName VARCHAR(100),
     SlpCode INT NOT NULL,
-    CntctCode INT,
+    CntctCode INT, /*ELIMINAR PORQUE NO SE USA POR EL MOMENTO*/
     Phone1 VARCHAR(20),
     E_Mail VARCHAR(100),
     DocCur VARCHAR(3),
@@ -141,7 +141,7 @@ CREATE TABLE OQUT(
 CREATE TABLE QUT1(
   DocEntry INT NOT NULL,
   LineNum INT NOT NULL,
-  ObjType VARCHAR(20),
+  ObjType VARCHAR(20) DEFAULT '23',
   ItemCode VARCHAR(50) NOT NULL,
   U_Dscr VARCHAR(250),
   unitMsr2 VARCHAR(100),

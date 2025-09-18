@@ -17,6 +17,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['auth', 'role:1,2'])->group(function () {
         Route::get('/Dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
         Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
+        Route::get('/NuevaCotizacion', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
         Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
         Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
         Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');
