@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Cotizaciones')
+@section('title', 'Cotizacion')
 
 @section('contenido')
 
@@ -23,6 +23,7 @@
                             value="{{ $cliente->CardCode }}"  
                             data-phone="{{ $cliente->phone1 }}" 
                             data-email="{{ $cliente->{'e-mail'} }}"
+                            data-cardname="{{ $cliente->CardName }}"
                             data-descuentos='@json($cliente->descuentos->flatMap(function($d) {
                                 return $d->detalles->map(function($dd) {
                                     return [
@@ -79,6 +80,22 @@
                     @endforeach
                 </select>
             </div>
+
+            @if( $vendedores )
+                <div class="mb-3">
+                    <label>Vendedores</label>
+                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor">
+                        <option value="" selected disabled>Selecciona un Vendedor</option>
+                        @foreach($vendedores as $vendedor)
+                            <option value="{{ $vendedor->SlpCode }}"
+                                data-SlpName="{{ $vendedor->SlpName }}">
+                                {{ $vendedor->SlpCode. ' - ' .$vendedor->SlpName }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
         </div>
     </div>
 </div>
@@ -105,25 +122,26 @@
 <form id="formCotizacion" action="{{ route('cotizacionSave') }}" method="POST">
     @csrf
     <!-- Datos del cliente -->
-    <input type="hidden" name="cliente" id="clienteH">
-    <input type="hidden" name="telefono" id="telefonoH">
-    <input type="hidden" name="correo" id="correoH">
-    <input type="hidden" name="direccionFiscal" id="direccionFiscalH">
-    <input type="hidden" name="direccionEntrega" id="direccionEntregaH">
-
-    <!-- Fechas y moneda -->
-    <input type="hidden" name="fechaCreacion" id="fechaCreacionInputH">
-    <input type="hidden" name="fechaEntrega" id="fechaEntregaInputH">
-    <input type="hidden" name="moneda" id="monedaInput">
-
-    <!-- Totales -->
-    <input type="hidden" name="totalAntesDescuento" id="totalAntesDescuentoInputH">
-    <input type="hidden" name="totalConDescuento" id="totalConDescuentoInputH">
-    <input type="hidden" name="iva" id="ivaInputH">
-    <input type="hidden" name="total" id="totalInputH">
+    <input type="hidden" name="cliente" id="clienteH">  {{--cardcode--}}
+    <input type="hidden" name="fechaCreacion" id="fechaCreacionH"> {{--DocDate--}}
+    <input type="hidden" name="fechaEntrega" id="fechaEntregaH"> {{--DocDue--}}
+    <input type="hidden" name="CardName" id="CardNameH"> {{--CardName--}}
+    <input type="hidden" name="SlpCode" id="SlpCodeH"> {{--SlpCode--}}
+    <input type="hidden" name="phone1" id="phone1H"> {{--phone1--}}
+    <input type="hidden" name="email" id="emailH"> {{--email--}}
+    <input type="hidden" name="DocCur" id="DocCurH"> {{--DocCur--}}
+    <input type="hidden" name="ShipToCode" id="ShipToCodeH"> {{--ShipToCode--}}
+    <input type="hidden" name="PayToCode" id="PayToCodeH"> {{--PayToCode--}}
+    <input type="hidden" name="direccionFiscal" id="direccionFiscalH"> {{--Address--}}
+    <input type="hidden" name="direccionEntrega" id="direccionEntregaH"> {{--Address--}}
+    <input type="hidden" name="TotalSinPromo" id="TotalSinPromoH"> {{--TotalSinPromo--}}
+    <input type="hidden" name="Descuento" id="DescuentoH"> {{--Descuento--}}
+    <input type="hidden" name="Subtotal" id="SubtotalH"> {{--Subtotal--}}
+    <input type="hidden" name="iva" id="ivaH"> {{--Iva--}}
+    <input type="hidden" name="total" id="totalH"> {{--Total--}}
 
     <!-- Artículos -->
-    <input type="hidden" name="articulos" id="articulosInputH">
+    <input type="hidden" name="articulos" id="articulosH">
 </form>
 
 <div class="container my-4 d-flex justify-content-start gap-2">
@@ -142,6 +160,5 @@
         <i class="bi bi-bag"></i> Pedido
     </button>
 </div>
-
 
 @endsection

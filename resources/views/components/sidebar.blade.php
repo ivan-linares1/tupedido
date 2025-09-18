@@ -1,8 +1,9 @@
+{{--Boton auxiliar para mandar las monedas a la base del dia de hoy //borrar cuando este en produccion*****************--}}
 @if(session('success'))
-    <script>alert("{{ session('success') }}");</script>
+    <script>alert("Uso en monedas sidebar - {{ session('success') }}");</script>
 @endif
 @if(session('error'))
-    <script>alert("{{ session('error') }}");</script>
+    <script>alert("Uso en monedas sidebar - {{ session('error') }}");</script>
 @endif
 
 <nav class="sidebar d-flex flex-column">
@@ -28,7 +29,7 @@
             <div class="collapse" id="submenuVentas" data-bs-parent=".sidebar">
                 <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                     <li><a href="{{ url('/work') }}" class="nav-link">Clientes</a></li>
-                    <li><a href="#" class="nav-link">Cotizaciones</a></li>
+                    <li><a href="{{ route('cotizaciones') }}" class="nav-link">Cotizaciones</a></li>
                     <li><a href="#" class="nav-link">Pedidos</a></li>
                     <li>
                         <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionVentas" role="button" aria-expanded="false" aria-controls="submenuConfiguracionVentas">
