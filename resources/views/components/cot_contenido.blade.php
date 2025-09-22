@@ -22,7 +22,7 @@
     <table class="table table-bordered" id="tablaArticulos">
         <thead>
             <tr>
-                <th></th>
+                @if(isset($modo) && $modo == 0)<th></th>@endif
                 <th>Clave</th>
                 <th>Producto</th>
                 <th>Imagen</th>
@@ -38,14 +38,44 @@
                 <th>Total (doc)</th>
             </tr>
         </thead>
+
         <tbody>
+            @if(isset($cotizacion) && $cotizacion->lineas)
+                @foreach($cotizacion->lineas as $linea)
+                    <tr >
+                        @if(isset($modo) && $modo == 0)<th></th>@endif
+                        <td class="itemcode">{{ $linea->ItemCode }}</td>
+                        <td class="frgnName">{{ $linea->FrgnName }}</td>
+                        <td class="imagen">
+                            <img src="{{ $linea->imagen?->Ruta_imagen }}" alt="Imagen" style="width: 50px; height: auto;">
+                        </td>
+                        <td class="medida">Unidad de medida</td>
+                        <td class="precio">{{ number_format($linea->Price, 2) }}</td>
+                        <td class="moneda">  {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}</td>
+                        <td class="iva">IVA {{ $IVA }}%</td>
+                        <td>
+                            <span>{{ number_format($linea->Quantity, 0) }}</span>
+                        </td>
+                        <td class="promocion">Promociones</td>
+                        <td class="subtotal">{{ number_format($linea->Price * $linea->Quantity, 2) }}</td>
+                        <td class="descuentoporcentaje">{{ number_format($linea->DiscPrcnt, 0) }} %</td>
+                        <td class="desMoney">{{ number_format(($linea->Price * $linea->Quantity) * ($linea->DiscPrcnt / 100), 2) }}</td>
+                        <td class="totalFinal">{{ (number_format($linea->Price * $linea->Quantity, 2)) - (number_format(($linea->Price * $linea->Quantity) * ($linea->DiscPrcnt / 100), 2)) }}</td>
+                    </tr>
+                @endforeach
+            @endif
+
+            @if(isset($modo) && $modo == 0)
+            <!-- Botón para agregar nuevos artículos -->
             <tr>
                 <td>
                     <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalArticulos">+</button>
                 </td>
                 <td colspan="26"></td>
             </tr>
+            @endif
         </tbody>
+
     </table>
 </div>
 
@@ -56,23 +86,53 @@
         <table class="table">
             <tr>
                 <th>Total antes del descuento</th>
-                <td id="totalAntesDescuento">$0.00</td>
+                <td id="totalAntesDescuento">
+                    @if($modo == 1)
+                        {{ number_format($cotizacion->TotalSinPromo ?? 0, 2) }}
+                    @else
+                        <span id="totalAntesDescuento">$0.00</span>
+                    @endif
+                </td>
             </tr>
             <tr>
                 <th>Descuento del:</th>
-                <td id="DescuentoD">$0.00</td>
+                <td id="DescuentoD">
+                    @if($modo == 1)
+                        {{ number_format($cotizacion->Descuento ?? 0, 2) }}
+                    @else
+                        <span id="DescuentoD">$0.00</span>
+                    @endif
+                </td>
             </tr>
             <tr>
                 <th>Total con el descuento</th>
-                <td id="totalConDescuento">$0.00</td>
+                <td id="totalConDescuento">
+                    @if($modo == 1)
+                        {{ number_format(($cotizacion->TotalSinPromo ?? 0) - ($cotizacion->Descuento ?? 0), 2) }}
+                    @else
+                        <span id="totalConDescuento">$0.00</span>
+                    @endif
+                </td>
             </tr>
             <tr>
                 <th>Impuesto (IVA {{ $IVA }}%)</th>
-                <td id="iva">$0.00</td>
+                <td id="iva">
+                    @if($modo == 1)
+                        {{ number_format($cotizacion->IVA ?? 0, 2) }}
+                    @else
+                        <span id="iva">$0.00</span>
+                    @endif
+                </td>
             </tr>
             <tr>
                 <th>Total</th>
-                <td id="total">$0.00</td>
+                <td id="total">
+                    @if($modo == 1)
+                        {{ number_format($cotizacion->Total ?? 0, 2) }}
+                    @else
+                        <span id="total">$0.00</span>
+                    @endif
+                </td>
             </tr>
         </table>
     </div>

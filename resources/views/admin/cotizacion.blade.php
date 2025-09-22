@@ -8,7 +8,13 @@
 @vite(['resources/js/validaciones.js', 'resources/js/cotizaciones.js'])
 
 <div class="container my-4">
-    <h3 class="mb-4">Nueva Cotización</h3>
+    <h3 class="mb-4">
+        @if($modo == 0)
+            Nueva Cotización
+        @else
+            CO - {{ $cotizacion->DocEntry }}
+        @endif
+    </h3>
 
     <div class="row">
         <!-- COLUMNA IZQUIERDA: Datos del Cliente -->
@@ -16,7 +22,7 @@
             <h5>CLIENTES</h5>
             <div class="mb-3">
                 <label>Cliente</label>
-                <select class="form-select" name="cliente" id="selectCliente">
+                <select class="form-select campo-editable" name="cliente" id="selectCliente" @if(isset($modo) && $modo == 1) disabled @endif>>
                     <option value="" selected disabled>Selecciona un cliente...</option>
                     @foreach($clientes as $cliente)
                         <option 
@@ -31,26 +37,27 @@
                                         "Discount" => $dd->Discount
                                     ];
                                 });
-                            }))'>
+                            }))' @if(isset($cotizacion) && $cotizacion->CardCode == $cliente->CardCode) selected @endif >
                             {{ $cliente->CardCode.' - '.$cliente->CardName }}
                         </option>
                     @endforeach
                 </select>
             </div>
+
             <!-- Aquí se mostrarán los datos -->
             <div id="infoCliente" class="mt-2" style="font-size: 14px;">
-                <span id="telefono"></span><br>
-                <span id="correo"></span><br>
+                <span id="telefono">{{ $cotizacion->Phone1 ?? '' }}</span><br>
+                <span id="correo">{{ $cotizacion->E_Mail ?? '' }}</span><br>
             </div>
 
             <div class="mb-3">
                 <label>Dirección Fiscal</label>
-                <span id="direccionFiscal" class="form-control" style="white-space: pre-wrap; display: block;"></span>
+                <span id="direccionFiscal" class="form-control" style="white-space: pre-wrap; display: block;"> {{ $cotizacion->Address ?? '' }} </span>
             </div>
 
             <div class="mb-3">
                 <label>Dirección de Entrega</label>
-                <span id="direccionEntrega" class="form-control" style="white-space: pre-wrap; display: block;"></span>
+                <span id="direccionEntrega" class="form-control" style="white-space: pre-wrap; display: block;"> {{ $cotizacion->Address2 ?? '' }} </span>
             </div>
         </div>
 
@@ -60,22 +67,24 @@
             <div class="row mb-3">
                 <div class="col-md-4">
                     <label>Fecha de Creacion</label>
-                    <input type="date" id="fechaCreacion" class="form-control" readonly>
+                    <input type="date" id="fechaCreacion" class="form-control" value="{{ isset($cotizacion) ? $cotizacion->DocDate : '' }}" readonly>
                 </div>
                 <div class="col-md-4">
                     <label>Válido Entrega</label>
-                    <input type="date" id="fechaEntrega" class="form-control" >
+                    <input type="date" id="fechaEntrega" class="form-control" value="{{ isset($cotizacion) ? $cotizacion->DocDate : '' }}" @if(isset($modo) && $modo == 1) readonly @endif >
                 </div>
             </div>
 
             <div class="mb-3">
                 <label>Moneda</label>
-                <select class="form-select" name="currency_id" id="selectMoneda" data-monedas='@json($monedas)' data-iva='@json($IVA)'>
+                <select class="form-select campo-editable" name="currency_id" id="selectMoneda"
+                    data-monedas='@json($monedas)' data-iva='@json($IVA)'
+                    @if(isset($modo) && $modo == 1) disabled @endif>
                     <option value="" selected disabled>Selecciona una moneda</option>
                     @foreach($monedas as $moneda)
-                        <option value="{{ $moneda->Currency_ID }}" @if($moneda->cambios->isEmpty()) disabled @endif> {{--Si no hay cambios del dia deshabilita el selector--}}
+                        <option value="{{ $moneda->Currency_ID }}" @if($moneda->cambios->isEmpty()) disabled @endif @if(isset($cotizacion) && $cotizacion->DocCur == $moneda->Currency_ID) selected @endif > {{--si no hay monedas de cambio disponibles se inhabilita--}}
                             {{ $moneda->Currency }}
-                            @if($moneda->cambios->isEmpty()) (Sin tipo de cambio) @endif{{--Si no hay cambios del dia agrega la leyenda sin tipo de cambio--}}
+                            @if($moneda->cambios->isEmpty() && isset($modo) && $modo == 0) (Sin tipo de cambio) @endif
                         </option>
                     @endforeach
                 </select>
@@ -84,10 +93,10 @@
             @if( $vendedores )
                 <div class="mb-3">
                     <label>Vendedores</label>
-                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor">
+                    <select class="form-select campo-editable" name="vendedor_SlpCode" id="selectVendedor"  @if(isset($modo) && $modo == 1) disabled @endif>
                         <option value="" selected disabled>Selecciona un Vendedor</option>
                         @foreach($vendedores as $vendedor)
-                            <option value="{{ $vendedor->SlpCode }}"
+                            <option value="{{ $vendedor->SlpCode }}" @if(isset($cotizacion) && $cotizacion->SlpCode == $vendedor->SlpCode) selected @endif
                                 data-SlpName="{{ $vendedor->SlpName }}">
                                 {{ $vendedor->SlpCode. ' - ' .$vendedor->SlpName }}
                             </option>
@@ -145,15 +154,29 @@
 </form>
 
 <div class="container my-4 d-flex justify-content-start gap-2">
-    <!-- Botón Cancelar -->
-    <button type="button" class="btn btn-danger" onclick="window.location='{{ url('/') }}'">
-        <i class="bi bi-x-circle"></i> Cancelar
-    </button>
 
-    <!-- Botón Guardar -->
-    <button type="button" id="guardarCotizacion" class="btn btn-primary">
-        <i class="bi bi-save"></i> Guardar
-    </button>
+    @if($modo == 0)
+        <!-- Botón Cancelar -->
+        <button type="button" class="btn btn-danger" onclick="window.location='{{ url('/') }}'">
+            <i class="bi bi-x-circle"></i> Cancelar
+        </button>
+
+        <!-- Botón Guardar -->
+        <button type="button" id="guardarCotizacion" class="btn btn-primary">
+            <i class="bi bi-save"></i> Guardar
+        </button>
+    @else
+        <!-- Botón PDF -->
+        <button type="button" class="btn btn-danger" onclick="window.location='#'">
+            <i class="bi bi-filetype-pdf"></i> PDF
+        </button>
+
+        <!-- Botón Editar -->
+        <button type="button" id="editarCotizacion" class="btn btn-secondary">
+            <i class="bi bi-pencil-square"></i> Editar
+        </button>
+    @endif
+    
 
     <!-- Botón Pedido -->
     <button type="button" class="btn btn-success">

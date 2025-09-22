@@ -1,10 +1,26 @@
 //coloca los datos de la fecha del dia
 const hoy = new Date().toISOString().split('T')[0];
-document.getElementById('fechaCreacion').value = hoy;
-document.getElementById('fechaEntrega').value = hoy;
-//Evitar que el calendario permita escojer dias pasados
-document.getElementById('fechaEntrega').setAttribute('min', hoy);
-//Recibe el dato de monedas desde el controlador-vista-json-js
+// Declarar la variable modo global
+let modo = 0; // 0 = nuevo, 1 = solo lectura (ver)
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    const fechaCreacion = document.getElementById('fechaCreacion');
+    const fechaEntrega = document.getElementById('fechaEntrega');
+
+    // Si es modo 0 (nuevo), Blade no puso valores -> entonces los asignamos desde JS
+    if (!fechaCreacion.value) {
+        fechaCreacion.value = hoy;
+    }
+
+    if (!fechaEntrega.value) {
+        fechaEntrega.value = hoy;
+    }
+
+    // Evitar que el calendario permita escoger días pasados
+    fechaEntrega.setAttribute('min', hoy);
+});
+
 const monedas = JSON.parse(selectMoneda.dataset.monedas);
 //Recibe el dato de monedas desde el controlador-vista-json-js
 const IVA = JSON.parse(selectMoneda.dataset.iva);
@@ -338,3 +354,65 @@ $("#guardarCotizacion").on("click", function() {
     // Enviar el form
     $("#formCotizacion").submit();
 });
+
+
+// Cuando se hace click en "Editar" en una cotización existente
+$("#editarCotizacion").on("click", function() {
+    // Cambiamos modo a 0 para simular "nueva cotización"
+    modo = 0; // variable que puedes usar si necesitas condicionar comportamiento
+
+    // Habilitar campos principales
+    $("#selectCliente").prop("disabled", false).trigger('change');
+    $("#selectMoneda").prop("disabled", false);
+    $("#selectVendedor").prop("disabled", false);
+    $("#fechaEntrega").prop("readonly", false);
+
+    // Limpiar tabla de artículos existente (excepto fila botón agregar si la tienes)
+    const tabla = document.querySelector("#tablaArticulos tbody");
+    $("#tablaArticulos tbody tr").not(':last').remove();
+
+    // Tomar los artículos de la cotización actual
+    const articulosExistentes = [];
+    $("#tablaArticulos tbody tr").each(function() {
+        const row = $(this);
+        if(row.find(".itemcode").length) { // Ignorar fila botón agregar
+            articulosExistentes.push({
+                ItemCode: row.find(".itemcode").text(),
+                FrgnName: row.find(".frgnName").text(),
+                precio: {
+                    Price: parseFloat(row.find(".precio").text()),
+                    moneda: monedas.find(m => m.Currency === row.find(".moneda").text()) // buscar la moneda correspondiente
+                },
+                Id_imagen: row.find(".imagen").data("imagen"),
+                ItmsGrpCod: row.data("itmsGrpCod") || 0,
+                cantidad: parseFloat(row.find(".cantidad").val()),
+                descuentoPorcentaje: parseFloat(row.find(".descuentoporcentaje").text())
+            });
+        }
+    });
+
+    // Reagregar los artículos a la tabla como si fueran nuevos
+    articulosExistentes.forEach(art => {
+        window.agregarArticulo({
+            ItemCode: art.ItemCode,
+            FrgnName: art.FrgnName,
+            precio: art.precio,
+            imagen: { Ruta_imagen: art.Id_imagen },
+            ItmsGrpCod: art.ItmsGrpCod
+        });
+
+        // Actualizar cantidad y descuento
+        const ultimaFila = $("#tablaArticulos tbody tr").not(':last').last();
+        ultimaFila.find(".cantidad").val(art.cantidad);
+        ultimaFila.find(".descuentoporcentaje").text(art.descuentoPorcentaje + " %");
+    });
+
+    // Recalcular totales generales
+    calcularTotales();
+
+    // Actualizar fechas si quieres resetear
+    const hoy = new Date().toISOString().split('T')[0];
+    $("#fechaCreacion").val(hoy);
+    $("#fechaEntrega").val(hoy).attr('min', hoy);
+});
+

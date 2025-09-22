@@ -15,13 +15,21 @@ Route::middleware('auth')->group(function () {
 
     //RUTAS PARA EL ADMIN
     Route::middleware(['auth', 'role:1,2'])->group(function () {
+        //principal
         Route::get('/Dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
+
+        //usuarios
         Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
+
+        //cotizaciones
         Route::get('/NuevaCotizacion', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
         Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
         Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
-        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');
         Route::post('/CotizacionesGuardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
+        Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])    ->name('detalles');
+
+        //Articulos
+        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');
         
         //borrar cuando este en produccion*****************
         Route::get('/insertar-monedas', [UsuarioController::class, 'insertarMonedas'])->name('insertar.monedas');

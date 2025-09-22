@@ -17,9 +17,9 @@ use Illuminate\Http\Request;
 class CotizacionesController extends Controller
 {
 
-    public function index(){
-        // Obtenemos cotizaciones con su vendedor y el nombre de la moneda
-        $cotizaciones = Cotizacion::select(
+    public function index(){//se encarga de listar todas las cotizaciones existentes
+        // Obtenemos cotizaciones con su vendedor y el nombre de la moneda 
+        $cotizaciones = Cotizacion::select( 
                 'OQUT.*',
                 'OSLP.SlpName as vendedor_nombre',
                 'OCRN.Currency as moneda_nombre'
@@ -50,8 +50,9 @@ class CotizacionesController extends Controller
         $articulos = Articulo::with(['precio.moneda.cambios' => function($query) use ($hoy) {
             $query->whereDate('RateDate', $hoy);
         }])->where('Active', 'Y')->get();        
+        $modo = 0;
 
-        return view('admin.cotizacion', compact('clientes', 'monedas', 'articulos', 'IVA', 'vendedores'));
+        return view('admin.cotizacion', compact('clientes', 'monedas', 'articulos', 'IVA', 'vendedores', 'modo'));
     }
 
     public function ObtenerDirecciones($CardCode){
@@ -101,6 +102,13 @@ class CotizacionesController extends Controller
             $iva           = floatval(str_replace(['$', 'MXM', ','], '', $request->iva));
             $total         = floatval(str_replace(['$', 'MXM', ','], '', $request->total));
 
+            // Guardar líneas de cotización
+            $articulos = json_decode($request->articulos, true);
+            if (is_array($articulos) && count($articulos) < 1){
+                return redirect()->route('cotizaciones')->with('error', 'Ocurrio un error no puedes guardar cotizaciones sin articulos');
+            }
+            
+
             // Guardar cotización
             $cotizacion = Cotizacion::create([
                 'CardCode'      => $request->cliente,
@@ -122,9 +130,7 @@ class CotizacionesController extends Controller
                 'Total'         => $total,
             ]);
 
-            // Guardar líneas de cotización
-            $articulos = json_decode($request->articulos, true);
-            //dd($articulos);
+
             $lineNum = 0;
 
             foreach ($articulos as $art) {
@@ -148,6 +154,41 @@ class CotizacionesController extends Controller
             return redirect()->route('cotizaciones')
                             ->with('error', 'Ocurrió un error al guardar la cotización: ' . $e->getMessage());
         }
+    }
+
+   public function detalles($DocEntry)
+    {
+        // Obtener la cotización con sus líneas
+        $cotizacion = Cotizacion::with('lineas')->findOrFail($DocEntry);
+
+        // Datos adicionales para la vista
+        $IVA = 16;
+        $hoy = Carbon::today()->format('Y-m-d');
+
+        // Clientes
+        $clientes = Clientes::with('descuentos.detalles.marca')->get();
+
+        // Vendedores
+        $user = Auth::user();
+        $vendedores = null;
+        if($user->rol_id == 1 || $user->rol_id == 2){
+            $vendedores = Vendedores::all();
+        }
+
+        // Monedas con el tipo de cambio del día
+        $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
+            $query->whereDate('RateDate', $hoy);
+        }])->get();
+
+        $articulos = Articulo::with(['precio.moneda.cambios' => function($query) use ($hoy) {
+            $query->whereDate('RateDate', $hoy);
+        }])->where('Active', 'Y')->get(); 
+
+        // Modo: 1 = solo ver (todos los campos readonly/disabled)
+        $modo = 1;
+
+        // Retornar la misma vista de cotización
+        return view('admin.cotizacion', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo' ));
     }
 
 }

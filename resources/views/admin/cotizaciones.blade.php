@@ -33,7 +33,7 @@
                 @foreach($cotizaciones as $cotizacion)
                     <tr>
                         <td>
-                            <a href="#" 
+                            <a href="{{ route('detalles', $cotizacion->DocEntry) }}" 
                             style="cursor: pointer; color: blue; text-decoration: underline;">
                             CO - {{ $cotizacion->DocEntry }}
                             </a>
