@@ -22,7 +22,7 @@
             <h5>CLIENTES</h5>
             <div class="mb-3">
                 <label>Cliente</label>
-                <select class="form-select campo-editable" name="cliente" id="selectCliente" @if(isset($modo) && $modo == 1) disabled @endif>>
+                <select class="form-select" name="cliente" id="selectCliente" @if(isset($modo) && $modo == 1) disabled @endif>
                     <option value="" selected disabled>Selecciona un cliente...</option>
                     @foreach($clientes as $cliente)
                         <option 
@@ -37,7 +37,8 @@
                                         "Discount" => $dd->Discount
                                     ];
                                 });
-                            }))' @if(isset($cotizacion) && $cotizacion->CardCode == $cliente->CardCode) selected @endif >
+                            }))'
+                            @if(isset($preseleccionados['cliente']) && $preseleccionados['cliente'] == $cliente->CardCode) selected @endif>
                             {{ $cliente->CardCode.' - '.$cliente->CardName }}
                         </option>
                     @endforeach
@@ -46,8 +47,26 @@
 
             <!-- Aquí se mostrarán los datos -->
             <div id="infoCliente" class="mt-2" style="font-size: 14px;">
-                <span id="telefono">{{ $cotizacion->Phone1 ?? '' }}</span><br>
-                <span id="correo">{{ $cotizacion->E_Mail ?? '' }}</span><br>
+                <span id="telefono">@if(isset($modo) && $modo == 1){{ $cotizacion->Phone1  }}@endif</span><br>
+                <span id="correo">
+                    @if(isset($modo) && $modo == 1)
+                        @php
+                            $email = $cotizacion->E_Mail ?? 'Sin correo';
+                            $emailFormatted = $email;
+
+                            if ($email !== 'Sin correo') {
+                                $emails = array_map('trim', explode(',', $email));
+                                $emailFormatted = '<ul style="padding-left: 20px; margin: 0;">';
+                                foreach ($emails as $e) {
+                                    $emailFormatted .= "<li>{$e}</li>";
+                                }
+                                $emailFormatted .= '</ul>';
+                            }
+                        @endphp
+
+                        {!! $emailFormatted !!}
+                    @endif
+                </span><br>
             </div>
 
             <div class="mb-3">
@@ -67,22 +86,23 @@
             <div class="row mb-3">
                 <div class="col-md-4">
                     <label>Fecha de Creacion</label>
-                    <input type="date" id="fechaCreacion" class="form-control" value="{{ isset($cotizacion) ? $cotizacion->DocDate : '' }}" readonly>
+                    <input type="date" id="fechaCreacion" class="form-control" value="{{ $fechaCreacion }}"  readonly>
                 </div>
                 <div class="col-md-4">
                     <label>Válido Entrega</label>
-                    <input type="date" id="fechaEntrega" class="form-control" value="{{ isset($cotizacion) ? $cotizacion->DocDate : '' }}" @if(isset($modo) && $modo == 1) readonly @endif >
+                    <input type="date" id="fechaEntrega" class="form-control" value="{{ $fechaEntrega }}"   @if(isset($modo) && $modo == 1) readonly @endif >
                 </div>
             </div>
 
             <div class="mb-3">
                 <label>Moneda</label>
-                <select class="form-select campo-editable" name="currency_id" id="selectMoneda"
+                <select class="form-select" name="currency_id" id="selectMoneda"
                     data-monedas='@json($monedas)' data-iva='@json($IVA)'
                     @if(isset($modo) && $modo == 1) disabled @endif>
                     <option value="" selected disabled>Selecciona una moneda</option>
                     @foreach($monedas as $moneda)
-                        <option value="{{ $moneda->Currency_ID }}" @if($moneda->cambios->isEmpty()) disabled @endif @if(isset($cotizacion) && $cotizacion->DocCur == $moneda->Currency_ID) selected @endif > {{--si no hay monedas de cambio disponibles se inhabilita--}}
+                        <option value="{{ $moneda->Currency_ID }}" @if($moneda->cambios->isEmpty()) disabled @endif 
+                            @if(isset($preseleccionados['moneda']) && $preseleccionados['moneda'] == $moneda->Currency_ID) selected @endif > {{--si no hay monedas de cambio disponibles se inhabilita--}}
                             {{ $moneda->Currency }}
                             @if($moneda->cambios->isEmpty() && isset($modo) && $modo == 0) (Sin tipo de cambio) @endif
                         </option>
@@ -93,10 +113,11 @@
             @if( $vendedores )
                 <div class="mb-3">
                     <label>Vendedores</label>
-                    <select class="form-select campo-editable" name="vendedor_SlpCode" id="selectVendedor"  @if(isset($modo) && $modo == 1) disabled @endif>
+                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"  @if(isset($modo) && $modo == 1) disabled @endif>
                         <option value="" selected disabled>Selecciona un Vendedor</option>
                         @foreach($vendedores as $vendedor)
-                            <option value="{{ $vendedor->SlpCode }}" @if(isset($cotizacion) && $cotizacion->SlpCode == $vendedor->SlpCode) selected @endif
+                            <option value="{{ $vendedor->SlpCode }}" 
+                                @if(isset($preseleccionados['vendedor']) && $preseleccionados['vendedor'] == $vendedor->SlpCode) selected @endif
                                 data-SlpName="{{ $vendedor->SlpName }}">
                                 {{ $vendedor->SlpCode. ' - ' .$vendedor->SlpName }}
                             </option>
@@ -172,9 +193,10 @@
         </button>
 
         <!-- Botón Editar -->
-        <button type="button" id="editarCotizacion" class="btn btn-secondary">
-            <i class="bi bi-pencil-square"></i> Editar
-        </button>
+        <a href="{{ route('NuevaCotizacion', ['DocEntry' => $cotizacion->DocEntry]) }}" 
+            class="btn btn-secondary">
+                <i class="bi bi-pencil-square"></i> Editar
+            </a>
     @endif
     
 

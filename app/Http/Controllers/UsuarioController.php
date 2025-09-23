@@ -176,4 +176,5 @@ class UsuarioController extends Controller
         // Concatenamos los mensajes y mostramos en un alert
         return redirect()->back()->with('success', implode(' ', $mensajes));
     }
+    
 }

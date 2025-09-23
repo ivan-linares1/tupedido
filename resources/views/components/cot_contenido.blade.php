@@ -42,27 +42,36 @@
         <tbody>
             @if(isset($cotizacion) && $cotizacion->lineas)
                 @foreach($cotizacion->lineas as $linea)
-                    <tr >
-                        @if(isset($modo) && $modo == 0)<th></th>@endif
-                        <td class="itemcode">{{ $linea->ItemCode }}</td>
-                        <td class="frgnName">{{ $linea->FrgnName }}</td>
-                        <td class="imagen">
-                            <img src="{{ $linea->imagen?->Ruta_imagen }}" alt="Imagen" style="width: 50px; height: auto;">
-                        </td>
-                        <td class="medida">Unidad de medida</td>
-                        <td class="precio">{{ number_format($linea->Price, 2) }}</td>
-                        <td class="moneda">  {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}</td>
-                        <td class="iva">IVA {{ $IVA }}%</td>
-                        <td>
-                            <span>{{ number_format($linea->Quantity, 0) }}</span>
-                        </td>
-                        <td class="promocion">Promociones</td>
-                        <td class="subtotal">{{ number_format($linea->Price * $linea->Quantity, 2) }}</td>
-                        <td class="descuentoporcentaje">{{ number_format($linea->DiscPrcnt, 0) }} %</td>
-                        <td class="desMoney">{{ number_format(($linea->Price * $linea->Quantity) * ($linea->DiscPrcnt / 100), 2) }}</td>
-                        <td class="totalFinal">{{ (number_format($linea->Price * $linea->Quantity, 2)) - (number_format(($linea->Price * $linea->Quantity) * ($linea->DiscPrcnt / 100), 2)) }}</td>
-                    </tr>
+                        <tr >
+                            <td class="itemcode">{{ $linea->ItemCode }}</td>
+                            <td class="frgnName">{{ $linea->U_Dscr }}</td>
+                            <td class="imagen">
+                                <img src="{{ $linea->imagen?->Ruta_imagen }}" alt="Imagen" style="width: 50px; height: auto;">
+                            </td>
+                            <td class="medida">Unidad de medida</td>
+                            <td class="precio">{{ number_format($linea->Price, 2) }}</td>
+                            <td class="moneda">  {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}</td>
+                            <td class="iva">IVA {{ $IVA }}%</td>
+                            <td>
+                                <span>{{ number_format($linea->Quantity, 0) }}</span>
+                            </td>
+                            <td class="promocion">Promociones</td>
+                            <td class="subtotal">{{ number_format($linea->Price * $linea->Quantity, 2) }}</td>
+                            <td class="descuentoporcentaje">{{ number_format($linea->DiscPrcnt, 0) }} %</td>
+                            <td class="desMoney">{{ number_format(($linea->Price * $linea->Quantity) * ($linea->DiscPrcnt / 100), 2) }}</td>
+                            <td class="totalFinal">{{ number_format(($linea->Price * $linea->Quantity) - (($linea->Price * $linea->Quantity) * ($linea->DiscPrcnt / 100)), 2) }}</td>
+                        </tr>
                 @endforeach
+            @endif
+
+            {{-- Modo 0: agregar artículos automáticamente desde lineasComoArticulos --}}
+            @if(isset($modo) && $modo == 0 && isset($lineasComoArticulos) && count($lineasComoArticulos) > 0)
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const lineas = @json($lineasComoArticulos);
+                        lineas.forEach(art => agregarArticulo(art));
+                    });
+                </script>
             @endif
 
             @if(isset($modo) && $modo == 0)

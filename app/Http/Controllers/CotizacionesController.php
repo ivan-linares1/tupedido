@@ -31,12 +31,17 @@ class CotizacionesController extends Controller
         return view('admin.cotizaciones', compact('cotizaciones'));
     }
 
-    public function NuevaCotizacion ()
+    public function NuevaCotizacion ($DocEntry = null)
     {
         $IVA = 16;
         $hoy = Carbon::today()->format('Y-m-d'); // Obtiene la fecha de hoy
         $clientes = Clientes::with('descuentos.detalles.marca')->get();
         $vendedores = null;
+        $hoy = Carbon::today()->format('Y-m-d');
+        // Fechas por defecto (HOY para nueva cotización)
+        $fechaCreacion = $hoy;
+        $fechaEntrega  = $hoy;
+
         
         $user = Auth::user();
         if($user->rol_id == 1 || $user->rol_id == 2)
@@ -50,9 +55,55 @@ class CotizacionesController extends Controller
         $articulos = Articulo::with(['precio.moneda.cambios' => function($query) use ($hoy) {
             $query->whereDate('RateDate', $hoy);
         }])->where('Active', 'Y')->get();        
+       
         $modo = 0;
 
-        return view('admin.cotizacion', compact('clientes', 'monedas', 'articulos', 'IVA', 'vendedores', 'modo'));
+        // Valores por defecto
+        $preseleccionados = [
+            'cliente' => null,
+            'vendedor' => null,
+            'moneda' => null,
+        ];
+        
+        $lineasComoArticulos = [];
+
+        if ($DocEntry) {
+            // Si hay cotización, precargamos datos
+            $cotizacion = Cotizacion::with('lineas')->findOrFail($DocEntry);
+
+            $preseleccionados = [
+                'cliente' => $cotizacion->CardCode,
+                'vendedor' => $cotizacion->SlpCode,
+                'moneda' => $cotizacion->DocCur,
+            ];
+
+             foreach ($cotizacion->lineas as $linea) {
+        // Buscar el artículo ya cargado en $articulos
+        $articulo = $articulos->firstWhere('ItemCode', $linea->ItemCode);
+
+        if ($articulo) {
+                    $lineasComoArticulos[] = [
+                        'ItemCode'   => $articulo->ItemCode,
+                        'FrgnName'   => $articulo->FrgnName,
+                        'Id_imagen'  => $articulo->Id_imagen,
+                        'imagen'     => [
+                            'Ruta_imagen' => $articulo->imagen?->Ruta_imagen ?? ''
+                        ],
+                        'precio' => [
+                            'Price'  => $articulo->Precio->Price,
+                            'moneda' => $monedas->firstWhere('Currency_ID', $articulo->Precio->Currency_ID)
+                        ],
+                        'ItmsGrpCod' => $articulo->ItmsGrpCod,
+                        'IVA'        => $IVA,
+                        'Quantity'   => $linea->Quantity,
+                        'DiscPrcnt'  => $linea->DiscPrcnt
+                    ];
+                }
+            }
+        }
+
+        //dd($lineasComoArticulos);
+        return view('admin.cotizacion', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos'));
     }
 
     public function ObtenerDirecciones($CardCode){
@@ -156,7 +207,7 @@ class CotizacionesController extends Controller
         }
     }
 
-   public function detalles($DocEntry)
+    public function detalles($DocEntry)
     {
         // Obtener la cotización con sus líneas
         $cotizacion = Cotizacion::with('lineas')->findOrFail($DocEntry);
@@ -165,30 +216,34 @@ class CotizacionesController extends Controller
         $IVA = 16;
         $hoy = Carbon::today()->format('Y-m-d');
 
-        // Clientes
+        // Clientes y vendedores
         $clientes = Clientes::with('descuentos.detalles.marca')->get();
-
-        // Vendedores
         $user = Auth::user();
-        $vendedores = null;
-        if($user->rol_id == 1 || $user->rol_id == 2){
-            $vendedores = Vendedores::all();
-        }
+        $vendedores = ($user->rol_id == 1 || $user->rol_id == 2) ? Vendedores::all() : [];
 
-        // Monedas con el tipo de cambio del día
+        // Monedas
         $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
             $query->whereDate('RateDate', $hoy);
         }])->get();
 
-        $articulos = Articulo::with(['precio.moneda.cambios' => function($query) use ($hoy) {
-            $query->whereDate('RateDate', $hoy);
-        }])->where('Active', 'Y')->get(); 
+        $articulos = [];
+
+        // Fechas de la cotización
+        $fechaCreacion = $cotizacion->DocDate;
+        $fechaEntrega  = $cotizacion->DocDueDate;
 
         // Modo: 1 = solo ver (todos los campos readonly/disabled)
         $modo = 1;
 
-        // Retornar la misma vista de cotización
-        return view('admin.cotizacion', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo' ));
+        // Datos preseleccionados para evitar errores en la vista
+        $preseleccionados = [
+            'cliente' => $cotizacion->CardCode,
+            'vendedor' => $cotizacion->SlpCode,
+            'moneda' => $cotizacion->DocCur,
+        ];
+
+        // Retornar la vista
+        return view('admin.cotizacion', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados' ));
     }
 
 }
