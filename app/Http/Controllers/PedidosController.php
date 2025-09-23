@@ -13,25 +13,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
-
-class CotizacionesController extends Controller
+class PedidosController extends Controller
 {
-
-    public function index(){//se encarga de listar todas las cotizaciones existentes
-        // Obtenemos cotizaciones con su vendedor y el nombre de la moneda 
-        $cotizaciones = Cotizacion::select( 
-                'OQUT.*',
-                'OSLP.SlpName as vendedor_nombre',
-                'OCRN.Currency as moneda_nombre'
-            )
-            ->leftJoin('OSLP', 'OQUT.SlpCode', '=', 'OSLP.SlpCode')  // Relación con vendedor
-            ->leftJoin('OCRN', 'OQUT.DocCur', '=', 'OCRN.Currency_ID') // Relación con moneda
-            ->get();
-
-        return view('users.cotizaciones', compact('cotizaciones'));
-    }
-
-    public function NuevaCotizacion ($DocEntry = null)
+    public function NuevoPedido ($DocEntry = null)
     {
         $IVA = 16;
         $hoy = Carbon::today()->format('Y-m-d'); // Obtiene la fecha de hoy
@@ -104,7 +88,7 @@ class CotizacionesController extends Controller
         }
 
         //dd($lineasComoArticulos);
-        return view('users.cotizacion', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos'));
+        return view('users.pedido', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos'));
     }
 
     public function ObtenerDirecciones($CardCode){
@@ -141,69 +125,6 @@ class CotizacionesController extends Controller
             'fiscal' =>$fiscal,
             'entrega' => $entrega,
         ]);
-    }
-
-
-    public function GuardarCotizacion(Request $request)
-    {
-        try {
-            // Limpiar valores numéricos
-            $totalSinPromo = floatval(str_replace(['$', 'MXM', ','], '', $request->TotalSinPromo));
-            $descuento     = floatval(str_replace(['$', 'MXM', ','], '', $request->Descuento));
-            $subtotal      = floatval(str_replace(['$', 'MXM', ','], '', $request->Subtotal));
-            $iva           = floatval(str_replace(['$', 'MXM', ','], '', $request->iva));
-            $total         = floatval(str_replace(['$', 'MXM', ','], '', $request->total));
-
-            // Guardar líneas de cotización
-            $articulos = json_decode($request->articulos, true);
-            if (is_array($articulos) && count($articulos) < 1){
-                return redirect()->route('cotizaciones')->with('error', 'Ocurrio un error no puedes guardar cotizaciones sin articulos');
-            }
-            
-
-            // Guardar cotización
-            $cotizacion = Cotizacion::create([
-                'CardCode'      => $request->cliente,
-                'DocDate'       => $request->fechaCreacion,
-                'DocDueDate'    => $request->fechaEntrega,
-                'CardName'      => $request->CardName,
-                'SlpCode'       => $request->SlpCode,
-                'Phone1'        => $request->phone1,
-                'E_Mail'        => $request->email,
-                'DocCur'        => $request->DocCur,
-                'ShipToCode'    => $request->ShipToCode ?? '',
-                'PayToCode'     => $request->PayToCode ?? '',
-                'Address'       => $request->direccionFiscal,
-                'Address2'      => $request->direccionEntrega,
-                'TotalSinPromo' => $totalSinPromo,
-                'Descuento'     => $descuento,
-                'Subtotal'      => $subtotal,
-                'IVA'           => $iva,
-                'Total'         => $total,
-            ]);
-
-
-            $lineNum = 0;
-
-            foreach ($articulos as $art) {
-                $lineNum++;
-                LineasCotizacion::create([
-                    'DocEntry'   => $cotizacion->DocEntry,
-                    'LineNum'    => $lineNum,
-                    'ItemCode'   => $art['itemCode'],
-                    'U_Dscr'     => $art['descripcion'],
-                    'unitMsr2'   => $art['unidad'],
-                    'Price'      => floatval(str_replace(',', '', $art['precio'])),
-                    'DiscPrcnt'  => floatval(str_replace(['%', ','], '', $art['descuentoPorcentaje'])),
-                    'Quantity'   => floatval($art['cantidad']),
-                    'Id_imagen'  => $art['imagen'] ?? null,
-                ]);
-            }
-
-            return redirect()->route('cotizaciones')->with('success', 'Cotización guardada correctamente.');
-        } catch (\Exception $e) {
-            return redirect()->route('cotizaciones')->with('error', 'Ocurrió un error al guardar la cotización: ' . $e->getMessage());
-        }
     }
 
     public function detalles($DocEntry)
@@ -244,5 +165,4 @@ class CotizacionesController extends Controller
         // Retornar la vista
         return view('users.cotizacion', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados' ));
     }
-
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticuloController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CotizacionesController;
+use App\Http\Controllers\PedidosController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 
@@ -25,6 +26,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
         Route::post('/CotizacionesGuardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
         Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])->name('detalles');
+
+        //Pedidos
+        Route::get('/NuevPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
+        Route::get('/Pedido/{id}', [PedidosController::class, 'detalles'])->name('detalles');
 
         //Articulos
         Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');

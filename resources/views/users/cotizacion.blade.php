@@ -183,8 +183,13 @@
         </button>
 
         <!-- Botón Guardar -->
-        <button type="button" id="guardarCotizacion" class="btn btn-primary">
+        <button type="button" id="guardarCotizacion"  class="btn btn-primary Save">
             <i class="bi bi-save"></i> Guardar
+        </button>
+
+        
+        <button type="button" id="btnPedido" class="btn btn-success Save">
+            <i class="bi bi-bag"></i> Pedido
         </button>
     @else
         <!-- Botón PDF -->
@@ -193,17 +198,17 @@
         </button>
 
         <!-- Botón Editar -->
-        <a href="{{ route('NuevaCotizacion', ['DocEntry' => $cotizacion->DocEntry]) }}" 
-            class="btn btn-secondary">
-                <i class="bi bi-pencil-square"></i> Editar
-            </a>
+        <a href="{{ route('NuevaCotizacion', ['DocEntry' => $cotizacion->DocEntry]) }}" class="btn btn-secondary">
+            <i class="bi bi-pencil-square"></i> Editar
+        </a>
+
+        <a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry]) }}" class="btn btn-success">
+            <i class="bi bi-bag"></i> Pedido
+        </a>
     @endif
     
 
-    <!-- Botón Pedido -->
-    <button type="button" class="btn btn-success">
-        <i class="bi bi-bag"></i> Pedido
-    </button>
+    
 </div>
 
 @endsection

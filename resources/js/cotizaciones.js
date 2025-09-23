@@ -113,6 +113,9 @@ $('#selectCliente').on('change', function() {
 window.agregarArticulo = function(art) {
     const tabla = document.querySelector("#tablaArticulos tbody");
     const fila = document.createElement("tr");
+    // Determina la cantidad
+    const cantidad = art.Quantity ? Number(art.Quantity) : 1;
+
 
     // Guardamos info útil
     fila.dataset.precioOriginal = art.precio.Price; //precio original del articulo
@@ -143,7 +146,7 @@ window.agregarArticulo = function(art) {
         <td class="precio">${Number(precio || 0).toFixed(2)}</td>
         <td class="moneda">${monedaCambio ? monedaCambio.Currency : art.precio.moneda.Currency}</td>
         <td class="iva">IVA ${IVA}%</td>
-        <td><input type="number" value="1" min="1" class="form-control form-control-sm cantidad"></td>
+        <td><input type="number" value="${cantidad}" min="1" class="form-control form-control-sm cantidad"></td>
         <td class="promocion">Promociones</td>
         <td class="subtotal"></td>
         <td class="descuentoporcentaje">${descuento} %</td>
@@ -306,7 +309,6 @@ $(document).ready(function() {
         scrollModalAlInicio();
     });
 });
-
 
 //Funcion para guardar los datos en un form oculto y mandarlos alcontrolador 
 $("#guardarCotizacion").on("click", function() {
