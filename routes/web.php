@@ -29,7 +29,9 @@ Route::middleware('auth')->group(function () {
 
         //Pedidos
         Route::get('/NuevPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
-        Route::get('/Pedido/{id}', [PedidosController::class, 'detalles'])->name('detalles');
+        Route::get('/Pedidos', [PedidosController::class, 'index'])->name('Pedidos');
+        Route::post('/CotizacionesGuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+        Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
 
         //Articulos
         Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');

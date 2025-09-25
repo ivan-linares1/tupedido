@@ -1,10 +1,10 @@
 {{--Boton auxiliar para mandar las monedas a la base del dia de hoy //borrar cuando este en produccion*****************--}}
-@if(session('success'))
+{{--@if(session('success'))
     <script>alert("Uso en monedas sidebar - {{ session('success') }}");</script>
 @endif
 @if(session('error'))
     <script>alert("Uso en monedas sidebar - {{ session('error') }}");</script>
-@endif
+@endif--}}
 
 <nav class="sidebar d-flex flex-column">
     <!-- Botón cerrar sidebar (icono flecha) -->
@@ -30,7 +30,7 @@
                 <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                     <li><a href="{{ url('/work') }}" class="nav-link">Clientes</a></li>
                     <li><a href="{{ route('cotizaciones') }}" class="nav-link">Cotizaciones</a></li>
-                    <li><a href="#" class="nav-link">Pedidos</a></li>
+                    <li><a href="{{ route('Pedidos') }}" class="nav-link">Pedidos</a></li>
                     <li>
                         <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionVentas" role="button" aria-expanded="false" aria-controls="submenuConfiguracionVentas">
                         Configuración

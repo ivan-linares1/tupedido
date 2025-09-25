@@ -7,12 +7,26 @@
  <!-- Importación de JS -->
 @vite(['resources/js/validaciones.js', 'resources/js/cotizaciones.js'])
 
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <div class="container my-4">
     <h3 class="mb-4">
         @if($modo == 0)
             Nuevo Pedido
         @else
-            PE - {{ $cotizacion->DocEntry }}
+            PE - {{ $idPedido }}
         @endif
     </h3>
 
@@ -148,30 +162,30 @@
 </div>
 
 
-<!-- Form para enviar la cotización -->
-<form id="formCotizacion" action="{{ route('cotizacionSave') }}" method="POST">
+<!-- Form para enviar la cotización ya pedida -->
+<form id="formCotizacionPedido" action="{{ route('cotizacionSavePedido') }}" method="POST">
     @csrf
     <!-- Datos del cliente -->
-    <input type="hidden" name="cliente" id="clienteH">  {{--cardcode--}}
-    <input type="hidden" name="fechaCreacion" id="fechaCreacionH"> {{--DocDate--}}
-    <input type="hidden" name="fechaEntrega" id="fechaEntregaH"> {{--DocDue--}}
-    <input type="hidden" name="CardName" id="CardNameH"> {{--CardName--}}
-    <input type="hidden" name="SlpCode" id="SlpCodeH"> {{--SlpCode--}}
-    <input type="hidden" name="phone1" id="phone1H"> {{--phone1--}}
-    <input type="hidden" name="email" id="emailH"> {{--email--}}
-    <input type="hidden" name="DocCur" id="DocCurH"> {{--DocCur--}}
-    <input type="hidden" name="ShipToCode" id="ShipToCodeH"> {{--ShipToCode--}}
+    <input type="hidden" name="cliente" id="clienteP">  {{--cardcode--}}
+    <input type="hidden" name="fechaCreacion" id="fechaCreacionP"> {{--DocDate--}}
+    <input type="hidden" name="fechaEntrega" id="fechaEntregaP"> {{--DocDue--}}
+    <input type="hidden" name="CardName" id="CardNameP"> {{--CardName--}}
+    <input type="hidden" name="SlpCode" id="SlpCodeP"> {{--SlpCode--}}
+    <input type="hidden" name="phone1" id="phone1P"> {{--phone1--}}
+    <input type="hidden" name="email" id="emailP"> {{--email--}}
+    <input type="hidden" name="DocCur" id="DocCurP"> {{--DocCur--}}
+    <input type="hidden" name="ShipToCode" id="ShipToCodeP"> {{--ShipToCode--}}
     <input type="hidden" name="PayToCode" id="PayToCodeH"> {{--PayToCode--}}
-    <input type="hidden" name="direccionFiscal" id="direccionFiscalH"> {{--Address--}}
-    <input type="hidden" name="direccionEntrega" id="direccionEntregaH"> {{--Address--}}
-    <input type="hidden" name="TotalSinPromo" id="TotalSinPromoH"> {{--TotalSinPromo--}}
-    <input type="hidden" name="Descuento" id="DescuentoH"> {{--Descuento--}}
-    <input type="hidden" name="Subtotal" id="SubtotalH"> {{--Subtotal--}}
-    <input type="hidden" name="iva" id="ivaH"> {{--Iva--}}
-    <input type="hidden" name="total" id="totalH"> {{--Total--}}
+    <input type="hidden" name="direccionFiscal" id="direccionFiscalP"> {{--Address--}}
+    <input type="hidden" name="direccionEntrega" id="direccionEntregaP"> {{--Address--}}
+    <input type="hidden" name="TotalSinPromo" id="TotalSinPromoP"> {{--TotalSinPromo--}}
+    <input type="hidden" name="Descuento" id="DescuentoP"> {{--Descuento--}}
+    <input type="hidden" name="Subtotal" id="SubtotalP"> {{--Subtotal--}}
+    <input type="hidden" name="iva" id="ivaP"> {{--Iva--}}
+    <input type="hidden" name="total" id="totalP"> {{--Total--}}
 
     <!-- Artículos -->
-    <input type="hidden" name="articulos" id="articulosH">
+    <input type="hidden" name="articulos" id="articulosP">
 </form>
 
 <div class="container my-4 d-flex justify-content-start gap-2">
@@ -183,7 +197,7 @@
         </button>
 
         <!-- Botón Guardar -->
-        <button type="button" id="guardarCotizacion" class="btn btn-success">
+        <button type="button" id="btnPedido" class="btn btn-success">
             <i class="bi bi-save"></i> Crear Pedido
         </button>
     @else

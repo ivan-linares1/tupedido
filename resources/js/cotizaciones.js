@@ -61,8 +61,8 @@ $(document).ready(function () {
     }
 });
 
-//cada que cambiamos la moneda en el selector recalcula las monedas
-document.getElementById('selectMoneda').addEventListener('change', function() {
+// Función que actualiza los datos de la moneda
+function actualizarDatosMoneda(){
     const monedaCambioID = parseInt(this.value);
     const monedaCambio = monedas.find(m => m.Currency_ID == monedaCambioID);
 
@@ -85,7 +85,10 @@ document.getElementById('selectMoneda').addEventListener('change', function() {
 
     // Recalculamos totales
     calcularTotales();
-});
+}
+
+// Ejecutar cuando cambie el select de moneda
+$('#selectMoneda').on('change', actualizarDatosMoneda);
 
 // Cuando cambia el cliente, actualizar los descuentos en todas las filas
 $('#selectCliente').on('change', function() {
@@ -126,6 +129,7 @@ window.agregarArticulo = function(art) {
     const monedaCambioID = parseInt(document.querySelector('select[name="currency_id"]').value);//guarda el id de la moneda seleccionada
     const monedaCambio =  monedas.find(m => m.Currency_ID == monedaCambioID);//obtiene el arrglo de la moneda escojida completo con su relacion de cambios
                                         //precio decimal,  arreglo de moneda, arreglo de moneda
+    console.log(art.precio.moneda);
     const precio = conversionesMonedas( art.precio.Price, art.precio.moneda, monedaCambio);//se envian los arreglos compeltos para poder realizar las consultas  
 
     // Cliente seleccionado
@@ -171,12 +175,12 @@ window.agregarArticulo = function(art) {
     // Cierra el modal
    //bootstrap.Modal.getInstance(document.getElementById('modalArticulos')).hide();
    const modalEl = document.getElementById('modalArticulos');
-if (modalEl) {
-    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-    if (modalInstance) {
-        modalInstance.hide();
+    if (modalEl) {
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
     }
-}
 
 }
 
@@ -350,4 +354,46 @@ $("#guardarCotizacion").on("click", function() {
 
     // Enviar el form
     $("#formCotizacion").submit();
+});
+
+//Funcion para guardar los datos en un form oculto y mandarlos alcontrolador del pedido
+$("#btnPedido").on("click", function() {
+    // Llenamos los inputs con los valores actuales de tu página
+    $("#clienteP").val($("#selectCliente").val()); // CardCode
+    $("#fechaCreacionP").val($("#fechaCreacion").val()); // DocDate
+    $("#fechaEntregaP").val($("#fechaEntrega").val()); // DocDueDate
+    $("#CardNameP").val($("#selectCliente option:selected").data("cardname")); // nombre cliente
+    $("#SlpCodeP").val($("#selectVendedor").val());  //vendedor codigo
+    $("#phone1P").val($("#selectCliente option:selected").data("phone")); // teléfono
+    $("#emailP").val($("#selectCliente option:selected").data("email")); // correo
+    $("#DocCurP").val($("#selectMoneda").val());  //moneda
+    //obtener en el controlador $("#ShipToCodeH").val($("#ShipToCode").text());  //a dónde se enviará (dirección de entrega).*
+    //obtener en el controlador $("#PayToCodeH").val($("#PayToCode").text());  //a qué dirección fiscal se factura/paga.*
+    $("#direccionFiscalP").val($("#direccionFiscal").text()); // Dirección fiscal
+    $("#direccionEntregaP").val($("#direccionEntrega").text()); // Dirección de entrega
+    // Totales
+    $("#TotalSinPromoP").val($("#totalAntesDescuento").text().replace('$',''));
+    $("#DescuentoP").val($("#DescuentoD").text().replace('$',''));
+    $("#SubtotalP").val($("#totalConDescuento").text().replace('$',''));
+    $("#ivaP").val($("#iva").text().replace('$',''));
+    $("#totalP").val($("#total").text().replace('$',''));
+
+    // Recopilar artículos de la tabla
+    let articulos = [];
+    $("#tablaArticulos tbody tr:not(:last)").each(function() {
+        articulos.push({
+            itemCode: $(this).find(".itemcode").text(),
+            descripcion: $(this).find(".frgnName").text(),
+            unidad: $(this).find(".medida").text(),
+            precio: $(this).find(".precio").text(),
+            descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
+            cantidad: $(this).find(".cantidad").val(),
+            imagen: $(this).find(".imagen").data("imagen") 
+        });
+    });
+
+    $("#articulosP").val(JSON.stringify(articulos));
+
+    // Enviar el form
+    $("#formCotizacionPedido").submit();
 });

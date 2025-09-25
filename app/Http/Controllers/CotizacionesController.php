@@ -34,29 +34,35 @@ class CotizacionesController extends Controller
     public function NuevaCotizacion ($DocEntry = null)
     {
         $IVA = 16;
-        $hoy = Carbon::today()->format('Y-m-d'); // Obtiene la fecha de hoy
-        $clientes = Clientes::with('descuentos.detalles.marca')->get();
-        $vendedores = null;
         $hoy = Carbon::today()->format('Y-m-d');
         $mañana = Carbon::tomorrow()->format('Y-m-d');
+
         // Fechas por defecto (HOY para nueva cotización)
         $fechaCreacion = $hoy;
         $fechaEntrega  = $mañana;
 
-        
-        $user = Auth::user();
-        if($user->rol_id == 1 || $user->rol_id == 2)
-            $vendedores = Vendedores::all();
-        
+        $clientes = Clientes::with('descuentos.detalles.marca')->get();
 
+        $user = Auth::user();
+        $vendedores = ($user->rol_id == 1 || $user->rol_id == 2)
+            ? Vendedores::all()
+            : null;
+
+        // Monedas con cambios del día
         $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
             $query->whereDate('RateDate', $hoy);
         }])->get();
 
-        $articulos = Articulo::with(['precio.moneda.cambios' => function($query) use ($hoy) {
-            $query->whereDate('RateDate', $hoy);
-        }])->where('Active', 'Y')->get();        
-       
+        // Artículos activos que tengan cambios en su moneda para hoy
+        $articulos = Articulo::where('Active', 'Y')
+            ->whereHas('precio.moneda.cambios', function($query) use ($hoy) {
+                $query->whereDate('RateDate', $hoy);
+            })
+            ->with(['precio.moneda.cambios' => function($query) use ($hoy) {
+                $query->whereDate('RateDate', $hoy);
+            }, 'imagen'])
+            ->get();
+
         $modo = 0;
 
         // Valores por defecto
@@ -65,7 +71,7 @@ class CotizacionesController extends Controller
             'vendedor' => null,
             'moneda' => null,
         ];
-        
+
         $lineasComoArticulos = [];
 
         if ($DocEntry) {
@@ -73,37 +79,24 @@ class CotizacionesController extends Controller
             $cotizacion = Cotizacion::with('lineas')->findOrFail($DocEntry);
 
             $preseleccionados = [
-                'cliente' => $cotizacion->CardCode,
+                'cliente'  => $cotizacion->CardCode,
                 'vendedor' => $cotizacion->SlpCode,
-                'moneda' => $cotizacion->DocCur,
+                'moneda'   => $cotizacion->DocCur,
             ];
 
-             foreach ($cotizacion->lineas as $linea) {
-        // Buscar el artículo ya cargado en $articulos
-        $articulo = $articulos->firstWhere('ItemCode', $linea->ItemCode);
+            foreach ($cotizacion->lineas as $linea) {
+                $articulo = $articulos->firstWhere('ItemCode', $linea->ItemCode);
 
-        if ($articulo) {
-                    $lineasComoArticulos[] = [
-                        'ItemCode'   => $articulo->ItemCode,
-                        'FrgnName'   => $articulo->FrgnName,
-                        'Id_imagen'  => $articulo->Id_imagen,
-                        'imagen'     => [
-                            'Ruta_imagen' => $articulo->imagen?->Ruta_imagen ?? ''
-                        ],
-                        'precio' => [
-                            'Price'  => $articulo->Precio->Price,
-                            'moneda' => $monedas->firstWhere('Currency_ID', $articulo->Precio->Currency_ID)
-                        ],
-                        'ItmsGrpCod' => $articulo->ItmsGrpCod,
-                        'IVA'        => $IVA,
-                        'Quantity'   => $linea->Quantity,
-                        'DiscPrcnt'  => $linea->DiscPrcnt
-                    ];
+                if ($articulo) {
+                    // Clonamos el objeto artículo y agregamos los datos de la cotización
+                    $artClone = clone $articulo;
+                    $artClone->Quantity  = $linea->Quantity;
+
+                    $lineasComoArticulos[] = $artClone;
                 }
             }
         }
 
-        //dd($lineasComoArticulos);
         return view('users.cotizacion', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos'));
     }
 
@@ -147,19 +140,54 @@ class CotizacionesController extends Controller
     public function GuardarCotizacion(Request $request)
     {
         try {
+
+            //Validaciones
+            $request->validate([
+                'cliente'          => 'required',
+                'fechaCreacion'    => 'required',
+                'fechaEntrega'     => 'required',
+                'CardName'         => 'required',
+                'SlpCode'          => 'required',
+                'phone1'           => 'required',
+                'email'            => 'required',
+                'DocCur'           => 'required',
+                //'ShipToCode'       => 'required',
+                //'PayToCode'        => 'required',
+                'direccionFiscal'  => 'required',
+                'direccionEntrega' => 'required',
+                'TotalSinPromo'    => 'required',
+                'Descuento'        => 'required',
+                'Subtotal'         => 'required',
+                'iva'              => 'required',
+                'total'            => 'required',
+                'articulos'        => 'required|json',
+            ], [
+                // Mensajes personalizados
+                'required' => 'El campo :attribute es obligatorio.',
+                'json'     => 'Los artículos deben enviarse en formato JSON válido.',
+            ], [
+                //quivalencias de atributos
+                'CardName'         => 'Nombre del cliente',
+                'SlpCode'          => 'Vendedor',
+                'phone1'           => 'Teléfono',
+                'email'            => 'Correo electrónico',
+                'DocCur'           => 'Moneda',
+                //'ShipToCode'       => 'Dirección de envío',
+                //'PayToCode'        => 'Dirección de pago',
+            ]);
+
+            // Guardar líneas de cotización
+            $articulos = json_decode($request->articulos, true);
+            if (is_array($articulos) && count($articulos) < 1){
+                return back()->with('error', 'Ocurrio un error no puedes guardar cotizaciones sin articulos');
+            }
+
             // Limpiar valores numéricos
             $totalSinPromo = floatval(str_replace(['$', 'MXM', ','], '', $request->TotalSinPromo));
             $descuento     = floatval(str_replace(['$', 'MXM', ','], '', $request->Descuento));
             $subtotal      = floatval(str_replace(['$', 'MXM', ','], '', $request->Subtotal));
             $iva           = floatval(str_replace(['$', 'MXM', ','], '', $request->iva));
             $total         = floatval(str_replace(['$', 'MXM', ','], '', $request->total));
-
-            // Guardar líneas de cotización
-            $articulos = json_decode($request->articulos, true);
-            if (is_array($articulos) && count($articulos) < 1){
-                return redirect()->route('cotizaciones')->with('error', 'Ocurrio un error no puedes guardar cotizaciones sin articulos');
-            }
-            
 
             // Guardar cotización
             $cotizacion = Cotizacion::create([
@@ -189,6 +217,7 @@ class CotizacionesController extends Controller
                 $lineNum++;
                 LineasCotizacion::create([
                     'DocEntry'   => $cotizacion->DocEntry,
+                    'fecha' => Carbon::today()->format('Y-m-d'),
                     'LineNum'    => $lineNum,
                     'ItemCode'   => $art['itemCode'],
                     'U_Dscr'     => $art['descripcion'],
@@ -202,7 +231,7 @@ class CotizacionesController extends Controller
 
             return redirect()->route('cotizaciones')->with('success', 'Cotización guardada correctamente.');
         } catch (\Exception $e) {
-            return redirect()->route('cotizaciones')->with('error', 'Ocurrió un error al guardar la cotización: ' . $e->getMessage());
+            return back()->with('error', 'Ocurrió un error al guardar la cotización: ' . $e->getMessage());
         }
     }
 

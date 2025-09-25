@@ -169,14 +169,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($articulos as $articulo)
+                        @foreach($articulos as $articuloM)
                             <tr>
-                                <td>{{ $articulo->ItemCode }}</td>
-                                <td>{{ $articulo->FrgnName }}</td>
+                                <td>{{ $articuloM->ItemCode }}</td>
+                                <td>{{ $articuloM->FrgnName }}</td>
                                 <td>Precio Pendiente</td>
-                                <td><img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px;height:auto;"></td>
+                                <td><img src="{{ asset($articuloM->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px;height:auto;"></td>
                                 <td>
-                                    <button class="btn" style="background-color: blue; color: white; border: none; padding: 10px 20px; border-radius: 5px;" onclick='agregarArticulo(@json($articulo))'>Agregar</button>
+                                    <button class="btn" style="background-color: blue; color: white; border: none; padding: 10px 20px; border-radius: 5px;" onclick='agregarArticulo(@json($articuloM))'>Agregar</button>
                                 </td>
                             </tr>
                         @endforeach
