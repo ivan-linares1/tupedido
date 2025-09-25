@@ -19,26 +19,36 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      text-align: center;
     }
-    .container { text-align: center; }
+
+    .container { max-width: 500px; }
+
     h1 {
       font-size: 8rem;
       margin: 0;
       animation: shake 1s infinite;
       color: #ff4d4d;
     }
+
     h2 { font-size: 2rem; margin: 20px 0; }
     p { font-size: 1.2rem; margin-bottom: 20px; }
-    a {
+
+    a, button {
       text-decoration: none;
       background: #ff4d4d;
       color: white;
       padding: 12px 30px;
       border-radius: 25px;
       font-weight: bold;
+      border: none;
+      cursor: pointer;
       transition: 0.3s;
+      margin: 5px;
+      display: inline-block;
     }
-    a:hover { background: #cc0000; }
+
+    a:hover, button:hover { background: #cc0000; }
 
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
@@ -53,6 +63,7 @@
       margin-top: 20px;
       animation: pulse 1.5s infinite;
     }
+
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.2); }
@@ -68,6 +79,11 @@
     <i class="fas fa-lock lock"></i>
     <br><br>
     <a href="{{ url('/') }}">Volver al inicio</a>
+
+    <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+        @csrf
+        <button type="submit">Cerrar sesión</button>
+    </form>
   </div>
 </body>
 </html>

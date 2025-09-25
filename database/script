@@ -120,7 +120,6 @@ CREATE TABLE OQUT(
     DocDueDate DATE,
     CardName VARCHAR(100),
     SlpCode INT NOT NULL,
-    CntctCode INT, /*ELIMINAR PORQUE NO SE USA POR EL MOMENTO*/
     Phone1 VARCHAR(20),
     E_Mail VARCHAR(100),
     DocCur VARCHAR(3),
@@ -153,6 +152,18 @@ CREATE TABLE QUT1(
   FOREIGN KEY (DocEntry) REFERENCES OQUT(DocEntry),
   FOREIGN KEY (ItemCode) REFERENCES OITM(ItemCode),
   FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
+);
+
+CREATE TABLE RDR1 (
+  DocEntry INT AUTO_INCREMENT PRIMARY KEY,
+  fecha DATE NOT NULL,
+  LineNum INT,
+  TargetType INT,
+  TrgetEntry INT,
+  BaseRef VARCHAR(16),
+  BaseType INT DEFAULT '23',
+  BaseEntry INT,
+  FOREIGN KEY (BaseEntry) REFERENCES OQUT(DocEntry)
 );
 
 /* =============================

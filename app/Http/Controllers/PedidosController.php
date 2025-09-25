@@ -8,30 +8,39 @@ use App\Models\Cotizacion;
 use App\Models\DireccionesClientes;
 use App\Models\LineasCotizacion;
 use App\Models\Moneda;
+use App\Models\pedidos;
 use App\Models\Vendedores; 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
-
-class CotizacionesController extends Controller
+class PedidosController extends Controller
 {
+    
+    public function index()
+    {
+        // Obtener todos los pedidos con la cotización asociada
+        $pedidos = pedidos::with(['cotizacionBase'])->get();
 
-    public function index(){//se encarga de listar todas las cotizaciones existentes
-        // Obtenemos cotizaciones con su vendedor y el nombre de la moneda 
-        $cotizaciones = Cotizacion::select( 
-                'OQUT.*',
-                'OSLP.SlpName as vendedor_nombre',
-                'OCRN.Currency as moneda_nombre'
-            )
-            ->leftJoin('OSLP', 'OQUT.SlpCode', '=', 'OSLP.SlpCode')  // Relación con vendedor
-            ->leftJoin('OCRN', 'OQUT.DocCur', '=', 'OCRN.Currency_ID') // Relación con moneda
-            ->get();
+        // Transformar para la vista
+        $pedidosList = $pedidos->map(function($pedido) {
+            $cotizacion = $pedido->cotizacionBase;
 
-        return view('users.cotizaciones', compact('cotizaciones'));
+            return (object)[
+                'DocEntry' => $pedido->DocEntry,
+                'CotizacionDocEntry' => $cotizacion->DocEntry ?? null,
+                'CotizacionFecha' => $cotizacion->DocDate ?? null,
+                'Cliente' => $cotizacion->CardName ?? null,
+                'Vendedor' => optional($cotizacion->vendedor)->Nombre ?? null, // ajustar relación si existe
+                'Total' => $cotizacion->Total ?? 0,
+                'Moneda' => $cotizacion->moneda_nombre ?? 'MXN',
+            ];
+        });
+
+        return view('users.pedidos', ['pedidos' => $pedidosList]);
     }
 
-    public function NuevaCotizacion ($DocEntry = null)
+    public function NuevoPedido ($DocEntry = null)
     {
         $IVA = 16;
         $hoy = Carbon::today()->format('Y-m-d');
@@ -97,7 +106,7 @@ class CotizacionesController extends Controller
             }
         }
 
-        return view('users.cotizacion', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos'));
+        return view('users.pedido', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos'));
     }
 
     public function ObtenerDirecciones($CardCode){
@@ -136,11 +145,50 @@ class CotizacionesController extends Controller
         ]);
     }
 
+    public function detallesPedido($DocEntry)
+    {
+        // Obtener la cotización con sus líneas
+        $cotizacion = Cotizacion::with('lineas')->findOrFail($DocEntry);
+        $idPedido = pedidos::where('BaseEntry', $DocEntry)->first()?->DocEntry;
+
+        // Datos adicionales para la vista
+        $IVA = 16;
+        $hoy = Carbon::today()->format('Y-m-d');
+
+        // Clientes y vendedores
+        $clientes = Clientes::with('descuentos.detalles.marca')->get();
+        $user = Auth::user();
+        $vendedores = ($user->rol_id == 1 || $user->rol_id == 2) ? Vendedores::all() : [];
+
+        // Monedas
+        $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
+            $query->whereDate('RateDate', $hoy);
+        }])->get();
+
+        $articulos = [];
+
+        // Fechas de la cotización
+        $fechaCreacion = $cotizacion->DocDate;
+        $fechaEntrega  = $cotizacion->DocDueDate;
+
+        // Modo: 1 = solo ver (todos los campos readonly/disabled)
+        $modo = 1;
+
+        // Datos preseleccionados para evitar errores en la vista
+        $preseleccionados = [
+            'cliente' => $cotizacion->CardCode,
+            'vendedor' => $cotizacion->SlpCode,
+            'moneda' => $cotizacion->DocCur,
+        ];
+
+        // Retornar la vista
+        return view('users.Pedido', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados', 'idPedido' ));
+    }
+
 
     public function GuardarCotizacion(Request $request)
     {
         try {
-
             //Validaciones
             $request->validate([
                 'cliente'          => 'required',
@@ -217,7 +265,6 @@ class CotizacionesController extends Controller
                 $lineNum++;
                 LineasCotizacion::create([
                     'DocEntry'   => $cotizacion->DocEntry,
-                    'fecha' => Carbon::today()->format('Y-m-d'),
                     'LineNum'    => $lineNum,
                     'ItemCode'   => $art['itemCode'],
                     'U_Dscr'     => $art['descripcion'],
@@ -229,49 +276,23 @@ class CotizacionesController extends Controller
                 ]);
             }
 
-            return redirect()->route('cotizaciones')->with('success', 'Cotización guardada correctamente.');
+            $this->guardarPedido($cotizacion->DocEntry);
+            return $this->detallesPedido($cotizacion->DocEntry);
+
         } catch (\Exception $e) {
             return back()->with('error', 'Ocurrió un error al guardar la cotización: ' . $e->getMessage());
         }
     }
 
-    public function detalles($DocEntry)
-    {
-        // Obtener la cotización con sus líneas
-        $cotizacion = Cotizacion::with('lineas')->findOrFail($DocEntry);
+    public function guardarPedido($DocEntry){
+        $Pedido = pedidos::create([
+            'LineNum' => null,
+            'TargetType' => null,
+            'TrgetEntry' => null,
+            'BaseRef' => $DocEntry,
+            'BaseEntry' => $DocEntry,
+        ]);
 
-        // Datos adicionales para la vista
-        $IVA = 16;
-        $hoy = Carbon::today()->format('Y-m-d');
-
-        // Clientes y vendedores
-        $clientes = Clientes::with('descuentos.detalles.marca')->get();
-        $user = Auth::user();
-        $vendedores = ($user->rol_id == 1 || $user->rol_id == 2) ? Vendedores::all() : [];
-
-        // Monedas
-        $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
-            $query->whereDate('RateDate', $hoy);
-        }])->get();
-
-        $articulos = [];
-
-        // Fechas de la cotización
-        $fechaCreacion = $cotizacion->DocDate;
-        $fechaEntrega  = $cotizacion->DocDueDate;
-
-        // Modo: 1 = solo ver (todos los campos readonly/disabled)
-        $modo = 1;
-
-        // Datos preseleccionados para evitar errores en la vista
-        $preseleccionados = [
-            'cliente' => $cotizacion->CardCode,
-            'vendedor' => $cotizacion->SlpCode,
-            'moneda' => $cotizacion->DocCur,
-        ];
-
-        // Retornar la vista
-        return view('users.cotizacion', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados' ));
+         return $Pedido->DocEntry;
     }
-
 }

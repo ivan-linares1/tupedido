@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticuloController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CotizacionesController;
+use App\Http\Controllers\PedidosController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UsuarioController;
 
@@ -16,12 +17,24 @@ Route::middleware('auth')->group(function () {
     //RUTAS PARA EL ADMIN
     Route::middleware(['auth', 'role:1,2'])->group(function () {
         Route::get('/Dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
+
         Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
-        Route::get('/NuevaCotizacion', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
+
+        //cotizaciones
+        Route::get('/NuevaCotizacion/{DocEntry?}', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
         Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
         Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
-        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');
         Route::post('/CotizacionesGuardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
+        Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])->name('detalles');
+
+        //Pedidos
+        Route::get('/NuevPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
+        Route::get('/Pedidos', [PedidosController::class, 'index'])->name('Pedidos');
+        Route::post('/CotizacionesGuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+        Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
+
+        //Articulos
+        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');
         
         //borrar cuando este en produccion*****************
         Route::get('/insertar-monedas', [UsuarioController::class, 'insertarMonedas'])->name('insertar.monedas');
