@@ -31,6 +31,6 @@ class ArticuloController extends Controller
         $mostrar = $request->mostrar ?? 25;//el 25 esta por default antes de que se seleccione un otro numero de paginacion
         $articulos = $articulo->paginate($mostrar);
 
-        return view('admin.catalogo_productos', compact('articulos'));
+        return view('users.catalogo_productos', compact('articulos'));
     }
 }

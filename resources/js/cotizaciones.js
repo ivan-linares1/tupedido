@@ -129,7 +129,6 @@ window.agregarArticulo = function(art) {
     const monedaCambioID = parseInt(document.querySelector('select[name="currency_id"]').value);//guarda el id de la moneda seleccionada
     const monedaCambio =  monedas.find(m => m.Currency_ID == monedaCambioID);//obtiene el arrglo de la moneda escojida completo con su relacion de cambios
                                         //precio decimal,  arreglo de moneda, arreglo de moneda
-    console.log(art.precio.moneda);
     const precio = conversionesMonedas( art.precio.Price, art.precio.moneda, monedaCambio);//se envian los arreglos compeltos para poder realizar las consultas  
 
     // Cliente seleccionado
@@ -173,7 +172,6 @@ window.agregarArticulo = function(art) {
     calcularTotales();
 
     // Cierra el modal
-   //bootstrap.Modal.getInstance(document.getElementById('modalArticulos')).hide();
    const modalEl = document.getElementById('modalArticulos');
     if (modalEl) {
         const modalInstance = bootstrap.Modal.getInstance(modalEl);
