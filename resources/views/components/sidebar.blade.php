@@ -20,7 +20,7 @@
             </a>
             <div class="collapse" id="submenuVentas" data-bs-parent=".sidebar">
                 <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                    <li><a href="{{ url('/work') }}" class="nav-link">Clientes</a></li>
+                    <li><a href="{{ route('clientes') }}" class="nav-link">Clientes</a></li>
                     <li><a href="{{ route('cotizaciones') }}" class="nav-link">Cotizaciones</a></li>
                     <li><a href="{{ route('Pedidos') }}" class="nav-link">Pedidos</a></li>
                     <li>
