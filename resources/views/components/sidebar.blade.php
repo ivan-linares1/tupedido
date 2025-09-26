@@ -1,11 +1,3 @@
-{{--Boton auxiliar para mandar las monedas a la base del dia de hoy //borrar cuando este en produccion*****************--}}
-{{--@if(session('success'))
-    <script>alert("Uso en monedas sidebar - {{ session('success') }}");</script>
-@endif
-@if(session('error'))
-    <script>alert("Uso en monedas sidebar - {{ session('error') }}");</script>
-@endif--}}
-
 <nav class="sidebar d-flex flex-column">
     <!-- Botón cerrar sidebar (icono flecha) -->
     <button id="sidebarClose" class="d-md-none">
@@ -80,8 +72,7 @@
             </a>
             <div class="collapse" id="submenuConfiguracionGeneral" data-bs-parent=".sidebar">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                <li><a href="#" class="nav-link">Configurar Sistema</a></li>
-                <li><a href="#" class="nav-link">Configurar Multimoneda</a></li>
+                <li><a href="{{ route('configuracion') }}" class="nav-link">Configurar Sistema</a></li>
                 <li><a href="{{ route('usuarios') }}" class="nav-link">Usuarios</a></li>
                 <li><a href="#" class="nav-link">Perfiles</a></li>
             </ul>

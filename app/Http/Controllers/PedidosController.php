@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Articulo;
 use App\Models\Clientes;
 use App\Models\Cotizacion;
+use App\Models\configuracion;
 use App\Models\DireccionesClientes;
 use App\Models\LineasCotizacion;
 use App\Models\Moneda;
@@ -42,7 +43,7 @@ class PedidosController extends Controller
 
     public function NuevoPedido ($DocEntry = null)
     {
-        $IVA = 16;
+        $IVA = configuracion::firstOrFail()->iva;
         $hoy = Carbon::today()->format('Y-m-d');
         $mañana = Carbon::tomorrow()->format('Y-m-d');
 
@@ -152,7 +153,7 @@ class PedidosController extends Controller
         $idPedido = pedidos::where('BaseEntry', $DocEntry)->first()?->DocEntry;
 
         // Datos adicionales para la vista
-        $IVA = 16;
+        $IVA = configuracion::firstOrFail()->iva;
         $hoy = Carbon::today()->format('Y-m-d');
 
         // Clientes y vendedores
