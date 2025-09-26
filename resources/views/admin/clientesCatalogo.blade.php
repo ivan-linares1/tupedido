@@ -5,7 +5,7 @@
 @section('contenido')
 
 <div class="container mt-4">
-    <h4 class="mb-3 fw-bold">Catálogo de Clientes</h4>
+    <h3 class="mb-3 fw-bold">Catálogo de Clientes</h3>
 
     <!-- Filtros -->
     <form method="GET" action="{{ route('clientes') }}">

@@ -23,9 +23,9 @@
 <div class="container mt-5">
     <div class="card shadow-lg border-0 rounded-3">
         <div class="card-header text-white py-3 d-flex justify-content-between align-items-center" style="background-color: #05564f">
-            <h4 class="mb-0 fw-bold">
+            <h3 class="mb-0 fw-bold">
                 <i class="bi bi-gear-fill me-2 text-warning"></i> Configuración General
-            </h4>
+            </h3>
             <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editarConfigModal">
                 <i class="bi bi-pencil-square me-1 fw-bold"></i> Editar
             </button>

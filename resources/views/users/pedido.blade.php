@@ -8,7 +8,7 @@
 @vite(['resources/js/validaciones.js', 'resources/js/cotizaciones.js'])
 
 <div class="container my-4">
-    <h3 class="mb-4">
+    <h3 class="mb-3 fw-bold">
         @if($modo == 0)
             Nuevo Pedido
         @else
@@ -19,7 +19,7 @@
     <div class="row">
         <!-- COLUMNA IZQUIERDA: Datos del Cliente -->
         <div class="col-md-6">
-            <h5>CLIENTES</h5>
+            <h4>CLIENTES</h4>
             <div class="mb-3">
                 <label>Cliente</label>
                 <select class="form-select" name="cliente" id="selectCliente" @if(isset($modo) && $modo == 1) disabled @endif>
