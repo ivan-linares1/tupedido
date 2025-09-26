@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticuloController;
+use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\configuracionController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CotizacionesController;
@@ -33,6 +34,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/Pedidos', [PedidosController::class, 'index'])->name('Pedidos');
         Route::post('/CotizacionesGuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
         Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
+
+        //Clientes
+        Route::get('/CatalogosClientes', [ClienteController::class, 'index'])->name('clientes'); 
 
         //configuracion 
         Route::get('/configuracion', [configuracionController::class, 'index'])->name('configuracion');
