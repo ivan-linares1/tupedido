@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class configuracion extends Model
+{
+    protected $table = 'configuracion';
+    public $timestamps = false;
+
+    protected $fillable = [
+        'iva',
+        'ruta_logo',
+        'nombre_empresa',
+        'calle',
+        'colonia',
+        'CP',
+        'ciudad',
+        'telefono',
+        'pais',
+    ];
+}

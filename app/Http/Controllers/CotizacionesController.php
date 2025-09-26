@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Articulo;
 use App\Models\Clientes;
 use App\Models\Cotizacion;
+use App\Models\configuracion;
 use App\Models\DireccionesClientes;
 use App\Models\LineasCotizacion;
 use App\Models\Moneda;
@@ -33,7 +34,8 @@ class CotizacionesController extends Controller
 
     public function NuevaCotizacion ($DocEntry = null)
     {
-        $IVA = 16;
+
+        $IVA = configuracion::firstOrFail()->iva;
         $hoy = Carbon::today()->format('Y-m-d');
         $mañana = Carbon::tomorrow()->format('Y-m-d');
 
@@ -241,7 +243,7 @@ class CotizacionesController extends Controller
         $cotizacion = Cotizacion::with('lineas')->findOrFail($DocEntry);
 
         // Datos adicionales para la vista
-        $IVA = 16;
+        $IVA = configuracion::firstOrFail()->iva;
         $hoy = Carbon::today()->format('Y-m-d');
 
         // Clientes y vendedores

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticuloController;
+use App\Http\Controllers\configuracionController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CotizacionesController;
 use App\Http\Controllers\PedidosController;
@@ -33,8 +34,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/CotizacionesGuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
         Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
 
+        //configuracion 
+        Route::get('/configuracion', [configuracionController::class, 'index'])->name('configuracion');
+        Route::put('/configuracion', [configuracionController::class, 'update'])->name('GuardarConfig');
+
+
         //Articulos
-        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');
+        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos'); 
         
         //borrar cuando este en produccion*****************
         Route::get('/insertar-monedas', [UsuarioController::class, 'insertarMonedas'])->name('insertar.monedas');

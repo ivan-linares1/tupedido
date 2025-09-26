@@ -72,8 +72,7 @@
             </a>
             <div class="collapse" id="submenuConfiguracionGeneral" data-bs-parent=".sidebar">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                <li><a href="#" class="nav-link">Configurar Sistema</a></li>
-                <li><a href="#" class="nav-link">Configurar Multimoneda</a></li>
+                <li><a href="{{ route('configuracion') }}" class="nav-link">Configurar Sistema</a></li>
                 <li><a href="{{ route('usuarios') }}" class="nav-link">Usuarios</a></li>
                 <li><a href="#" class="nav-link">Perfiles</a></li>
             </ul>
