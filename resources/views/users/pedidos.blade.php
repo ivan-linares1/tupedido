@@ -4,6 +4,8 @@
 @section('contenido')
 
 <div class="table-responsive mt-4">
+    <h3 class="mb-3 fw-bold">PEDIDOS</h3>
+
     <a href="{{ route('NuevaPedido') }}" class="btn btn-primary">Nuevo Pedido</a>
 
     <table class="table table-bordered table-striped m-3">
