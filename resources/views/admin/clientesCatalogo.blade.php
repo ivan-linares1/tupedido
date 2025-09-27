@@ -25,7 +25,7 @@
                     <option value="Inactivos" {{ request('estatus') == 'Inactivos' ? 'selected' : '' }}>Inactivos</option>
                 </select>
             </div>
-            <div class="col-md-3 offset-md-2">
+            <div class="col-md-3 offset-md-5">
                 <label class="form-label">Buscar</label>
                 <div class="input-group input-group-sm">
                     <input type="text" name="buscar" class="form-control" value="{{ request('buscar') }}" placeholder="Buscar...">
