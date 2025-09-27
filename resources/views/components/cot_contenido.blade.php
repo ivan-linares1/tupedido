@@ -149,12 +149,12 @@
 
 
 <!-- Modal Artículos -->
-<div class="modal fade" id="modalArticulos" tabindex="-1">
+<div class="modal fade" id="modalArticulos" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header text-white" style="background-color: #05564f">
                 <h5 class="modal-title">Seleccionar Artículo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <!-- Tabla -->
