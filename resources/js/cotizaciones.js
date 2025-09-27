@@ -177,10 +177,14 @@ window.agregarArticulo = function(art) {
         const modalInstance = bootstrap.Modal.getInstance(modalEl);
         if (modalInstance) {
             modalInstance.hide();
+
+            // Dar foco al input de cantidad en la nueva fila
+            fila.querySelector('.cantidad')?.focus();
         }
     }
 
 }
+
 
 //Funcion para hacer las conversiones de monedas
 function conversionesMonedas(precioOriginal, monedaOriginal, monedaConvertir)

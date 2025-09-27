@@ -92,7 +92,7 @@
 
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="iva" class="form-label fw-bold><i class="bi bi-percent me-1"></i> IVA (%)</label>
+                    <label for="iva" class="form-label fw-bold"><i class="bi bi-percent me-1"></i> IVA (%)</label>
                     <input type="number" name="iva" id="iva" class="form-control" value="{{ old('iva', $configuracion->iva) }}">
                 </div>
                 <div class="col-md-6">
