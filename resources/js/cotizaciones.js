@@ -200,7 +200,7 @@ function actualizarPrecios() {
             ? monedaCambio.Currency 
             : monedaOriginal.Currency;
 
-        cell.innerHTML = `${Number(precioConvertido).toFixed(2)} ${simboloMoneda}`;
+        cell.innerHTML = `$${Number(precioConvertido).toFixed(2)} ${simboloMoneda}`;
     });
 }
 
