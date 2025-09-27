@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+// Borrar al poner en producción
+use App\Models\MonedaCambio;
+use Illuminate\Support\Facades\Http;
 
 class UsuarioController extends Controller
 {
@@ -16,47 +21,74 @@ class UsuarioController extends Controller
         // Traemos los clientes de OCRD
         $clientes = DB::table('ocrd')->select('CardCode','CardName')->get();
 
-        return view('admin.user', compact('usuarios', 'clientes'));
+        // Traemos los vendedores activos de OSLP
+        $vendedores = DB::table('oslp')
+            ->select('SlpCode','SlpName','Active')
+            ->where('Active','Y')
+            ->get();
+
+        return view('admin.user', compact('usuarios', 'clientes', 'vendedores'));
     }
 
     // Guarda un nuevo usuario
     public function store(Request $request)
     {
-        $request->validate([
-            'cliente'   => 'required',
-            'email'     => 'required|email|unique:users,email',
-            'password'  => 'required|confirmed|min:6',
-        ]);
+        // Si viene cliente, es usuario cliente
+        if ($request->has('cliente')) {
+            $request->validate([
+                'cliente'   => 'required',
+                'email'     => 'required|email|unique:users,email',
+                'password'  => 'required|confirmed|min:6',
+            ]);
 
-        // Obtenemos datos del cliente
-        $cliente = DB::table('ocrd')->where('CardCode', $request->cliente)->first();
+            $cliente = DB::table('ocrd')->where('CardCode', $request->cliente)->first();
 
-        $user = new User();
-        $user->email    = $request->email;
-        $user->password = bcrypt($request->password);
-        $user->rol_id   = 3; // 👈 Rol por defecto = 3
-        $user->activo   = 1;
+            $user = new User();
+            $user->email    = $request->email;
+            $user->password = Hash::make($request->password);
+            $user->rol_id   = 3; // Rol cliente
+            $user->activo   = 1;
+            $user->nombre   = $cliente->CardName ?? 'Cliente';
 
-        // Si existe el cliente, tomamos sus datos
-        if ($cliente) {
-            $user->nombre = $cliente->CardName;
-            // si tu tabla users tiene más campos relacionados, aquí los llenas
+            $user->save();
+
+            return redirect()->route('admin.usuarios.index')
+                ->with('success', 'Usuario cliente creado correctamente');
         }
 
-        $user->save();
+        // Si viene slpcode, es usuario vendedor
+        if ($request->has('slpcode')) {
+            $request->validate([
+                'slpcode'  => 'required',
+                'email'    => 'required|email|unique:users,email',
+                'password' => 'required|confirmed|min:6',
+            ]);
 
-        return redirect()->route('admin.usuarios.index')
-            ->with('success', 'Usuario creado correctamente');
+            $vendedor = DB::table('oslp')->where('SlpCode', $request->slpcode)->first();
+
+            $user = new User();
+            $user->email    = $request->email;
+            $user->password = Hash::make($request->password);
+            $user->rol_id   = 4; // Rol vendedor
+            $user->activo   = 1;
+            $user->nombre   = $vendedor->SlpName ?? 'Vendedor';
+
+            $user->save();
+
+            return redirect()->route('admin.usuarios.index')
+                ->with('success', 'Usuario vendedor creado correctamente');
+        }
+
+        return redirect()->back()->with('error', 'No se pudo determinar el tipo de usuario a crear.');
     }
 
-    // Devuelve info del cliente (para AJAX en el modal)
+    // Devuelve info del cliente (AJAX)
     public function getCliente(Request $request)
     {
         $cardCode = $request->cardCode;
 
-        // Cliente en OCRD
         $cliente = DB::table('ocrd')
-            ->select('CardCode', 'CardName')
+            ->select('CardCode', 'CardName', 'phone1', 'e-mail')
             ->where('CardCode', $cardCode)
             ->first();
 
@@ -64,26 +96,23 @@ class UsuarioController extends Controller
             return response()->json(['error' => 'Cliente no encontrado'], 404);
         }
 
-        // Dirección Fiscal (S)
         $direccionFiscal = DB::table('crd1')
             ->where('CardCode', $cardCode)
             ->where('AdresType', 'S')
             ->first();
 
-        // Dirección de Envío (B)
         $direccionEnvio = DB::table('crd1')
             ->where('CardCode', $cardCode)
             ->where('AdresType', 'B')
             ->first();
 
-        // Armamos respuesta
         $data = [
             "CardCode"        => $cliente->CardCode ?? "*SIN DATO*",
             "Nombres"         => $cliente->CardName ?? "*SIN DATO*",
-            "ApellidoPaterno" => "*SIN DATO*", // No existe en OCRD
+            "ApellidoPaterno" => "*SIN DATO*",
             "ApellidoMaterno" => "*SIN DATO*",
-            "Telefono"        => "*SIN DATO*", // Ajusta si tienes Tel1/Cellular
-            "TelefonoCelular" => "*SIN DATO*",
+            "Telefono"        => $cliente->phone1 ?? "*SIN DATO*",
+            "EmailContacto"   => $cliente->{"e-mail"} ?? "*SIN DATO*",
             "DireccionFiscal" => $direccionFiscal
                 ? trim(($direccionFiscal->Street ?? '') . ', ' . ($direccionFiscal->Block ?? '') . ', ' .
                        ($direccionFiscal->City ?? '') . ', ' . ($direccionFiscal->State ?? '') . ', ' .
@@ -97,5 +126,82 @@ class UsuarioController extends Controller
         ];
 
         return response()->json($data);
+    }
+
+    // Devuelve info del vendedor (AJAX)
+    public function show($slpCode)
+    {
+        $vendedor = DB::table('oslp')
+            ->select('SlpCode', 'SlpName', 'Active')
+            ->where('SlpCode', $slpCode)
+            ->where('Active', 'Y')
+            ->first();
+
+        if (!$vendedor) {
+            return response()->json(['error' => 'Vendedor no encontrado o inactivo'], 404);
+        }
+
+        return response()->json($vendedor);
+    }
+
+    // Borrar cuando esté en producción
+    public function insertarMonedas()
+    {
+        $hoy = now()->format('Y-m-d');
+
+        $response = Http::get('https://api.frankfurter.app/latest', [
+            'from' => 'MXN',
+            'to'   => 'USD,EUR'
+        ]);
+
+        if ($response->failed()) {
+            return redirect()->back()->with('error', 'No se pudo obtener el tipo de cambio.');
+        }
+
+        $rates = $response->json()['rates'] ?? null;
+
+        if (!$rates) {
+            return redirect()->back()->with('error', 'No se encontraron tipos de cambio.');
+        }
+
+        $usdToMxn = 1 / $rates['USD'];
+        $eurToMxn = 1 / $rates['EUR'];
+
+        $mensajes = [];
+
+        if (!MonedaCambio::where('Currency_ID', 1)->where('RateDate', $hoy)->exists()) {
+            MonedaCambio::create([
+                'Currency_ID' => 1,
+                'RateDate'    => $hoy,
+                'Rate'        => 1.0
+            ]);
+            $mensajes[] = 'MXN agregado.';
+        } else {
+            $mensajes[] = 'MXN ya existe para hoy.';
+        }
+
+        if (!MonedaCambio::where('Currency_ID', 2)->where('RateDate', $hoy)->exists()) {
+            MonedaCambio::create([
+                'Currency_ID' => 2,
+                'RateDate'    => $hoy,
+                'Rate'        => $usdToMxn
+            ]);
+            $mensajes[] = 'USD→MXN agregado.';
+        } else {
+            $mensajes[] = 'USD→MXN ya existe para hoy.';
+        }
+
+        if (!MonedaCambio::where('Currency_ID', 3)->where('RateDate', $hoy)->exists()) {
+            MonedaCambio::create([
+                'Currency_ID' => 3,
+                'RateDate'    => $hoy,
+                'Rate'        => $eurToMxn
+            ]);
+            $mensajes[] = 'EUR→MXN agregado.';
+        } else {
+            $mensajes[] = 'EUR→MXN ya existe para hoy.';
+        }
+
+        return redirect()->back()->with('success', implode(' ', $mensajes));
     }
 }
