@@ -185,6 +185,32 @@ window.agregarArticulo = function(art) {
 
 }
 
+function actualizarPrecios() {
+    const monedaCambioID = parseInt(document.querySelector('select[name="currency_id"]').value);
+    const monedaCambio = monedas.find(m => m.Currency_ID == monedaCambioID);
+
+    document.querySelectorAll(".precio-celda").forEach(cell => {
+        const precioOriginal = parseFloat(cell.dataset.precio);
+        const monedaOriginal = JSON.parse(cell.dataset.moneda);
+
+        const precioConvertido = conversionesMonedas(precioOriginal, monedaOriginal, monedaCambio);
+
+        // Si hay moneda seleccionada, usamos esa, si no, la original
+        const simboloMoneda = monedaCambio 
+            ? monedaCambio.Currency 
+            : monedaOriginal.Currency;
+
+        cell.innerHTML = `${Number(precioConvertido).toFixed(2)} ${simboloMoneda}`;
+    });
+}
+
+document.addEventListener("DOMContentLoaded", actualizarPrecios);
+
+// Detecta cuando cambias la moneda en el select
+document.querySelector('select[name="currency_id"]').addEventListener("change", actualizarPrecios);
+
+
+
 
 //Funcion para hacer las conversiones de monedas
 function conversionesMonedas(precioOriginal, monedaOriginal, monedaConvertir)
