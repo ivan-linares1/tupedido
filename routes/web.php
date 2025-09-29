@@ -1,8 +1,11 @@
 <?php
 
 use App\Http\Controllers\ArticuloController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\configuracionController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CotizacionesController;
+use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\OslpController;
@@ -16,22 +19,39 @@ Route::middleware('auth')->group(function () {
 
     // RUTAS PARA EL ADMIN
     Route::middleware(['auth', 'role:1,2'])->group(function () {
-        Route::get('/Dashboard', function () { 
-            return view('admin.dashboard'); 
-        })->name('dashboard');
+        Route::get('/Dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
 
+        //Usuarios
         Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
+
+        //cotizaciones
+        Route::get('/NuevaCotizacion/{DocEntry?}', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
         Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
         Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
-        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos');
         Route::post('/CotizacionesGuardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
+        Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])->name('detalles');
+
+        //Pedidos
+        Route::get('/NuevPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
+        Route::get('/Pedidos', [PedidosController::class, 'index'])->name('Pedidos');
+        Route::post('/CotizacionesGuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+        Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
+
+        //Clientes
+        Route::get('/CatalogosClientes', [ClienteController::class, 'index'])->name('clientes'); 
+
+        //configuracion 
+        Route::get('/configuracion', [configuracionController::class, 'index'])->name('configuracion');
+        Route::put('/configuracion', [configuracionController::class, 'update'])->name('GuardarConfig');
+
+        //Articulos
+        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos'); 
         
         // Borrar cuando este en producción *****************
         Route::get('/insertar-monedas', [UsuarioController::class, 'insertarMonedas'])->name('insertar.monedas');
 
-        // ✅ Ruta Catálogo de Vendedores (solo admin)
-        Route::get('/admin/catalogo-vendedores', [VendedorController::class, 'index'])
-            ->name('admin.catalogo.vendedores');
+        //Ruta Catálogo de Vendedores (solo admin)
+        Route::get('/admin/catalogo-vendedores', [VendedorController::class, 'index'])->name('admin.catalogo.vendedores');
     });
 
     // RUTAS PARA USUARIOS NORMALES Y VENDEDORES

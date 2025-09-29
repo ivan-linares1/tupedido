@@ -1,0 +1,73 @@
+@extends('layouts.app')
+
+@section('title', 'Productos')
+
+@section('contenido')
+
+<div class="container mt-4">
+    <h3 class="mb-3 fw-bold">Catálogo de Clientes</h3>
+
+    <!-- Filtros -->
+    <form method="GET" action="{{ route('clientes') }}">
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-2">
+                <label class="form-label">Mostrar</label>
+                <select class="form-select form-select-sm" name="mostrar" onchange="this.form.submit()">
+                    <option {{ request('mostrar') == 25 ? 'selected' : '' }}>25</option>
+                    <option {{ request('mostrar') == 50 ? 'selected' : '' }}>50</option>
+                    <option {{ request('mostrar') == 100 ? 'selected' : '' }}>100</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Estatus</label>
+                <select class="form-select form-select-sm" name="estatus" onchange="this.form.submit()">
+                    <option value="Activos" {{ request('estatus') == 'Activos' ? 'selected' : '' }}>Activos</option>
+                    <option value="Inactivos" {{ request('estatus') == 'Inactivos' ? 'selected' : '' }}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-md-3 offset-md-5">
+                <label class="form-label">Buscar</label>
+                <div class="input-group input-group-sm">
+                    <input type="text" name="buscar" class="form-control" value="{{ request('buscar') }}" placeholder="Buscar...">
+                    <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Tabla -->
+    <div class="table-responsive ">
+        <table class="table table-bordered align-middle">
+            <thead class="table-info  text-center">
+                <tr>
+                    <th>CODIGO</th>
+                    <th>NOMBRE</th>
+                    <th>TELEFONO</th>
+                    <th>E-MAIL</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($clientes as $cliente)
+                <tr>
+                    <td>{{ $cliente->CardCode }}</td>
+                    <td>{{ $cliente->CardName }}</td>
+                    <td>{{ $cliente->phone1}}</td>
+                    <td>{{ $cliente->{'e-mail'} }}</td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No se encontraron resultados</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación Bootstrap -->
+    <div class="d-flex justify-content-center">
+        {{ $clientes->appends(request()->query())->links('pagination::bootstrap-5') }}
+    </div>
+
+</div>
+
+@endsection

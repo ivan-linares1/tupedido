@@ -1,10 +1,3 @@
-@if(session('success'))
-    <script>alert("{{ session('success') }}");</script>
-@endif
-@if(session('error'))
-    <script>alert("{{ session('error') }}");</script>
-@endif
-
 <nav class="sidebar d-flex flex-column">
     <!-- Botón cerrar sidebar (icono flecha) -->
     <button id="sidebarClose" class="d-md-none">
@@ -27,9 +20,9 @@
             </a>
             <div class="collapse" id="submenuVentas" data-bs-parent=".sidebar">
                 <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                    <li><a href="{{ url('/work') }}" class="nav-link">Clientes</a></li>
-                    <li><a href="#" class="nav-link">Cotizaciones</a></li>
-                    <li><a href="#" class="nav-link">Pedidos</a></li>
+                    <li><a href="{{ route('clientes') }}" class="nav-link">Clientes</a></li>
+                    <li><a href="{{ route('cotizaciones') }}" class="nav-link">Cotizaciones</a></li>
+                    <li><a href="{{ route('Pedidos') }}" class="nav-link">Pedidos</a></li>
                     <li>
                         <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionVentas" role="button" aria-expanded="false" aria-controls="submenuConfiguracionVentas">
                         Configuración
@@ -81,8 +74,7 @@
             </a>
             <div class="collapse" id="submenuConfiguracionGeneral" data-bs-parent=".sidebar">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                <li><a href="#" class="nav-link">Configurar Sistema</a></li>
-                <li><a href="#" class="nav-link">Configurar Multimoneda</a></li>
+                <li><a href="{{ route('configuracion') }}" class="nav-link">Configurar Sistema</a></li>
                 <li><a href="{{ route('usuarios') }}" class="nav-link">Usuarios</a></li>
                 <li><a href="#" class="nav-link">Perfiles</a></li>
             </ul>

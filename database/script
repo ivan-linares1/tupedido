@@ -13,7 +13,7 @@ CREATE TABLE OITB(
   ItmsGrpCod VARCHAR(50) PRIMARY KEY,
   ItmsGrpNam VARCHAR(100),
   Locked CHAR(1),
-  Object VARCHAR(20)
+  Object VARCHAR(20) DEFAULT '52'
 );
 
 /*Descuentos por cliente*/
@@ -41,7 +41,7 @@ CREATE TABLE EDG1(
 CREATE TABLE OSLP(
   SlpCode INT PRIMARY KEY,
   SlpName VARCHAR(155) NOT NULL,
-  Active CHAR(1)
+  Active CHAR(1) DEFAULT 'Y'
 );
 
 /* Direcciones de clientes */
@@ -75,10 +75,8 @@ CREATE TABLE OPLN(
 /* Tipos de cambio */
 CREATE TABLE ORTT(
   RateDate DATE,
-  /*Currency VARCHAR(3),*/
   Currency_ID INT NOT NULL,
   Rate DECIMAL(19,6),
-  /*PRIMARY KEY(RateDate, Currency),*/
   PRIMARY KEY(RateDate, Currency_ID),
   FOREIGN KEY(Currency_ID) REFERENCES OCRN(Currency_ID)
 );
@@ -94,9 +92,11 @@ CREATE TABLE OITM(
   ItemCode VARCHAR(50) PRIMARY KEY,
   ItemName VARCHAR(100),
   FrgnName VARCHAR(100),
+  ItmsGrpCod VARCHAR(50),
   SalUnitMsr VARCHAR(100),
   Id_imagen BIGINT NOT NULL,
   Active CHAR(1) NOT NULL DEFAULT 'Y',
+  FOREIGN KEY (ItmsGrpCod) REFERENCES OITB(ItmsGrpCod),
   FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
 );
 
@@ -105,24 +105,21 @@ CREATE TABLE ITM1(
   ItemCode VARCHAR(50) NOT NULL,
   PriceList INT NOT NULL,
   Price DECIMAL(19,6),
-  /*Currency VARCHAR(3) NOT NULL,*/
   Currency_ID INT NOT NULL,
   PRIMARY KEY(ItemCode, PriceList),
   FOREIGN KEY(ItemCode) REFERENCES OITM(ItemCode),
   FOREIGN KEY(PriceList) REFERENCES OPLN(ListNum),
   FOREIGN KEY(Currency_ID) REFERENCES OCRN(Currency_ID)
-  /*FOREIGN KEY(Currency) REFERENCES ORTT(Currency) */
 );
 
 /* Cotizaciones */
 CREATE TABLE OQUT(
-    DocEntry INT PRIMARY KEY,
+    DocEntry INT AUTO_INCREMENT PRIMARY KEY,
     CardCode VARCHAR(15) NOT NULL,
-    DocDate TIMESTAMP,
-    DocDueDate TIMESTAMP,
+    DocDate DATE,
+    DocDueDate DATE,
     CardName VARCHAR(100),
     SlpCode INT NOT NULL,
-    CntctCode INT,
     Phone1 VARCHAR(20),
     E_Mail VARCHAR(100),
     DocCur VARCHAR(3),
@@ -143,7 +140,7 @@ CREATE TABLE OQUT(
 CREATE TABLE QUT1(
   DocEntry INT NOT NULL,
   LineNum INT NOT NULL,
-  ObjType VARCHAR(20),
+  ObjType VARCHAR(20) DEFAULT '23',
   ItemCode VARCHAR(50) NOT NULL,
   U_Dscr VARCHAR(250),
   unitMsr2 VARCHAR(100),
@@ -157,6 +154,18 @@ CREATE TABLE QUT1(
   FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
 );
 
+CREATE TABLE RDR1 (
+  DocEntry INT AUTO_INCREMENT PRIMARY KEY,
+  fecha DATE NOT NULL,
+  LineNum INT,
+  TargetType INT,
+  TrgetEntry INT,
+  BaseRef VARCHAR(16),
+  BaseType INT DEFAULT '23',
+  BaseEntry INT,
+  FOREIGN KEY (BaseEntry) REFERENCES OQUT(DocEntry)
+);
+
 /* =============================
    Usuarios
    ============================= */
@@ -164,6 +173,13 @@ CREATE TABLE roles (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50)
 );
+
+/* Insertar roles */
+INSERT INTO roles (nombre) VALUES
+  ('Super Administrador'),
+  ('Administrador'),
+  ('Cliente'),
+  ('Vendedor');
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -175,9 +191,14 @@ CREATE TABLE users (
     FOREIGN KEY (rol_id) REFERENCES roles(id)
 );
 
-/* Insertar roles */
-INSERT INTO roles (nombre) VALUES
-  ('Super Administrador'),
-  ('Administrador'),
-  ('Cliente'),
-  ('Vendedor');
+CREATE TABLE configuracion(
+  iva INT DEFAULT '16',
+  ruta_logo VARCHAR(255) DEFAULT '',
+  nombre_empresa VARCHAR(255) DEFAULT 'KOMBITEC, S.A. DE C.V',
+  calle VARCHAR(150) DEFAULT 'AV. DR. SALVADOR NAVA MARTÍNEZ 232' ,
+  colonia VARCHAR (50) DEFAULT 'COL. EL PASEO, SAN LUIS POTOSÍ' ,
+  CP VARCHAR (10) DEFAULT 'C.P. 78320 ' ,
+  ciudad VARCHAR (30) DEFAULT 'San Luis Potosí ' ,
+  telefono VARCHAR(15) DEFAULT '',
+  pais VARCHAR(30) DEFAULT 'MEXICO'
+);
