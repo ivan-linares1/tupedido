@@ -19,6 +19,7 @@ class Articulo extends Model
         'SalUnitMsr',
         'Id_imagen',
         'Active',
+        'ItmsGrpCod',
     ];
 
      // Relación: un artículo pertenece a una imagen (imagenes)

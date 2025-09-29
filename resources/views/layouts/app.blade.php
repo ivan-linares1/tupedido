@@ -21,7 +21,7 @@
     
 
     <!-- Importación de CSS -->
-    @vite(['resources/css/variables.css', 'resources/css/style.css'])
+    @vite(['resources/css/variables.css', 'resources/css/style.css', 'resources/js/validaciones.js'])
 </head>
 <body>
 

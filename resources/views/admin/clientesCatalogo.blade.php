@@ -3,7 +3,7 @@
 @section('title', 'Productos')
 
 @section('contenido')
-
+<div id="flash-messages"></div>
 <div class="container mt-4">
     <h3 class="mb-3 fw-bold">Catálogo de Clientes</h3>
 
@@ -21,6 +21,7 @@
             <div class="col-md-2">
                 <label class="form-label">Estatus</label>
                 <select class="form-select form-select-sm" name="estatus" onchange="this.form.submit()">
+                    <option value="Todos" {{ request('estatus') == 'Todos' ? 'selected' : '' }}>Todos</option>
                     <option value="Activos" {{ request('estatus') == 'Activos' ? 'selected' : '' }}>Activos</option>
                     <option value="Inactivos" {{ request('estatus') == 'Inactivos' ? 'selected' : '' }}>Inactivos</option>
                 </select>
@@ -44,6 +45,7 @@
                     <th>NOMBRE</th>
                     <th>TELEFONO</th>
                     <th>E-MAIL</th>
+                    <th>ACTIVO</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,6 +55,19 @@
                     <td>{{ $cliente->CardName }}</td>
                     <td>{{ $cliente->phone1}}</td>
                     <td>{{ $cliente->{'e-mail'} }}</td>
+                    <td class="text-center">
+                        <div class="form-check form-switch d-flex justify-content-center">
+                            <input 
+                                class="form-check-input toggle-estado" 
+                                type="checkbox" 
+                                role="switch"
+                                id="estado-{{ $cliente->CardCode }}"
+                                data-id="{{ $cliente->CardCode }}"
+                                data-field="Active"
+                                data-url="{{ route('estado.Cliente') }}"
+                                {{  $cliente->Active == 'Y' ? 'checked' : ''  }}>
+                        </div>
+                    </td>
                 </tr>
                 @empty
                 <tr>

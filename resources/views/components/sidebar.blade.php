@@ -20,10 +20,12 @@
             </a>
             <div class="collapse" id="submenuVentas" data-bs-parent=".sidebar">
                 <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                    <li><a href="{{ route('clientes') }}" class="nav-link">Clientes</a></li>
+                   
+                        <li><a href="{{ route('clientes') }}" class="nav-link">Clientes</a></li>
+                    
                     <li><a href="{{ route('cotizaciones') }}" class="nav-link">Cotizaciones</a></li>
                     <li><a href="{{ route('Pedidos') }}" class="nav-link">Pedidos</a></li>
-                    <li>
+                    
                         <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionVentas" role="button" aria-expanded="false" aria-controls="submenuConfiguracionVentas">
                         Configuración
                         <i class="bi bi-chevron-down"></i>
@@ -32,11 +34,8 @@
                             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                                 <li><a href="#" class="nav-link">Zonas de venta</a></li>
                                 <li><a href="{{ route('admin.catalogo.vendedores') }}" class="nav-link">Catálogo de vendedores</a></li>
-
-
                             </ul>
                         </div>
-                    </li>
                 </ul>
             </div>
         </li>
@@ -49,7 +48,7 @@
             </a>
             <div class="collapse" id="submenuProductos" data-bs-parent=".sidebar">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                <li><a href="{{ route('articulos') }}" class="nav-link">Productos</a></li>
+                <li><a href="{{ route('articulos', ['estatus' => 'Activos'])}}" class="nav-link">Productos</a></li>
                 <li><a href="#" class="nav-link">Lista de Precios</a></li>
                 <li>
                     <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionProductos" role="button" aria-expanded="false" aria-controls="submenuConfiguracionProductos">
@@ -67,6 +66,7 @@
         </li>
 
         {{-- Configuracion general --}}
+        @if (Auth::user()->id_rol == 1 || Auth::user()->id_rol == 2)
         <li class="nav-item">
             <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionGeneral" role="button" aria-expanded="false" aria-controls="submenuConfiguracionGeneral">
             Configuración General   
@@ -79,11 +79,14 @@
                 <li><a href="#" class="nav-link">Perfiles</a></li>
             </ul>
             </div>
-        </li>
+        </li>@endif
+
 
         {{--Boton auxiliar para mandar las monedas a la base del dia de hoy //borrar cuando este en produccion*****************--}}
+        @if (Auth::user()->id_rol == 1 || Auth::user()->id_rol == 2)
         <li>
             <a href="{{ route ('insertar.monedas') }}"  class="nav-link">Insertar monedas</a>
         </li>
+        @endif
     </ul>
 </nav>

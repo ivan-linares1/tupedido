@@ -4,8 +4,6 @@
 
 @section('contenido')
 
-@vite(['resources/js/validaciones.js'])
-
 <style>
 .lista li {
     font-size: 14px; 

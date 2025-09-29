@@ -18,6 +18,7 @@ class Clientes extends Model
         'GroupNum',
         'phone1',
         'e-mail',
+        'Active',
     ];
 
     // Relación: un cliente tiene muchas direcciones
