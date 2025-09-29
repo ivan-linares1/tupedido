@@ -4,12 +4,7 @@
 
 @section('contenido')
 <h1 class="mb-3 fw-bold">Dashboard</h1>
-@if (Auth::user()->id_rol == 1 || Auth::user()->id_rol == 2)
-    <p>Bienvenido al panel de administración.</p>
-@else
-    <p>Bienvenido a Tu Pedido.</p>
-@endif
-
+<p>Bienvenido</p>
 <a href="{{ route('NuevaCotizacion') }}" class="btn btn-primary">Nueva Cotización</a>
 <a href="{{ route('NuevaPedido') }}" class="btn btn-primary">Nuevo Pedido</a>
 @endsection

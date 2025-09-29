@@ -17,14 +17,10 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
 
-    // RUTAS PARA EL ADMIN
-    Route::middleware(['auth', 'role:1,2'])->group(function () {
-        Route::get('/Dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
+    //rutasGenerales ambos usuarios
+    Route::get('/Dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
 
-        //Usuarios
-        Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
-
-        //cotizaciones
+    //cotizaciones
         Route::get('/NuevaCotizacion/{DocEntry?}', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
         Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
         Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
@@ -37,16 +33,26 @@ Route::middleware('auth')->group(function () {
         Route::post('/CotizacionesGuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
         Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
 
+        //Articulos
+        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos'); 
+        Route::post('/Articulo/Estado', [ArticuloController::class, 'activo_inactivo'])->name('estado.Articulo');
+
+
+    // RUTAS PARA EL ADMIN
+    Route::middleware(['auth', 'role:1,2'])->group(function () {
+
+        //Usuarios
+        Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
+
         //Clientes
         Route::get('/CatalogosClientes', [ClienteController::class, 'index'])->name('clientes'); 
+        Route::post('/Clientes/Estado', [ClienteController::class, 'activo_inactivo'])->name('estado.Cliente'); 
 
         //configuracion 
         Route::get('/configuracion', [configuracionController::class, 'index'])->name('configuracion');
         Route::put('/configuracion', [configuracionController::class, 'update'])->name('GuardarConfig');
 
-        //Articulos
-        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos'); 
-        
+
         // Borrar cuando este en producción *****************
         Route::get('/insertar-monedas', [UsuarioController::class, 'insertarMonedas'])->name('insertar.monedas');
 
@@ -56,7 +62,6 @@ Route::middleware('auth')->group(function () {
 
     // RUTAS PARA USUARIOS NORMALES Y VENDEDORES
     Route::middleware(['auth', 'role:3,4'])->group(function () { 
-        // aquí puedes agregar rutas para usuarios normales y vendedores si las necesitas
     });
     
 });

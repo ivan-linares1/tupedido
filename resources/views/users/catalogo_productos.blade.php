@@ -4,6 +4,8 @@
 
 @section('contenido')
 
+<div id="flash-messages"></div>
+
 <div class="container mt-4">
     <h3 class="mb-3 fw-bold">Catálogo de Productos / Servicios</h3>
 
@@ -23,13 +25,16 @@
                 <select class="form-select form-select-sm" name="estatus" onchange="this.form.submit()">
                     <option value="Activos" {{ request('estatus') == 'Activos' ? 'selected' : '' }}>Activos</option>
                     <option value="Inactivos" {{ request('estatus') == 'Inactivos' ? 'selected' : '' }}>Inactivos</option>
+                    <option value="Todos" {{ request('estatus') == 'Todos' ? 'selected' : '' }}>todos</option>
                 </select>
             </div>
             <div class="col-md-3">
                 <label class="form-label">Grupo de Productos</label>
                 <select class="form-select form-select-sm" name="grupo" onchange="this.form.submit()">
-                    <option>-Todos-</option>
-                    {{-- Aquí después cargamos dinámicamente los grupos --}}
+                        <option value="" >Selecciona una marca...</option>
+                        @foreach ($marcas as $marca)
+                            <option value="{{ $marca->ItmsGrpCod }}" {{ request('grupo') == $marca->ItmsGrpCod ? 'selected' : '' }}>{{ $marca->ItmsGrpNam }} </option>
+                        @endforeach
                 </select>
             </div>
             <div class="col-md-3 offset-md-2">
@@ -52,6 +57,7 @@
                     <th>Descripción</th>
                     <th>Grupo de Productos</th>
                     <th>Imagen</th>
+                    @if (Auth::user()->id_rol == 1 || Auth::user()->id_rol == 2)<th>Activo</th>@endif
                 </tr>
             </thead>
             <tbody>
@@ -66,10 +72,23 @@
                     <td>{{ $articulo->FrgnName }}</td>
                     <td>{{ $articulo->marca->ItmsGrpNam}}</td>
                     <td><img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:70px;height:auto;"></td>
+                    @if (Auth::user()->id_rol == 1 || Auth::user()->id_rol == 2)<td class="text-center">
+                        <div class="form-check form-switch d-flex justify-content-center">
+                            <input 
+                                class="form-check-input toggle-estado" 
+                                type="checkbox" 
+                                role="switch"
+                                id="estado-{{ $articulo->ItemCode }}"
+                                data-id="{{ $articulo->ItemCode }}"
+                                data-field="Active"
+                                data-url="{{ route('estado.Articulo') }}"
+                                {{  $articulo->Active == 'Y' ? 'checked' : ''  }}>
+                        </div>
+                    </td>@endif
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="text-center text-muted">No se encontraron resultados</td>
+                    <td colspan="6" class="text-center text-muted">No se encontraron resultados</td>
                 </tr>
                 @endforelse
             </tbody>

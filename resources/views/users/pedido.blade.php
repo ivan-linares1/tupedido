@@ -5,7 +5,7 @@
 @section('contenido')
 
  <!-- Importación de JS -->
-@vite(['resources/js/validaciones.js', 'resources/js/cotizaciones.js'])
+@vite(['resources/js/cotizaciones.js'])
 
 <div class="container my-4">
     <h3 class="mb-3 fw-bold">
