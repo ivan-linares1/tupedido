@@ -57,7 +57,7 @@
                     <th>Descripción</th>
                     <th>Grupo de Productos</th>
                     <th>Imagen</th>
-                    @if (Auth::user()->id_rol == 1 || Auth::user()->id_rol == 2)<th>Activo</th>@endif
+                    @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)<th>Activo</th>@endif
                 </tr>
             </thead>
             <tbody>
@@ -72,7 +72,7 @@
                     <td>{{ $articulo->FrgnName }}</td>
                     <td>{{ $articulo->marca->ItmsGrpNam}}</td>
                     <td><img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:70px;height:auto;"></td>
-                    @if (Auth::user()->id_rol == 1 || Auth::user()->id_rol == 2)<td class="text-center">
+                    @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)<td class="text-center">
                         <div class="form-check form-switch d-flex justify-content-center">
                             <input 
                                 class="form-check-input toggle-estado" 
@@ -88,7 +88,11 @@
                 </tr>
                 @empty
                 <tr>
+                    @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
                     <td colspan="6" class="text-center text-muted">No se encontraron resultados</td>
+                    @else
+                    <td colspan="5" class="text-center text-muted">No se encontraron resultados</td>
+                    @endif
                 </tr>
                 @endforelse
             </tbody>

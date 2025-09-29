@@ -19,6 +19,22 @@ class CotizacionesController extends Controller
 {
 
     public function index(){//se encarga de listar todas las cotizaciones existentes
+        $user = Auth::user();
+        if($user->rol_id == 1 || $user->rol_id == 2){
+           return $this->TodasLasCotizaciones();
+        }
+        else
+            return $this->CotizacionesCliente();
+    }
+
+    public function CotizacionesCliente()
+    {
+        $cotizaciones =[];
+
+        return view('users.cotizaciones', compact('cotizaciones'));
+    }
+
+    public function TodasLasCotizaciones(){
         // Obtenemos cotizaciones con su vendedor y el nombre de la moneda 
         $cotizaciones = Cotizacion::select( 
                 'OQUT.*',

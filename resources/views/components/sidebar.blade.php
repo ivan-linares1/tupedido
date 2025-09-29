@@ -20,22 +20,23 @@
             </a>
             <div class="collapse" id="submenuVentas" data-bs-parent=".sidebar">
                 <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                   
+                    @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
                         <li><a href="{{ route('clientes') }}" class="nav-link">Clientes</a></li>
-                    
+                    @endif
                     <li><a href="{{ route('cotizaciones') }}" class="nav-link">Cotizaciones</a></li>
                     <li><a href="{{ route('Pedidos') }}" class="nav-link">Pedidos</a></li>
-                    
-                        <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionVentas" role="button" aria-expanded="false" aria-controls="submenuConfiguracionVentas">
-                        Configuración
-                        <i class="bi bi-chevron-down"></i>
-                        </a>
-                        <div class="collapse" id="submenuConfiguracionVentas" data-bs-parent="#submenuVentas">
-                            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                                <li><a href="#" class="nav-link">Zonas de venta</a></li>
-                                <li><a href="{{ route('admin.catalogo.vendedores') }}" class="nav-link">Catálogo de vendedores</a></li>
-                            </ul>
-                        </div>
+                    @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)<li>
+                    <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionVentas" role="button" aria-expanded="false" aria-controls="submenuConfiguracionVentas">
+                    Configuración
+                    <i class="bi bi-chevron-down"></i>
+                    </a>
+                    <div class="collapse" id="submenuConfiguracionVentas" data-bs-parent="#submenuVentas">
+                        <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
+                            <li><a href="#" class="nav-link">Zonas de venta</a></li>
+                            <li><a href="{{ route('admin.catalogo.vendedores') }}" class="nav-link">Catálogo de vendedores</a></li>
+                        </ul>
+                    </div>
+                    </li>@endif
                 </ul>
             </div>
         </li>
@@ -50,7 +51,7 @@
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                 <li><a href="{{ route('articulos', ['estatus' => 'Activos'])}}" class="nav-link">Productos</a></li>
                 <li><a href="#" class="nav-link">Lista de Precios</a></li>
-                <li>
+                @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)<li>
                     <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionProductos" role="button" aria-expanded="false" aria-controls="submenuConfiguracionProductos">
                     Configuración
                     <i class="bi bi-chevron-down"></i>
@@ -60,13 +61,13 @@
                             <li><a href="#" class="nav-link">Grupos de Productos</a></li>
                         </ul>
                     </div>
-                </li>
+                </li>@endif
             </ul>
             </div>
         </li>
 
         {{-- Configuracion general --}}
-        @if (Auth::user()->id_rol == 1 || Auth::user()->id_rol == 2)
+        @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
         <li class="nav-item">
             <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionGeneral" role="button" aria-expanded="false" aria-controls="submenuConfiguracionGeneral">
             Configuración General   
@@ -83,7 +84,7 @@
 
 
         {{--Boton auxiliar para mandar las monedas a la base del dia de hoy //borrar cuando este en produccion*****************--}}
-        @if (Auth::user()->id_rol == 1 || Auth::user()->id_rol == 2)
+        @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
         <li>
             <a href="{{ route ('insertar.monedas') }}"  class="nav-link">Insertar monedas</a>
         </li>
