@@ -20,7 +20,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($cotizaciones as $cotizacion)
+            @forelse($cotizaciones as $cotizacion)
                 <tr>
                     <td>
                         <a href="{{ route('detalles', $cotizacion->DocEntry) }}" 
@@ -33,7 +33,11 @@
                     <td>{{ $cotizacion->vendedor_nombre }}</td>
                     <td>${{ number_format($cotizacion->Total, 2) }} {{ $cotizacion->moneda_nombre }}</td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center">Sin cotizaciones disponibles</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 </div>
