@@ -31,7 +31,9 @@
                         <div class="collapse" id="submenuConfiguracionVentas" data-bs-parent="#submenuVentas">
                             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                                 <li><a href="#" class="nav-link">Zonas de venta</a></li>
-                                <li><a href="#" class="nav-link">Catalogo de vendedores</a></li>
+                                <li><a href="{{ route('admin.catalogo.vendedores') }}" class="nav-link">Catálogo de vendedores</a></li>
+
+
                             </ul>
                         </div>
                     </li>

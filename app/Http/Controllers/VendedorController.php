@@ -2,35 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Articulo;
 use Illuminate\Http\Request;
+use App\Models\Vendedores; // Este modelo debes crearlo para apuntar a la tabla oslp
 
-class ArticuloController extends Controller
+class VendedorController extends Controller
 {
-    public function index (Request $request)
+    public function index(Request $request)
     {
-        $articulo = Articulo::query();
+        $vendedores = Vendedores::query();
 
         // Filtro estatus
         if ($request->estatus == 'Activos') {
-            $articulo->where('Active', 'Y'); 
+            $vendedores->where('Active', 'Y'); 
         } elseif ($request->estatus == 'Inactivos') {
-            $articulo->where('Active', 'N');
+            $vendedores->where('Active', 'N');
         }
 
         // Filtro búsqueda
         if ($request->buscar) {
-            $articulo->where(function ($q) use ($request) {
-                $q->where('ItemCode', 'like', "%{$request->buscar}%")
-                  ->orWhere('ItemName', 'like', "%{$request->buscar}%")
-                  ->orWhere('FrgnName', 'like', "%{$request->buscar}%");
+            $vendedores->where(function ($q) use ($request) {
+                $q->where('SlpCode', 'like', "%{$request->buscar}%")
+                  ->orWhere('SlpName', 'like', "%{$request->buscar}%");
             });
         }
 
         // Mostrar X registros (paginación)
-        $mostrar = $request->mostrar ?? 25;//el 25 esta por default antes de que se seleccione un otro numero de paginacion
-        $articulos = $articulo->paginate($mostrar);
+        $mostrar = $request->mostrar ?? 25; // 25 por default
+        $vendedores = $vendedores->paginate($mostrar);
 
-        return view('admin.catalogo_productos', compact('articulos'));
+        return view('admin.catalogo_vendedores', compact('vendedores'));
     }
 }
