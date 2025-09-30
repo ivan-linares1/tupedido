@@ -21,7 +21,7 @@ class PedidosController extends Controller
     public function index()
     {
         // Obtener todos los pedidos con la cotización asociada
-        $pedidos = pedidos::with(['cotizacionBase'])->get();
+        $pedidos = pedidos::with(['cotizacionBase'])->orderBy('DocEntry', 'desc')->get();
 
         // Transformar para la vista
         $pedidosList = $pedidos->map(function($pedido) {
@@ -32,7 +32,7 @@ class PedidosController extends Controller
                 'CotizacionDocEntry' => $cotizacion->DocEntry ?? null,
                 'CotizacionFecha' => $cotizacion->DocDate ?? null,
                 'Cliente' => $cotizacion->CardName ?? null,
-                'Vendedor' => optional($cotizacion->vendedor)->Nombre ?? null, // ajustar relación si existe
+                'Vendedor' => $cotizacion->vendedor->SlpName, 
                 'Total' => $cotizacion->Total ?? 0,
                 'Moneda' => $cotizacion->moneda_nombre ?? 'MXN',
             ];
@@ -287,6 +287,7 @@ class PedidosController extends Controller
 
     public function guardarPedido($DocEntry){
         $Pedido = pedidos::create([
+            'fecha' => Carbon::today()->format('Y-m-d'),
             'LineNum' => null,
             'TargetType' => null,
             'TrgetEntry' => null,

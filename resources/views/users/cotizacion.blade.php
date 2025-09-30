@@ -218,7 +218,7 @@
         </button>
     @else
         <!-- Botón PDF -->
-        <button type="button" class="btn btn-danger" onclick="window.location='#'">
+        <button type="button" class="btn btn-danger" onclick="window.open('{{ route('cotizacion.pdf', $cotizacion->DocEntry) }}', '_blank')">
             <i class="bi bi-filetype-pdf"></i> PDF
         </button>
 

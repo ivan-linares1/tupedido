@@ -13,6 +13,7 @@ use App\Models\Vendedores;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class CotizacionesController extends Controller
@@ -43,6 +44,7 @@ class CotizacionesController extends Controller
             )
             ->leftJoin('OSLP', 'OQUT.SlpCode', '=', 'OSLP.SlpCode')  // Relación con vendedor
             ->leftJoin('OCRN', 'OQUT.DocCur', '=', 'OCRN.Currency_ID') // Relación con moneda
+            ->orderBy('OQUT.DocDate', 'desc')
             ->get();
 
         return view('users.cotizaciones', compact('cotizaciones'));
@@ -290,6 +292,44 @@ class CotizacionesController extends Controller
 
         // Retornar la vista
         return view('users.cotizacion', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados' ));
+    }
+
+
+    public function pdfCotizacion($id)
+    {
+        $cotizacion = Cotizacion::with('lineas')->findOrFail($id);
+
+        $data = [
+            'logo'    => public_path('storage/' . configuracion::firstOrFail()->ruta_logo,),
+            'titulo'  => 'COTIZACIÓN',
+            'subtitulo'  => 'Cotización',
+            'numero'  =>  $cotizacion->DocEntry,
+            'fecha'   => $cotizacion->DocDate,
+            
+
+            'cliente' => [
+                'nombre'   => $cotizacion->CardName,
+                'email'    => $cotizacion->E_Mail,
+                'telefono' => $cotizacion->Phone1,
+            ],
+            'lineas' => $cotizacion->lineas->map(function($l) {
+                return [
+                    'codigo'      => $l->ItemCode,
+                    'descripcion' => $l->U_Dscr,
+                    'cantidad'    => $l->Quantity,
+                    'precio'      => $l->Price,
+                ];
+            })->toArray(),
+            'totales' => [
+                'subtotal' => $cotizacion->Subtotal,
+                'iva'      => $cotizacion->IVA,
+                'total'    => $cotizacion->Total,
+            ]
+        ];
+
+        $pdf = Pdf::loadView('pdf.documento', $data)->setPaper('lette', 'portrait');
+
+        return $pdf->stream("Cotizacion-{$cotizacion->DocEntry}.pdf");
     }
 
 }

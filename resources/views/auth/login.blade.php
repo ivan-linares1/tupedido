@@ -40,7 +40,7 @@
                     <span class="input-group-text">
                         <i class="bi bi-envelope-fill"></i>
                     </span>
-                    <input id="email" type="email" name="email" class="form-control input-custom" value="{{ old('email') }}" required autofocus>
+                    <input id="email" type="email" name="email" class="form-control input-custom" value="{{ old('email') }}" required >
                 </div>
             </div>
 
