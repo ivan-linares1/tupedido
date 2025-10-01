@@ -44,7 +44,7 @@ class CotizacionesController extends Controller
             )
             ->leftJoin('OSLP', 'OQUT.SlpCode', '=', 'OSLP.SlpCode')  // Relación con vendedor
             ->leftJoin('OCRN', 'OQUT.DocCur', '=', 'OCRN.Currency_ID') // Relación con moneda
-            ->orderBy('OQUT.DocDate', 'desc')
+            ->orderBy('OQUT.DocEntry', 'desc')
             ->get();
 
         return view('users.cotizaciones', compact('cotizaciones'));
@@ -130,8 +130,7 @@ class CotizacionesController extends Controller
             switch($direccion->Address) {
                 case 'FISCAL':
                     if ($direccion->cliente) {
-                        $fiscal = $direccion->cliente->CardName . "\n" .
-                                ($direccion->Street ?? '') . "\n" .
+                        $fiscal =($direccion->Street ?? '') . "\n" .
                                 ($direccion->Block ?? '') . "\n" .
                                 "C.P. " . ($direccion->ZipCode ?? '') . "\n" .
                                 ($direccion->City ?? '') . ", " . ($direccion->County ?? '') . "\n" .
@@ -297,6 +296,7 @@ class CotizacionesController extends Controller
 
     public function pdfCotizacion($id)
     {
+        
         $cotizacion = Cotizacion::with('lineas')->findOrFail($id);
 
         $data = [
@@ -305,10 +305,14 @@ class CotizacionesController extends Controller
             'subtitulo'  => 'Cotización',
             'numero'  =>  $cotizacion->DocEntry,
             'fecha'   => $cotizacion->DocDate,
+            'vendedor' => $cotizacion->vendedor->SlpName,
             
 
             'cliente' => [
+                'codigo'  => $cotizacion->CardCode,
                 'nombre'   => $cotizacion->CardName,
+                'dir_fiscal' => $cotizacion->Address,
+                'dir_envio' => $cotizacion->Address2,
                 'email'    => $cotizacion->E_Mail,
                 'telefono' => $cotizacion->Phone1,
             ],
@@ -321,15 +325,36 @@ class CotizacionesController extends Controller
                 ];
             })->toArray(),
             'totales' => [
-                'subtotal' => $cotizacion->Subtotal,
-                'iva'      => $cotizacion->IVA,
-                'total'    => $cotizacion->Total,
+                'subtotal' => number_format($cotizacion->Subtotal, 2),
+                'iva'      => number_format($cotizacion->IVA, 2),
+                'total'    => number_format($cotizacion->Total, 2),
             ]
         ];
 
         $pdf = Pdf::loadView('pdf.documento', $data)->setPaper('lette', 'portrait');
 
+        $pdf->output();
+        $dompdf = $pdf->getDomPDF();
+        $canvas = $dompdf->getCanvas();
+
+        // Footer en todas las páginas
+        $canvas->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
+            $user = Auth::user()->nombre;
+            $texto = "Documento generado automáticamente el " . date('d/m/Y H:i') . " — Página $pageNumber de $pageCount" ."   Autor: " . $user;
+            $font = $fontMetrics->get_font("Calibri", "normal");
+            $size = 6;
+
+            $width = $canvas->get_width();
+            $textWidth = $fontMetrics->get_text_width($texto, $font, $size);
+
+            // Centrado exacto
+            $x = ($width - $textWidth) / 2;
+            $y = $canvas->get_height() - 20;
+
+            $canvas->text($x, $y, $texto, $font, $size, [0,0,0]);
+        });
+
+
         return $pdf->stream("Cotizacion-{$cotizacion->DocEntry}.pdf");
     }
-
 }
