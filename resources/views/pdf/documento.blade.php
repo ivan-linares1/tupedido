@@ -15,9 +15,8 @@
         margin-right: 0cm;
     }
 
-    thead { display: table-header-group; }
-    tfoot { display: table-row-group; }
-    tbody { display: table-row-group; }
+     .page-break { page-break-after: always; }
+
 
 /*ENCABEZADO*/
     .encabezado, .logo-cell table{
@@ -174,11 +173,11 @@
         border-radius: 5px;
         overflow: hidden;        /* respeta las esquinas */
         width: auto;             /* ocupa todo el ancho disponible */
+        height: 4cm;
         box-sizing: border-box;  /* el borde cuenta en el ancho */
         margin-left: 15px;
-        margin-top: 15px;
+        margin-top: 5px;
     }
-
 
     .Datos{
          width: 100%;
@@ -197,11 +196,13 @@
     }
 
     .dato-details {
-        font-size: 7pt;
-        line-height: 2;
+        font-size: 6.5pt;
+        line-height: 1.5;
         text-align: left;
         width: 100%;
         padding: 2px 0;
+        margin: 0;
+        height:85%;
     }
     
 
@@ -209,7 +210,7 @@
         width: 100%;
         border-collapse: collapse; /* une bordes */
         border-spacing: 0;
-        font-size: 7pt;
+        font-size: 6pt;
         font-family: Calibri, Arial, sans-serif;
         margin: 0;
         padding: 0;
@@ -217,9 +218,9 @@
 
     .dato-table-interna td {
         border-bottom: 2px solid black; /* línea entre renglones */
-        padding: 2px 4px;
+        padding: 5%;
         vertical-align: top;
-
+        
     }
 
     /* Quitar borde al último */
@@ -228,7 +229,7 @@
     }
 
     .dato-label {
-        font-size: 7pt;
+        font-size: 6pt;
         font-family: Calibri, Arial, sans-serif;
         text-align: left;
         padding: 2px 4px;
@@ -240,7 +241,7 @@
 /************************************************************************************************************************/
 /*ARTICULOS*/
     .articulos-container {
-        min-height: 30%;     
+        height: 46%;     
         border: 2px solid black;
         border-radius: 5px;
         overflow: hidden;
@@ -329,6 +330,7 @@
 </style>
 
 <body>
+@foreach($lineas as $pagina => $bloque)
 {{--************************************************************************************************************************--}}
     
     <!-- ENCABEZADO-->
@@ -410,7 +412,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td class="dato-details" id="tablaintermedia" style="padding-left: 10px;">
+                            <td class="dato-details" id="tablaintermedia" style="padding-left: 10px;" >
                                 <b>{{ $cliente['codigo'] }}</b> <br>
                                 {{ $cliente['nombre'] }} <br>
                                 {!! preg_replace(
@@ -428,16 +430,9 @@
                                     1 // limita la coma a la primera ocurrencia
                                 ) !!} <br>
 
-                                {{-- Lista de correos --}}
-                                <b>CORREOS: </b>
-                                @php
-                                    $emails = explode(',', $cliente['email']);
-                                @endphp
-                                <ul style="margin: 0; padding-left: 15px;">
-                                    @foreach($emails as $correo)
-                                        <li>{{ trim($correo) }}</li>
-                                    @endforeach
-                                </ul>
+                                {{--  correos --}}
+                                Correos: <br>
+                                 {{ $cliente['email'] }} <br>
                                 {{ $cliente['telefono'] }}
                             </td>
                             <!-- SHIP TO con tabla interna -->
@@ -459,7 +454,6 @@
                                                 $cliente['dir_envio'],
                                                 1 // limita la coma a la primera ocurrencia
                                             ) !!} 
-                                            <br><br>
                                         </td>
                                     </tr>
                                     <tr>
@@ -493,11 +487,11 @@
                 </tr>
             </thead>
             <tbody class="articulos-lista">
-                @foreach($lineas as $linea)
+                @foreach($bloque  as $linea)
                     <tr>
                         <td>{{ $linea['codigo'] }}</td>
                         <td>{{ $linea['descripcion'] }}</td>
-                        <td class="text-center">{{ $linea['cantidad'] }}</td>
+                        <td class="text-center" style="text-align: center">{{ number_format($linea['cantidad'],0) }}</td>
                         <td class="text-right">${{ number_format($linea['precio'], 2) }}</td>
                         <td class="text-right">${{ number_format($linea['cantidad'] * $linea['precio'], 2) }}</td>
                     </tr>
@@ -536,15 +530,15 @@
                                 <table class="infoGeneral-inner-table">
                                     <tr>
                                         <td class="total-label" >SUBTOTAL </td>
-                                        <td class="total-numero">{{ $totales['subtotal']}}</td>
+                                        <td class="total-numero">{{ $totales['subtotal']}} {{$moneda}}</td>
                                     </tr>
                                     <tr>
                                         <td class="total-label">IVA</td>
-                                        <td class="total-numero">{{ $totales['iva']}}<</td>
+                                        <td class="total-numero">{{ $totales['iva']}} {{$moneda}}<</td>
                                     </tr>
                                     <tr>
                                         <td class="total-label"><b>TOTAL</b></td>
-                                        <td class="total-numero">{{ $totales['total']}}<</td>
+                                        <td class="total-numero">{{ $totales['total']}} {{$moneda}}<</td>
                                     </tr>
                                 </table>
                             </td>
@@ -575,9 +569,15 @@
             </p>
         </div>
     </footer>
-<div>
 
-</div>
     
+{{-- SALTO DE PÁGINA (excepto la última) --}}
+@if(!$loop->last)
+    <div class="page-break"></div>
+@endif
+@endforeach
+
 </body>
 </html>
+
+

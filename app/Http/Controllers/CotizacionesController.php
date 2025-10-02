@@ -9,6 +9,7 @@ use App\Models\configuracion;
 use App\Models\DireccionesClientes;
 use App\Models\LineasCotizacion;
 use App\Models\Moneda;
+use App\Models\pedidos;
 use App\Models\Vendedores; 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -306,7 +307,7 @@ class CotizacionesController extends Controller
             'numero'  =>  $cotizacion->DocEntry,
             'fecha'   => $cotizacion->DocDate,
             'vendedor' => $cotizacion->vendedor->SlpName,
-            
+            'moneda'   => $cotizacion->moneda->Currency,
 
             'cliente' => [
                 'codigo'  => $cotizacion->CardCode,
@@ -316,14 +317,18 @@ class CotizacionesController extends Controller
                 'email'    => $cotizacion->E_Mail,
                 'telefono' => $cotizacion->Phone1,
             ],
-            'lineas' => $cotizacion->lineas->map(function($l) {
-                return [
-                    'codigo'      => $l->ItemCode,
-                    'descripcion' => $l->U_Dscr,
-                    'cantidad'    => $l->Quantity,
-                    'precio'      => $l->Price,
-                ];
-            })->toArray(),
+
+            'lineas' => array_chunk(
+                $cotizacion->lineas->map(function($l) {
+                    return [
+                        'codigo'      => $l->ItemCode,
+                        'descripcion' => $l->U_Dscr,
+                        'cantidad'    => $l->Quantity,
+                        'precio'      => $l->Price,
+                    ];
+                })->toArray(),25 //25 arituclos por pagina para poder paginarlos
+            ),
+
             'totales' => [
                 'subtotal' => number_format($cotizacion->Subtotal, 2),
                 'iva'      => number_format($cotizacion->IVA, 2),

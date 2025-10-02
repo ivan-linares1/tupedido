@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/Pedidos', [PedidosController::class, 'index'])->name('Pedidos');
     Route::post('/CotizacionesGuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
     Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
+    Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfCotizacion'])->name('pedido.pdf');
 
     //Articulos
     Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos'); 
