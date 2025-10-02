@@ -21,7 +21,7 @@
             <h4 >CLIENTES</h4>
             <div class="mb-3">
                 <label>Cliente</label>
-                <select class="form-select" name="cliente" id="selectCliente" @if((isset($modo) && $modo == 1) || (Auth::user()->rol_id == 3)) disabled @endif  >
+                <select class="form-select" name="cliente" id="selectCliente" @if((isset($modo) && $modo == 1) || (Auth::user()->rol_id == 3)) disabled @endif>
                     <option value="" selected disabled>Selecciona un cliente...</option>
                     @foreach($clientes as $cliente)
                         <option 
@@ -218,7 +218,7 @@
         </button>
     @else
         <!-- Botón PDF -->
-        <button type="button" class="btn btn-danger" onclick="window.location='#'">
+        <button type="button" class="btn btn-danger" onclick="window.open('{{ route('cotizacion.pdf', $cotizacion->DocEntry) }}', '_blank')">
             <i class="bi bi-filetype-pdf"></i> PDF
         </button>
 

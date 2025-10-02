@@ -45,4 +45,9 @@ class Cotizacion extends Model
     {
         return $this->belongsTo(Vendedores::class, 'SlpCode', 'SlpCode');
     }
+
+    public function moneda()
+    {
+        return $this->belongsTo(Moneda::class, 'DocCur', 'Currency_ID');
+    }
 }

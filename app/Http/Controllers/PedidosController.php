@@ -14,6 +14,7 @@ use App\Models\Vendedores;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PedidosController extends Controller
 {
@@ -21,7 +22,7 @@ class PedidosController extends Controller
     public function index()
     {
         // Obtener todos los pedidos con la cotización asociada
-        $pedidos = pedidos::with(['cotizacionBase'])->get();
+        $pedidos = pedidos::with(['cotizacionBase'])->orderBy('DocEntry', 'desc')->get();
 
         // Transformar para la vista
         $pedidosList = $pedidos->map(function($pedido) {
@@ -32,7 +33,7 @@ class PedidosController extends Controller
                 'CotizacionDocEntry' => $cotizacion->DocEntry ?? null,
                 'CotizacionFecha' => $cotizacion->DocDate ?? null,
                 'Cliente' => $cotizacion->CardName ?? null,
-                'Vendedor' => optional($cotizacion->vendedor)->Nombre ?? null, // ajustar relación si existe
+                'Vendedor' => $cotizacion->vendedor->SlpName, 
                 'Total' => $cotizacion->Total ?? 0,
                 'Moneda' => $cotizacion->moneda_nombre ?? 'MXN',
             ];
@@ -287,6 +288,7 @@ class PedidosController extends Controller
 
     public function guardarPedido($DocEntry){
         $Pedido = pedidos::create([
+            'fecha' => Carbon::today()->format('Y-m-d'),
             'LineNum' => null,
             'TargetType' => null,
             'TrgetEntry' => null,
@@ -295,5 +297,74 @@ class PedidosController extends Controller
         ]);
 
          return $Pedido->DocEntry;
+    }
+
+    public function pdfCotizacion($id)
+    {
+        $cotizacion = Cotizacion::with('lineas')->findOrFail($id);
+        $pedido = pedidos::where('BaseEntry', $cotizacion->DocEntry)->first();
+
+        $data = [
+            'logo'    => public_path('storage/' . configuracion::firstOrFail()->ruta_logo,),
+            'titulo'  => 'PEDIDO',
+            'subtitulo'  => 'Pedido',
+            'numero'  =>  $pedido->DocEntry,
+            'fecha'   => $cotizacion->DocDate,
+            'vendedor' => $cotizacion->vendedor->SlpName,
+            'moneda'   => $cotizacion->moneda->Currency,
+            
+
+            'cliente' => [
+                'codigo'  => $cotizacion->CardCode,
+                'nombre'   => $cotizacion->CardName,
+                'dir_fiscal' => $cotizacion->Address,
+                'dir_envio' => $cotizacion->Address2,
+                'email'    => $cotizacion->E_Mail,
+                'telefono' => $cotizacion->Phone1,
+            ],
+
+            'lineas' => array_chunk(
+                $cotizacion->lineas->map(function($l) {
+                    return [
+                        'codigo'      => $l->ItemCode,
+                        'descripcion' => $l->U_Dscr,
+                        'cantidad'    => $l->Quantity,
+                        'precio'      => $l->Price,
+                    ];
+                })->toArray(),25 //25 arituclos por pagina para poder paginarlos
+            ),
+
+            'totales' => [
+                'subtotal' => number_format($cotizacion->Subtotal, 2),
+                'iva'      => number_format($cotizacion->IVA, 2),
+                'total'    => number_format($cotizacion->Total, 2),
+            ]
+        ];
+
+        $pdf = Pdf::loadView('pdf.documento', $data)->setPaper('lette', 'portrait');
+
+        $pdf->output();
+        $dompdf = $pdf->getDomPDF();
+        $canvas = $dompdf->getCanvas();
+
+        // Footer en todas las páginas
+        $canvas->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
+            $user = Auth::user()->nombre;
+            $texto = "Documento generado automáticamente el " . date('d/m/Y H:i') . " — Página $pageNumber de $pageCount" ."   Autor: " . $user;
+            $font = $fontMetrics->get_font("Calibri", "normal");
+            $size = 6;
+
+            $width = $canvas->get_width();
+            $textWidth = $fontMetrics->get_text_width($texto, $font, $size);
+
+            // Centrado exacto
+            $x = ($width - $textWidth) / 2;
+            $y = $canvas->get_height() - 20;
+
+            $canvas->text($x, $y, $texto, $font, $size, [0,0,0]);
+        });
+
+
+        return $pdf->stream("Cotizacion-{$cotizacion->DocEntry}.pdf");
     }
 }

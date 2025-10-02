@@ -21,21 +21,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/Dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
 
     //cotizaciones
-        Route::get('/NuevaCotizacion/{DocEntry?}', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
-        Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
-        Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
-        Route::post('/CotizacionesGuardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
-        Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])->name('detalles');
+    Route::get('/NuevaCotizacion/{DocEntry?}', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
+    Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
+    Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
+    Route::post('/CotizacionesGuardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
+    Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])->name('detalles');
+    Route::get('/cotizacion/pdf/{id}', [CotizacionesController::class, 'pdfCotizacion'])->name('cotizacion.pdf');
 
-        //Pedidos
-        Route::get('/NuevPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
-        Route::get('/Pedidos', [PedidosController::class, 'index'])->name('Pedidos');
-        Route::post('/CotizacionesGuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
-        Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
+    //Pedidos
+    Route::get('/NuevPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
+    Route::get('/Pedidos', [PedidosController::class, 'index'])->name('Pedidos');
+    Route::post('/CotizacionesGuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+    Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
+    Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfCotizacion'])->name('pedido.pdf');
 
-        //Articulos
-        Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos'); 
-        Route::post('/Articulo/Estado', [ArticuloController::class, 'activo_inactivo'])->name('estado.Articulo');
+    //Articulos
+    Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos'); 
+    Route::post('/Articulo/Estado', [ArticuloController::class, 'activo_inactivo'])->name('estado.Articulo');
 
 
     // RUTAS PARA EL ADMIN
