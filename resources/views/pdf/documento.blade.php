@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>{{ $titulo }} {{ $numero ?? '' }}</title>
+    <title>{{ $titulo }} {{ $numero }}</title>
 </head>
 
 <style>
-/************************************************************************************************************************/
+
 /*PAPEL*/
     @page {
         margin-top: 0.85cm;
@@ -164,7 +164,7 @@
     .infoGeneral-inner-table tr td:last-child {
         border-right: none;         /* quita borde derecho de la última col */
     }
-/************************************************************************************************************************/
+
 /*DATOS DEl CLIENTE*/
 
     .Datos-container {
@@ -238,7 +238,7 @@
     #tablaintermedia {
         border-right: 2px solid black;
     }
-/************************************************************************************************************************/
+
 /*ARTICULOS*/
     .articulos-container {
         height: 46%;     
@@ -280,7 +280,7 @@
     .articulos-lista tr:nth-child(even) {
         background-color: white; 
     }
-/************************************************************************************************************************/
+
 /*TOTALES*/
 
     .totales{
@@ -296,7 +296,7 @@
         background-color: #05564F;
         color: white;
     }
-/************************************************************************************************************************/
+
 /*PIE DE PAGINAS*/
     .politicas {
         background-color: rgb(226, 226, 226);
@@ -330,10 +330,8 @@
 </style>
 
 <body>
-@foreach($lineas as $pagina => $bloque)
-{{--************************************************************************************************************************--}}
-    
-    <!-- ENCABEZADO-->
+@foreach($lineas as $pagina => $bloque)    
+<!-- ENCABEZADO-->
     <table class="encabezado">
         <tr>
             <!-- LOGO -->
@@ -384,7 +382,7 @@
                                     </tr>
                                     <tr>
                                         <td class="cinfoGeneral-label-fecha">Fecha</td>
-                                        <td class="infoGeneral-number-fecha">{{ $fecha }}</td>
+                                        <td class="infoGeneral-number-fecha">{{ \Carbon\Carbon::parse($fecha)->format('d-m-Y') }}</td>
                                     </tr>
                                 </table>
                             </td>
@@ -394,7 +392,6 @@
             </td>
         </tr>
     </table>
-{{--************************************************************************************************************************--}}
 
 <!-- DATOS GENERALES DEL CLIENTE -->
     <div class="Datos-container">
@@ -412,7 +409,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td class="dato-details" id="tablaintermedia" style="padding-left: 10px;" >
+                            <td class="dato-details" id="tablaintermedia" style="padding-left: 10px; padding-top:0px" >
                                 <b>{{ $cliente['codigo'] }}</b> <br>
                                 {{ $cliente['nombre'] }} <br>
                                 {!! preg_replace(
@@ -473,8 +470,9 @@
             </tr>
         </table>
     </div>
-{{--************************************************************************************************************************--}}
-    <!-- ARTICULOS -->
+
+
+<!-- ARTICULOS -->
     <div class="articulos-container">
         <table class="articulos">
             <thead class="articulos-header">
@@ -499,8 +497,8 @@
             </tbody>
         </table>
     </div>
-{{--************************************************************************************************************************--}}
-    <!-- TOTALES Y NOTAS -->
+
+<!-- TOTALES Y NOTAS -->
      <table class="totales">
         <tr>
             <!-- NOTAS -->
@@ -513,7 +511,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td class="info-details" style="height: 1.15cm !important; text-align: left !important;">
+                            <td class="info-details" style="height: 1.15cm !important; text-align: left !important;"> {{--dejarlo en 50--}}
                                 {{$vendedor}}
                             </td>
                         </tr>
@@ -524,24 +522,18 @@
             <!-- TOTALES-->
             <td class="infoGeneral-cell">
                 <div class="infoGeneral-container-rounded">
-                    <table class="infoGeneral-table">
+                     <table class="infoGeneral-inner-table">
                         <tr>
-                            <td class="total-details">
-                                <table class="infoGeneral-inner-table">
-                                    <tr>
-                                        <td class="total-label" >SUBTOTAL </td>
-                                        <td class="total-numero">{{ $totales['subtotal']}} {{$moneda}}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="total-label">IVA</td>
-                                        <td class="total-numero">{{ $totales['iva']}} {{$moneda}}<</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="total-label"><b>TOTAL</b></td>
-                                        <td class="total-numero">{{ $totales['total']}} {{$moneda}}<</td>
-                                    </tr>
-                                </table>
-                            </td>
+                            <td class="total-label" >SUBTOTAL </td>
+                            <td class="total-numero">{{ $totales['subtotal']}} {{$moneda}}</td>
+                        </tr>
+                        <tr>
+                            <td class="total-label">IVA</td>
+                            <td class="total-numero">{{ $totales['iva']}} {{$moneda}}<</td>
+                        </tr>
+                        <tr>
+                            <td class="total-label"><b>TOTAL</b></td>
+                            <td class="total-numero">{{ $totales['total']}} {{$moneda}}<</td>
                         </tr>
                     </table>
                 </div>
@@ -549,7 +541,8 @@
 
         </tr>
     </table>
-{{--************************************************************************************************************************--}}
+
+<!-- PIE DE PAGINA -->
     <footer>
         <div class="politicas">
             <ul>
@@ -570,14 +563,11 @@
         </div>
     </footer>
 
-    
 {{-- SALTO DE PÁGINA (excepto la última) --}}
-@if(!$loop->last)
-    <div class="page-break"></div>
-@endif
-@endforeach
+    @if(!$loop->last)
+        <div class="page-break"></div>
+    @endif
+    @endforeach
 
 </body>
 </html>
-
-

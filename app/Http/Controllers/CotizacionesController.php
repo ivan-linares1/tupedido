@@ -57,6 +57,7 @@ class CotizacionesController extends Controller
         $IVA = configuracion::firstOrFail()->iva;
         $hoy = Carbon::today()->format('Y-m-d');
         $mañana = Carbon::tomorrow()->format('Y-m-d');
+        $pedido = null;
 
         // Fechas por defecto (HOY para nueva cotización)
         $fechaCreacion = $hoy;
@@ -103,6 +104,7 @@ class CotizacionesController extends Controller
                 'cliente'  => $cotizacion->CardCode,
                 'vendedor' => $cotizacion->SlpCode,
                 'moneda'   => $cotizacion->DocCur,
+                'comentario' =>$cotizacion->comment,
             ];
 
             foreach ($cotizacion->lineas as $linea) {
@@ -118,7 +120,7 @@ class CotizacionesController extends Controller
             }
         }
 
-        return view('users.cotizacion', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos'));
+        return view('users.cotizacion', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos', 'pedido'));
     }
 
     public function ObtenerDirecciones($CardCode){
@@ -228,6 +230,8 @@ class CotizacionesController extends Controller
                 'Subtotal'      => $subtotal,
                 'IVA'           => $iva,
                 'Total'         => $total,
+                'comment'       => $request->comentarios,
+                
             ]);
 
 
@@ -259,6 +263,7 @@ class CotizacionesController extends Controller
     {
         // Obtener la cotización con sus líneas
         $cotizacion = Cotizacion::with('lineas')->findOrFail($DocEntry);
+        $pedido = pedidos::where('BaseEntry', $cotizacion->DocEntry)->first();
 
         // Datos adicionales para la vista
         $IVA = configuracion::firstOrFail()->iva;
@@ -288,10 +293,11 @@ class CotizacionesController extends Controller
             'cliente' => $cotizacion->CardCode,
             'vendedor' => $cotizacion->SlpCode,
             'moneda' => $cotizacion->DocCur,
+            'comentario' =>$cotizacion->comment,
         ];
 
         // Retornar la vista
-        return view('users.cotizacion', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados' ));
+        return view('users.cotizacion', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados', 'pedido' ));
     }
 
 

@@ -47,6 +47,7 @@ class PedidosController extends Controller
         $IVA = configuracion::firstOrFail()->iva;
         $hoy = Carbon::today()->format('Y-m-d');
         $mañana = Carbon::tomorrow()->format('Y-m-d');
+        $cotizacion = null;
 
         // Fechas por defecto (HOY para nueva cotización)
         $fechaCreacion = $hoy;
@@ -81,6 +82,7 @@ class PedidosController extends Controller
             'cliente' => null,
             'vendedor' => null,
             'moneda' => null,
+            'comentario' =>null,
         ];
 
         $lineasComoArticulos = [];
@@ -93,6 +95,7 @@ class PedidosController extends Controller
                 'cliente'  => $cotizacion->CardCode,
                 'vendedor' => $cotizacion->SlpCode,
                 'moneda'   => $cotizacion->DocCur,
+                'comentario' =>$cotizacion->comment,
             ];
 
             foreach ($cotizacion->lineas as $linea) {
@@ -108,7 +111,7 @@ class PedidosController extends Controller
             }
         }
 
-        return view('users.pedido', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos'));
+        return view('users.pedido', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos', 'cotizacion'));
     }
 
     public function ObtenerDirecciones($CardCode){
@@ -258,6 +261,7 @@ class PedidosController extends Controller
                 'Subtotal'      => $subtotal,
                 'IVA'           => $iva,
                 'Total'         => $total,
+                'comment'       => $request->comentarios,
             ]);
 
 
@@ -305,7 +309,7 @@ class PedidosController extends Controller
         $pedido = pedidos::where('BaseEntry', $cotizacion->DocEntry)->first();
 
         $data = [
-            'logo'    => public_path('storage/' . configuracion::firstOrFail()->ruta_logo,),
+            'logo' => resource_path('views/pdf/logo.png'),
             'titulo'  => 'PEDIDO',
             'subtitulo'  => 'Pedido',
             'numero'  =>  $pedido->DocEntry,
@@ -365,6 +369,6 @@ class PedidosController extends Controller
         });
 
 
-        return $pdf->stream("Cotizacion-{$cotizacion->DocEntry}.pdf");
+        return $pdf->stream("Pedido-{$pedido->DocEntry}.pdf");
     }
 }

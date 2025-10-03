@@ -50,9 +50,9 @@
                 <!-- Logo -->
                 <div class="col-md-4 text-center">
                     @if($configuracion->ruta_logo)
-                        <div class="p-3 bg-light rounded-3 shadow-sm">
+                        <div class="bg-light rounded-3 shadow-sm "> 
                             <img src="{{ asset('storage/' . $configuracion->ruta_logo) }}" 
-                                 alt="Logo" class="img-fluid" style="max-height: 120px;">
+                                 alt="Logo" class="img-fluid" style="width: 100%;  height: 200px;">
                         </div>
                     @else
                         <div class="border rounded-3 py-5 text-muted bg-light shadow-sm">
