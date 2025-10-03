@@ -1,13 +1,26 @@
-//obtenemos la fecha del dia de hoy
+// ================================
+// FECHA MÍNIMA PARA ENTREGA
+// ================================
+
+// Obtenemos la fecha del día de hoy
 const hoy = new Date().toISOString().split('T')[0];
-//Evitar que el calendario permita escojer dias pasados
+
+// Evitar que el calendario permita escoger días pasados
 document.getElementById('fechaEntrega').setAttribute('min', hoy);
 
+// ================================
+// DATOS DE MONEDA Y IVA
+// ================================
+
+// Recibe el dato de monedas desde el controlador (JSON en dataset)
 const monedas = JSON.parse(selectMoneda.dataset.monedas);
-//Recibe el dato de monedas desde el controlador-vista-json-js
+
+// Recibe el IVA desde el controlador
 const IVA = JSON.parse(selectMoneda.dataset.iva);
 
-//Hace que el imput del cliente permita realizar la busqueda con el mismo imput y select
+// ================================
+// SELECT CLIENTE CON BUSQUEDA
+// ================================
 $(document).ready(function() {
     $('#selectCliente').select2({
         placeholder: "Selecciona un cliente",
@@ -16,8 +29,9 @@ $(document).ready(function() {
     });
 });
 
-
-// Función que actualiza los datos del cliente
+// ================================
+// ACTUALIZAR DATOS DEL CLIENTE
+// ================================
 function actualizarDatosCliente() {
     let selected = $('#selectCliente').find('option:selected');
     let cardCode = selected.val();
@@ -61,7 +75,9 @@ $(document).ready(function () {
     }
 });
 
-// Función que actualiza los datos de la moneda
+// ================================
+// ACTUALIZAR DATOS DE LA MONEDA
+// ================================
 function actualizarDatosMoneda(){
     const monedaCambioID = parseInt(this.value);
     const monedaCambio = monedas.find(m => m.Currency_ID == monedaCambioID);
@@ -69,11 +85,10 @@ function actualizarDatosMoneda(){
     // Recorremos todas las filas de la tabla y actualizamos el precio y la moneda
     const filas = document.querySelectorAll("#tablaArticulos tbody tr");
     filas.forEach(fila => {
-        if (!fila.dataset.precioOriginal || !fila.dataset.monedaOriginal) {
-            return; // saltamos filas que no tienen los atributos sino maerca error en la ultima fila dondo solo esta el boton agregar articulo
-        }
-        const precioOriginal = parseFloat(fila.dataset.precioOriginal); // Guardamos el precio original en un data attribute
-        const monedaOriginal = JSON.parse(fila.dataset.monedaOriginal); // Igual, guardamos el objeto moneda original
+        if (!fila.dataset.precioOriginal || !fila.dataset.monedaOriginal) return;
+
+        const precioOriginal = parseFloat(fila.dataset.precioOriginal);
+        const monedaOriginal = JSON.parse(fila.dataset.monedaOriginal);
 
         // Calculamos el precio convertido
         const precioConvertido = conversionesMonedas(precioOriginal, monedaOriginal, monedaCambio);
@@ -90,7 +105,9 @@ function actualizarDatosMoneda(){
 // Ejecutar cuando cambie el select de moneda
 $('#selectMoneda').on('change', actualizarDatosMoneda);
 
-// Cuando cambia el cliente, actualizar los descuentos en todas las filas
+// ================================
+// ACTUALIZAR DESCUENTOS SEGÚN CLIENTE
+// ================================
 $('#selectCliente').on('change', function() {
     const clienteOption = this.options[this.selectedIndex];
     const descuentosCliente = clienteOption ? JSON.parse(clienteOption.dataset.descuentos || '[]') : [];
@@ -98,7 +115,7 @@ $('#selectCliente').on('change', function() {
     // Recorremos las filas de artículos
     const filas = document.querySelectorAll("#tablaArticulos tbody tr");
     filas.forEach(fila => {
-        const itmsGrpCod = fila.dataset.itmsGrpCod; // lo guardamos al agregarArticulo
+        const itmsGrpCod = fila.dataset.itmsGrpCod;
         if (!itmsGrpCod) return;
 
         // Buscar descuento por grupo
@@ -107,39 +124,38 @@ $('#selectCliente').on('change', function() {
 
         // Actualizar columna de porcentaje
         fila.querySelector('.descuentoporcentaje').textContent = `${descuento} %`;
-        // Forzar recalcular totales
+
+        // Recalcular totales
         calcularTotales();
     });
 });
 
-//funcion que agrega los articulos al la tabla
+// ================================
+// AGREGAR ARTÍCULO A LA TABLA
+// ================================
 window.agregarArticulo = function(art) {
     const tabla = document.querySelector("#tablaArticulos tbody");
     const fila = document.createElement("tr");
-    // Determina la cantidad
+
     const cantidad = art.Quantity ? Number(art.Quantity) : 1;
 
+    // Guardamos info útil en data-attributes
+    fila.dataset.precioOriginal = art.precio.Price;
+    fila.dataset.monedaOriginal = JSON.stringify(art.precio.moneda);
+    fila.dataset.itmsGrpCod = art.ItmsGrpCod;
 
-    // Guardamos info útil
-    fila.dataset.precioOriginal = art.precio.Price; //precio original del articulo
-    fila.dataset.monedaOriginal = JSON.stringify(art.precio.moneda); //Guarda en formato JSON string toda la información del objeto de la moneda original en la que está expresado el precio del artículo.
-    fila.dataset.itmsGrpCod = art.ItmsGrpCod; //Guarda el código de grupo del artículo
+    const monedaCambioID = parseInt(document.querySelector('select[name="currency_id"]').value);
+    const monedaCambio = monedas.find(m => m.Currency_ID == monedaCambioID);
+    const precio = conversionesMonedas(art.precio.Price, art.precio.moneda, monedaCambio);
 
-
-    const monedaCambioID = parseInt(document.querySelector('select[name="currency_id"]').value);//guarda el id de la moneda seleccionada
-    const monedaCambio =  monedas.find(m => m.Currency_ID == monedaCambioID);//obtiene el arrglo de la moneda escojida completo con su relacion de cambios
-                                        //precio decimal,  arreglo de moneda, arreglo de moneda
-    const precio = conversionesMonedas( art.precio.Price, art.precio.moneda, monedaCambio);//se envian los arreglos compeltos para poder realizar las consultas  
-
-    // Cliente seleccionado
+    // Descuento según cliente y grupo de artículo
     const clienteSelect = document.getElementById('selectCliente');
     const clienteOption = clienteSelect.options[clienteSelect.selectedIndex];
     const descuentosCliente = clienteOption ? JSON.parse(clienteOption.dataset.descuentos || '[]') : [];
-    // Descuento según grupo de artículo
     const detalle = descuentosCliente.find(det => String(det.ObjKey) === String(art.ItmsGrpCod));
     const descuento = detalle ? parseFloat(detalle.Discount) : 0;
 
-    
+    // Construcción del HTML de la fila
     fila.innerHTML = `
         <td><button class="btn btn-sm btn-danger">X</button></td>
         <td class="itemcode">${art.ItemCode}</td>
@@ -157,34 +173,29 @@ window.agregarArticulo = function(art) {
         <td class="totalFinal">Total (doc)</td>
     `;
 
-    //EVENTOS
-    // Inserta la fila antes de la última fila de la tabla (si la tienes)
+    // Insertamos la fila antes de la última (botón agregar)
     tabla.insertBefore(fila, tabla.lastElementChild);
 
-    // Recalcular al cambiar la cantidad
+    // Eventos
     fila.querySelector('.cantidad').addEventListener('input', calcularTotales);
-    
-    // eliminar fila al presionar el boton
-    fila.querySelector('button').addEventListener('click', function() {
-        eliminarFila(this);
-    });
+    fila.querySelector('button').addEventListener('click', function() { eliminarFila(this); });
 
     calcularTotales();
 
-    // Cierra el modal
-   const modalEl = document.getElementById('modalArticulos');
+    // Cerrar modal si está abierto
+    const modalEl = document.getElementById('modalArticulos');
     if (modalEl) {
         const modalInstance = bootstrap.Modal.getInstance(modalEl);
         if (modalInstance) {
             modalInstance.hide();
-
-            // Dar foco al input de cantidad en la nueva fila
             fila.querySelector('.cantidad')?.focus();
         }
     }
+};
 
-}
-
+// ================================
+// ACTUALIZAR PRECIOS
+// ================================
 function actualizarPrecios() {
     const monedaCambioID = parseInt(document.querySelector('select[name="currency_id"]').value);
     const monedaCambio = monedas.find(m => m.Currency_ID == monedaCambioID);
@@ -194,50 +205,57 @@ function actualizarPrecios() {
         const monedaOriginal = JSON.parse(cell.dataset.moneda);
 
         const precioConvertido = conversionesMonedas(precioOriginal, monedaOriginal, monedaCambio);
-
-        // Si hay moneda seleccionada, usamos esa, si no, la original
-        const simboloMoneda = monedaCambio 
-            ? monedaCambio.Currency 
-            : monedaOriginal.Currency;
+        const simboloMoneda = monedaCambio ? monedaCambio.Currency : monedaOriginal.Currency;
 
         cell.innerHTML = `$${Number(precioConvertido).toFixed(2)} ${simboloMoneda}`;
     });
 }
 
 document.addEventListener("DOMContentLoaded", actualizarPrecios);
-
-// Detecta cuando cambias la moneda en el select
 document.querySelector('select[name="currency_id"]').addEventListener("change", actualizarPrecios);
 
+// ================================
+// TEXTAREA COMENTARIOS CON LÍMITE DE CARACTERES
+// ================================
+const textarea = document.getElementById("comentarios");
+const contador = document.getElementById("contador");
+const limiteCaracteres = 200;
 
+// Inicializa contador
+contador.textContent = `Te quedan ${limiteCaracteres} caracteres`;
 
+// Escucha input y corta si excede
+textarea.addEventListener("input", function() {
+    let texto = this.value;
 
-//Funcion para hacer las conversiones de monedas
-function conversionesMonedas(precioOriginal, monedaOriginal, monedaConvertir)
-{
-    //si no se llega una moneda a convertir 
-    if(!monedaConvertir)
-        return parseFloat(precioOriginal).toFixed(2);
+    if (texto.length > limiteCaracteres) {
+        this.value = texto.slice(0, limiteCaracteres);
+        texto = this.value;
+    }
 
-    let rate = monedaOriginal.cambios[0]?.Rate ?? 1; //obteniendo el valor de rate de cambio
+    const restantes = limiteCaracteres - texto.length;
+    contador.textContent = `Te quedan ${restantes} caracteres`;
+});
 
-    // Calculamos el precio base para los proximos calculos
+// ================================
+// FUNCIONES DE MONEDA Y TOTALES
+// ================================
+
+// Convierte precios según tipo de moneda
+function conversionesMonedas(precioOriginal, monedaOriginal, monedaConvertir) {
+    if(!monedaConvertir) return parseFloat(precioOriginal).toFixed(2);
+
+    let rate = monedaOriginal.cambios[0]?.Rate ?? 1;
     const precioBase = parseFloat(precioOriginal) * rate;
-
-    //buscamos el nuevo tipo de cambio
     rate = monedaConvertir.cambios[0]?.Rate ?? 1;
-    //Realizamos el cambio de moneda en precio
+
     return precioBase / rate;
 }
 
-// Calcular totales generales
+// Calcular totales generales de la tabla
 function calcularTotales() {
     const filas = document.querySelectorAll("#tablaArticulos tbody tr");
-    let totalAntesDescuento = 0;
-    let totalDescuento = 0;
-    let totalFinalGeneral = 0;
-
-    // Tomamos la moneda de la primera fila, si existe
+    let totalAntesDescuento = 0, totalDescuento = 0, totalFinalGeneral = 0;
     const moneda = filas[0]?.querySelector('td.moneda')?.textContent || '';
 
     filas.forEach(fila => {
@@ -245,17 +263,14 @@ function calcularTotales() {
         const precio = parseFloat(fila.querySelector(".precio")?.textContent) || 0;
         const descuentoP = parseFloat(fila.querySelector(".descuentoporcentaje")?.textContent.replace('%', '')) || 0;
 
-        // Subtotal y descuento
         const subtotal = cantidad * precio;
         const descuentoMoney = subtotal * (descuentoP / 100);
         const totalConDescuento = subtotal - descuentoMoney;
 
-        // Acumulamos totales generales
         totalAntesDescuento += subtotal;
         totalDescuento += descuentoMoney;
         totalFinalGeneral += totalConDescuento;
 
-        // Actualizamos celdas de la fila
         const cells = {
             subtotal: fila.querySelector('.subtotal'),
             desMoney: fila.querySelector('.desMoney'),
@@ -267,11 +282,9 @@ function calcularTotales() {
         if (cells.totalFinal) cells.totalFinal.textContent = totalConDescuento.toFixed(2);
     });
 
-    // Calculamos IVA y total con IVA
     const iva = totalFinalGeneral * (IVA / 100);
     const totalConIva = totalFinalGeneral + iva;
 
-    // Función para actualizar texto de los totales
     const setTotal = (id, value) => {
         const el = document.getElementById(id);
         if (el) el.textContent = `$${value} ${moneda}`;
@@ -284,87 +297,65 @@ function calcularTotales() {
     setTotal('total', totalConIva.toFixed(2));
 }
 
-// Función global para eliminar fila
+// Eliminar fila y recalcular totales
 function eliminarFila(boton) {
     boton.closest("tr").remove();
     calcularTotales();
 }
 
-//se encarga de los filtros del modal de articulos
+// ================================
+// FILTROS Y MODAL DE ARTÍCULOS
+// ================================
 $(document).ready(function() {
     var tablaModal = $('#tablaModalArticulos').DataTable({
         pageLength: 25,
-        language: {
-            url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
-        },
+        language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
         ordering: false,
         searching: true
     });
 
     function scrollModalAlInicio() {
-        setTimeout(() => {
-            $('#modalArticulos .modal-body').scrollTop(0);
-        }, 50); // espera a que DataTable renderice la nueva página
+        setTimeout(() => $('#modalArticulos .modal-body').scrollTop(0), 50);
     }
 
-    // Buscar en la tabla
-    $('#buscadorModal').on('keyup', function() {
-        tablaModal.search(this.value).draw();
-        scrollModalAlInicio();
-    });
+    $('#buscadorModal').on('keyup', function() { tablaModal.search(this.value).draw(); scrollModalAlInicio(); });
+    $('#filtroMostrar').on('change', function() { tablaModal.page.len($(this).val()).draw(); scrollModalAlInicio(); });
+    $('#tablaModalArticulos').on('page.dt', function() { scrollModalAlInicio(); });
+    $('#modalArticulos').on('shown.bs.modal', function() { scrollModalAlInicio(); });
 
-    // Cambiar cantidad de filas por página
-    $('#filtroMostrar').on('change', function() {
-        tablaModal.page.len($(this).val()).draw();
-        scrollModalAlInicio();
-    });
-
-    // Cambiar página
-    $('#tablaModalArticulos').on('page.dt', function() {
-        scrollModalAlInicio();
-    });
-
-    // Abrir el modal
-    $('#modalArticulos').on('shown.bs.modal', function() {
-        scrollModalAlInicio();
-    });
-
-    // Cerrar el modal: reinicia filtros y scroll
     $('#modalArticulos').on('hidden.bs.modal', function () {
         $('#buscadorModal').val('');
         tablaModal.search('').draw();
-
         $('#filtroMostrar').val('25');
         tablaModal.page.len(25).draw();
-
         tablaModal.page('first').draw('page');
         scrollModalAlInicio();
     });
 });
 
-//Funcion para guardar los datos en un form oculto y mandarlos alcontrolador 
+// ================================
+// GUARDAR COTIZACIÓN
+// ================================
 $("#guardarCotizacion").on("click", function() {
-    // Llenamos los inputs con los valores actuales de tu página
-    $("#clienteH").val($("#selectCliente").val()); // CardCode
-    $("#fechaCreacionH").val($("#fechaCreacion").val()); // DocDate
-    $("#fechaEntregaH").val($("#fechaEntrega").val()); // DocDueDate
-    $("#CardNameH").val($("#selectCliente option:selected").data("cardname")); // nombre cliente
-    $("#SlpCodeH").val($("#selectVendedor").val());  //vendedor codigo
-    $("#phone1H").val($("#selectCliente option:selected").data("phone")); // teléfono
-    $("#emailH").val($("#selectCliente option:selected").data("email")); // correo
-    $("#DocCurH").val($("#selectMoneda").val());  //moneda
-    //obtener en el controlador $("#ShipToCodeH").val($("#ShipToCode").text());  //a dónde se enviará (dirección de entrega).*
-    //obtener en el controlador $("#PayToCodeH").val($("#PayToCode").text());  //a qué dirección fiscal se factura/paga.*
-    $("#direccionFiscalH").val($("#direccionFiscal").text()); // Dirección fiscal
-    $("#direccionEntregaH").val($("#direccionEntrega").text()); // Dirección de entrega
-    // Totales
+    // Llenar inputs ocultos con valores de la página
+    $("#clienteH").val($("#selectCliente").val());
+    $("#fechaCreacionH").val($("#fechaCreacion").val());
+    $("#fechaEntregaH").val($("#fechaEntrega").val());
+    $("#CardNameH").val($("#selectCliente option:selected").data("cardname"));
+    $("#SlpCodeH").val($("#selectVendedor").val());
+    $("#phone1H").val($("#selectCliente option:selected").data("phone"));
+    $("#emailH").val($("#selectCliente option:selected").data("email"));
+    $("#DocCurH").val($("#selectMoneda").val());
+    $("#direccionFiscalH").val($("#direccionFiscal").text());
+    $("#direccionEntregaH").val($("#direccionEntrega").text());
     $("#TotalSinPromoH").val($("#totalAntesDescuento").text().replace('$',''));
     $("#DescuentoH").val($("#DescuentoD").text().replace('$',''));
     $("#SubtotalH").val($("#totalConDescuento").text().replace('$',''));
     $("#ivaH").val($("#iva").text().replace('$',''));
     $("#totalH").val($("#total").text().replace('$',''));
+    $("#comentariosH").val($('#comentarios').val());
 
-    // Recopilar artículos de la tabla
+    // Recopilar artículos
     let articulos = [];
     $("#tablaArticulos tbody tr:not(:last)").each(function() {
         articulos.push({
@@ -374,39 +365,35 @@ $("#guardarCotizacion").on("click", function() {
             precio: $(this).find(".precio").text(),
             descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
             cantidad: $(this).find(".cantidad").val(),
-            imagen: $(this).find(".imagen").data("imagen") 
+            imagen: $(this).find(".imagen").data("imagen")
         });
     });
 
     $("#articulosH").val(JSON.stringify(articulos));
-
-    // Enviar el form
     $("#formCotizacion").submit();
 });
 
-//Funcion para guardar los datos en un form oculto y mandarlos alcontrolador del pedido
+// ================================
+// GUARDAR PEDIDO
+// ================================
 $("#btnPedido").on("click", function() {
-    // Llenamos los inputs con los valores actuales de tu página
-    $("#clienteP").val($("#selectCliente").val()); // CardCode
-    $("#fechaCreacionP").val($("#fechaCreacion").val()); // DocDate
-    $("#fechaEntregaP").val($("#fechaEntrega").val()); // DocDueDate
-    $("#CardNameP").val($("#selectCliente option:selected").data("cardname")); // nombre cliente
-    $("#SlpCodeP").val($("#selectVendedor").val());  //vendedor codigo
-    $("#phone1P").val($("#selectCliente option:selected").data("phone")); // teléfono
-    $("#emailP").val($("#selectCliente option:selected").data("email")); // correo
-    $("#DocCurP").val($("#selectMoneda").val());  //moneda
-    //obtener en el controlador $("#ShipToCodeH").val($("#ShipToCode").text());  //a dónde se enviará (dirección de entrega).*
-    //obtener en el controlador $("#PayToCodeH").val($("#PayToCode").text());  //a qué dirección fiscal se factura/paga.*
-    $("#direccionFiscalP").val($("#direccionFiscal").text()); // Dirección fiscal
-    $("#direccionEntregaP").val($("#direccionEntrega").text()); // Dirección de entrega
-    // Totales
+    $("#clienteP").val($("#selectCliente").val());
+    $("#fechaCreacionP").val($("#fechaCreacion").val());
+    $("#fechaEntregaP").val($("#fechaEntrega").val());
+    $("#CardNameP").val($("#selectCliente option:selected").data("cardname"));
+    $("#SlpCodeP").val($("#selectVendedor").val());
+    $("#phone1P").val($("#selectCliente option:selected").data("phone"));
+    $("#emailP").val($("#selectCliente option:selected").data("email"));
+    $("#DocCurP").val($("#selectMoneda").val());
+    $("#direccionFiscalP").val($("#direccionFiscal").text());
+    $("#direccionEntregaP").val($("#direccionEntrega").text());
     $("#TotalSinPromoP").val($("#totalAntesDescuento").text().replace('$',''));
     $("#DescuentoP").val($("#DescuentoD").text().replace('$',''));
     $("#SubtotalP").val($("#totalConDescuento").text().replace('$',''));
     $("#ivaP").val($("#iva").text().replace('$',''));
     $("#totalP").val($("#total").text().replace('$',''));
+    $("#comentariosP").val($('#comentarios').val());
 
-    // Recopilar artículos de la tabla
     let articulos = [];
     $("#tablaArticulos tbody tr:not(:last)").each(function() {
         articulos.push({
@@ -416,12 +403,10 @@ $("#btnPedido").on("click", function() {
             precio: $(this).find(".precio").text(),
             descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
             cantidad: $(this).find(".cantidad").val(),
-            imagen: $(this).find(".imagen").data("imagen") 
+            imagen: $(this).find(".imagen").data("imagen")
         });
     });
 
     $("#articulosP").val(JSON.stringify(articulos));
-
-    // Enviar el form
     $("#formCotizacionPedido").submit();
 });

@@ -88,9 +88,17 @@
     </table>
 </div>
 
-<!-- Totales -->
+
+
+<!-- Totales y comentarios-->
 <div class="row mt-3">
-    <div class="col-md-8"></div>
+    <div class="col-md-6">
+        <label for="comentarios" class="form-label">Comentarios:</label>
+        <textarea id="comentarios" name="comentarios" class="form-control" rows="4" placeholder="Escribe tus comentarios aquí..." maxlength="254" @if(isset($modo) && $modo == 1) readonly @endif>{{ old('comentarios', $preseleccionados['comentario'] ?? '') }}</textarea>
+        <small id="contador" class="text-muted"  @if(isset($modo) && $modo == 1) style="display: none;" @endif> Te quedan {{ 254 - strlen($cotizacion->comment ?? '') }} caracteres </small>
+    </div>
+    <div class="col-md-2">
+    </div>
     <div class="col-md-4">
         <table class="table">
             <tr>

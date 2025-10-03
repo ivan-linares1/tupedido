@@ -31,7 +31,8 @@ class Cotizacion extends Model
         'Descuento', 
         'Subtotal',
         'IVA', 
-        'Total'
+        'Total',
+        'comment',
     ];
 
     // Relación con las líneas de cotización

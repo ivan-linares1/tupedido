@@ -144,6 +144,16 @@
             @include('components.cot_contenido', ['articulos' => $articulos])
         </div>
     </div>
+
+    @if($pedido)
+        <span>
+            Esta cotización tiene una relación con el 
+            <a href="{{ route('detallesP', ['id' => $cotizacion->DocEntry]) }}">
+                Pedido {{ $pedido->DocEntry }}
+            </a>
+        </span>
+    @endif
+
 </div>
 
 
@@ -168,6 +178,7 @@
     <input type="hidden" name="Subtotal" id="SubtotalH"> {{--Subtotal--}}
     <input type="hidden" name="iva" id="ivaH"> {{--Iva--}}
     <input type="hidden" name="total" id="totalH"> {{--Total--}}
+    <input type="hidden" name="comentarios" id="comentariosH"> {{--comentario--}}
 
     <!-- Artículos -->
     <input type="hidden" name="articulos" id="articulosH">
@@ -194,6 +205,7 @@
     <input type="hidden" name="Subtotal" id="SubtotalP"> {{--Subtotal--}}
     <input type="hidden" name="iva" id="ivaP"> {{--Iva--}}
     <input type="hidden" name="total" id="totalP"> {{--Total--}}
+    <input type="hidden" name="comentarios" id="comentariosP"> {{--comentario--}}
 
     <!-- Artículos -->
     <input type="hidden" name="articulos" id="articulosP">

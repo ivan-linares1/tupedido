@@ -145,6 +145,16 @@
             @include('components.cot_contenido', ['articulos' => $articulos])
         </div>
     </div>
+
+    @if($cotizacion)
+        <span>
+            Este pedido tiene una relación con la
+            <a href="{{ route('detalles', ['id' => $cotizacion->DocEntry]) }}">
+                Cotizacion {{ $cotizacion->DocEntry }}
+            </a>
+        </span>
+    @endif
+
 </div>
 
 
