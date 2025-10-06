@@ -15,35 +15,34 @@ class UsuarioController extends Controller
 {
     // Muestra la lista de usuarios
     public function index()
-{
-    $usuarios = User::all();
+    {
+        $usuarios = User::all();
 
-    // Clientes que ya tienen usuario
-    $clientesConUsuario = User::whereNotNull('codigo_cliente')
-                              ->pluck('codigo_cliente')
-                              ->toArray();
+        // Clientes que ya tienen usuario
+        $clientesConUsuario = User::whereNotNull('codigo_cliente')
+                                  ->pluck('codigo_cliente')
+                                  ->toArray();
 
-    // Vendedores que ya tienen usuario
-    $vendedoresConUsuario = User::whereNotNull('codigo_vendedor')
-                                ->pluck('codigo_vendedor')
-                                ->toArray();
+        // Vendedores que ya tienen usuario
+        $vendedoresConUsuario = User::whereNotNull('codigo_vendedor')
+                                    ->pluck('codigo_vendedor')
+                                    ->toArray();
 
-    // Traemos los clientes de OCRD que aún no tienen usuario
-    $clientes = DB::table('ocrd')
-        ->select('CardCode','CardName')
-        ->whereNotIn('CardCode', $clientesConUsuario)
-        ->get();
+        // Traemos los clientes de OCRD que aún no tienen usuario
+        $clientes = DB::table('ocrd')
+            ->select('CardCode','CardName')
+            ->whereNotIn('CardCode', $clientesConUsuario)
+            ->get();
 
-    // Traemos los vendedores activos de OSLP que aún no tienen usuario
-    $vendedores = DB::table('oslp')
-        ->select('SlpCode','SlpName','Active')
-        ->where('Active','Y')
-        ->whereNotIn('SlpCode', $vendedoresConUsuario)
-        ->get();
+        // Traemos los vendedores activos de OSLP que aún no tienen usuario
+        $vendedores = DB::table('oslp')
+            ->select('SlpCode','SlpName','Active')
+            ->where('Active','Y')
+            ->whereNotIn('SlpCode', $vendedoresConUsuario)
+            ->get();
 
-    return view('admin.user', compact('usuarios', 'clientes', 'vendedores'));
-}
-
+        return view('admin.user', compact('usuarios', 'clientes', 'vendedores'));
+    }
 
     // Guarda un nuevo usuario
     public function store(Request $request)
@@ -56,14 +55,20 @@ class UsuarioController extends Controller
                 'password'  => 'required|confirmed|min:6',
             ]);
 
+            // Validar que el cliente no tenga ya usuario
+            if (User::where('codigo_cliente', $request->cliente)->exists()) {
+                return redirect()->back()->with('error', 'El cliente ya tiene un usuario creado.');
+            }
+
             $cliente = DB::table('ocrd')->where('CardCode', $request->cliente)->first();
 
             $user = new User();
-            $user->email    = $request->email;
-            $user->password = Hash::make($request->password);
-            $user->rol_id   = 3; // Rol cliente
-            $user->activo   = 1;
-            $user->nombre   = $cliente->CardName ?? 'Cliente';
+            $user->email          = $request->email;
+            $user->password       = Hash::make($request->password);
+            $user->rol_id         = 3; // Rol cliente
+            $user->activo         = 1;
+            $user->nombre         = $cliente->CardName ?? 'Cliente';
+            $user->codigo_cliente = $cliente->CardCode; // Guardamos el código de cliente
 
             $user->save();
 
@@ -79,14 +84,20 @@ class UsuarioController extends Controller
                 'password' => 'required|confirmed|min:6',
             ]);
 
+            // Validar que el vendedor no tenga ya usuario
+            if (User::where('codigo_vendedor', $request->slpcode)->exists()) {
+                return redirect()->back()->with('error', 'El vendedor ya tiene un usuario creado.');
+            }
+
             $vendedor = DB::table('oslp')->where('SlpCode', $request->slpcode)->first();
 
             $user = new User();
-            $user->email    = $request->email;
-            $user->password = Hash::make($request->password);
-            $user->rol_id   = 4; // Rol vendedor
-            $user->activo   = 1;
-            $user->nombre   = $vendedor->SlpName ?? 'Vendedor';
+            $user->email           = $request->email;
+            $user->password        = Hash::make($request->password);
+            $user->rol_id          = 4; // Rol vendedor
+            $user->activo          = 1;
+            $user->nombre          = $vendedor->SlpName ?? 'Vendedor';
+            $user->codigo_vendedor = $vendedor->SlpCode; // Guardamos el código de vendedor
 
             $user->save();
 
@@ -220,7 +231,6 @@ class UsuarioController extends Controller
         return redirect()->back()->with('success', implode(' ', $mensajes));
     }
 
-
     public function activo_inactivo(Request $request)
     {
         $usuario = User::findOrFail($request->id);
@@ -229,7 +239,4 @@ class UsuarioController extends Controller
 
         return response()->json(['success' => true]);
     }
-
-
-    
 }
