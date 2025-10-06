@@ -20,13 +20,6 @@ class ClienteController extends Controller
         elseif($request->estatus == 'Todos'){
         }
 
-        // Filtro búsqueda
-        if ($request->buscar) {
-            $cliente->where(function ($q) use ($request) {
-                $q->where('CardCode', 'like', "%{$request->buscar}%")
-                  ->orWhere('CardName', 'like', "%{$request->buscar}%");
-            });
-        }
 
         // Mostrar X registros (paginación)
         $mostrar = $request->mostrar ?? 25;//el 25 esta por default antes de que se seleccione un otro numero de paginacion

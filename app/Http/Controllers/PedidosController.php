@@ -21,8 +21,20 @@ class PedidosController extends Controller
     
     public function index()
     {
-        // Obtener todos los pedidos con la cotización asociada
-        $pedidos = pedidos::with(['cotizacionBase'])->orderBy('DocEntry', 'desc')->get();
+        $user = Auth::user();
+
+        // Obtener todos los pedidos con su cotización asociada
+        $query = pedidos::with(['cotizacionBase.vendedor', 'cotizacionBase.moneda'])
+            ->orderBy('DocEntry', 'desc');
+
+        // Si el usuario es cliente, filtrar por su código de cliente
+        if ($user->rol_id == 3) {
+            $query->whereHas('cotizacionBase', function($q) use ($user) {
+                $q->where('CardCode', $user->codigo_cliente);
+            });
+        }
+
+        $pedidos = $query->get();
 
         // Transformar para la vista
         $pedidosList = $pedidos->map(function($pedido) {
@@ -33,14 +45,17 @@ class PedidosController extends Controller
                 'CotizacionDocEntry' => $cotizacion->DocEntry ?? null,
                 'CotizacionFecha' => $cotizacion->DocDate ?? null,
                 'Cliente' => $cotizacion->CardName ?? null,
-                'Vendedor' => $cotizacion->vendedor->SlpName, 
+                'Vendedor' => $cotizacion->vendedor->SlpName ?? null,
                 'Total' => $cotizacion->Total ?? 0,
-                'Moneda' => $cotizacion->moneda_nombre ?? 'MXN',
+                'Moneda' => $cotizacion->moneda->Currency ?? 'MXN',
             ];
         });
 
         return view('users.pedidos', ['pedidos' => $pedidosList]);
     }
+
+
+    
 
     public function NuevoPedido ($DocEntry = null)
     {

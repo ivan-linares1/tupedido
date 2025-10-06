@@ -21,13 +21,16 @@
                 </select>
             </div>
             <div class="col-md-2">
+                @if(Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
                 <label class="form-label">Estatus</label>
                 <select class="form-select form-select-sm" name="estatus" onchange="this.form.submit()">
                     <option value="Activos" {{ request('estatus') == 'Activos' ? 'selected' : '' }}>Activos</option>
                     <option value="Inactivos" {{ request('estatus') == 'Inactivos' ? 'selected' : '' }}>Inactivos</option>
                     <option value="Todos" {{ request('estatus') == 'Todos' ? 'selected' : '' }}>todos</option>
                 </select>
+                @endif
             </div>
+            
             <div class="col-md-3">
                 <label class="form-label">Grupo de Productos</label>
                 <select class="form-select form-select-sm" name="grupo" onchange="this.form.submit()">
@@ -37,11 +40,12 @@
                         @endforeach
                 </select>
             </div>
+            
             <div class="col-md-3 offset-md-2">
                 <label class="form-label">Buscar</label>
-                <div class="input-group input-group-sm">
-                    <input type="text" name="buscar" class="form-control" value="{{ request('buscar') }}" placeholder="Buscar...">
-                    <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+                <div class="input-group input-group-sm rounded-3">
+                    <input type="text" id="buscarArticulo" class="form-control form-control-sm" placeholder="Buscar...">
+                    <span class="input-group-text bg-white rounded-end"><i class="bi bi-search"></i></span>
                 </div>
             </div>
         </div>
@@ -105,5 +109,17 @@
     </div>
 
 </div>
+
+<script>
+$(document).ready(function() {
+    $('#buscarArticulo').on('keyup', function() {
+        let valor = $(this).val().toLowerCase();
+
+        $('table tbody tr').filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
+    });
+});
+</script>
 
 @endsection

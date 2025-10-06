@@ -20,36 +20,30 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class CotizacionesController extends Controller
 {
 
-    public function index(){//se encarga de listar todas las cotizaciones existentes
-        $user = Auth::user();
-        if($user->rol_id == 1 || $user->rol_id == 2){
-           return $this->TodasLasCotizaciones();
-        }
-        else
-            return $this->CotizacionesCliente();
-    }
-
-    public function CotizacionesCliente()
+    public function index()
     {
-        $cotizaciones =[];
+        $user = Auth::user();
 
-        return view('users.cotizaciones', compact('cotizaciones'));
-    }
-
-    public function TodasLasCotizaciones(){
-        // Obtenemos cotizaciones con su vendedor y el nombre de la moneda 
-        $cotizaciones = Cotizacion::select( 
+        // Base de la consulta: cotizaciones con sus relaciones
+        $query = Cotizacion::select(
                 'OQUT.*',
                 'OSLP.SlpName as vendedor_nombre',
                 'OCRN.Currency as moneda_nombre'
             )
-            ->leftJoin('OSLP', 'OQUT.SlpCode', '=', 'OSLP.SlpCode')  // Relación con vendedor
-            ->leftJoin('OCRN', 'OQUT.DocCur', '=', 'OCRN.Currency_ID') // Relación con moneda
-            ->orderBy('OQUT.DocEntry', 'desc')
-            ->get();
+            ->leftJoin('OSLP', 'OQUT.SlpCode', '=', 'OSLP.SlpCode')
+            ->leftJoin('OCRN', 'OQUT.DocCur', '=', 'OCRN.Currency_ID')
+            ->orderBy('OQUT.DocEntry', 'desc');
+
+        // Si el usuario es cliente, filtramos por su código
+        if ($user->rol_id == 3) {
+            $query->where('OQUT.CardCode', $user->codigo_cliente);
+        }
+
+        $cotizaciones = $query->get();
 
         return view('users.cotizaciones', compact('cotizaciones'));
     }
+
 
     public function NuevaCotizacion ($DocEntry = null)
     {
