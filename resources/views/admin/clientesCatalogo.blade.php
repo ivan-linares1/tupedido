@@ -27,10 +27,9 @@
                 </select>
             </div>
             <div class="col-md-3 offset-md-5">
-                <label class="form-label">Buscar</label>
-                <div class="input-group input-group-sm">
-                    <input type="text" name="buscar" class="form-control" value="{{ request('buscar') }}" placeholder="Buscar...">
-                    <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+                <div class="input-group input-group-sm rounded-3">
+                    <input type="text" id="buscarCliente" class="form-control form-control-sm" placeholder="Buscar...">
+                    <span class="input-group-text bg-white rounded-end"><i class="bi bi-search"></i></span>
                 </div>
             </div>
         </div>
@@ -85,4 +84,19 @@
 
 </div>
 
+<script>
+$(document).ready(function() {
+    $('#buscarCliente').on('keyup', function() {
+        let valor = $(this).val().toLowerCase();
+
+        $('table tbody tr').filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
+    });
+});
+</script>
+
+
 @endsection
+
+

@@ -21,15 +21,6 @@ class ArticuloController extends Controller
             $articulo->where('Active', 'N');
         }
 
-        // Filtro búsqueda
-        if ($request->buscar) {
-            $articulo->where(function ($q) use ($request) {
-                $q->where('ItemCode', 'like', "%{$request->buscar}%")
-                  ->orWhere('ItemName', 'like', "%{$request->buscar}%")
-                  ->orWhereHas('marca', function ($q) use ($request) { $q->where('ItmsGrpNam', 'like', "%{$request->buscar}%"); })
-                  ->orWhere('FrgnName', 'like', "%{$request->buscar}%");
-            });
-        }
 
         //filtro de marca
         if ($request->grupo) {
