@@ -8,6 +8,7 @@ use App\Http\Controllers\CotizacionesController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendedorController;
+use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\OslpController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,9 +47,22 @@ Route::middleware('auth')->group(function () {
         //Usuarios
         Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
 
+         Route::post('/usuarios/estado', [UsuarioController::class, 'activo_inactivo'])->name('estado.Usuario');
+
         //Clientes
         Route::get('/CatalogosClientes', [ClienteController::class, 'index'])->name('clientes'); 
         Route::post('/Clientes/Estado', [ClienteController::class, 'activo_inactivo'])->name('estado.Cliente'); 
+
+
+        //Vendedores
+        Route::post('/admin/vendedores/toggle-estado', [VendedorController::class, 'toggleActivo'])
+            ->name('admin.vendedores.toggleActivo');
+        
+
+        // Marcas
+       Route::get('/admin/marcas', [MarcaController::class, 'index'])->name('admin.marcas.index');
+
+
 
         //configuracion 
         Route::get('/configuracion', [configuracionController::class, 'index'])->name('configuracion');
@@ -72,6 +86,8 @@ Route::middleware('auth')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
     Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
+   
+
 
     // Ruta para obtener datos del cliente (AJAX) por cardCode
     Route::get('/ocrd/{cardCode}', [UsuarioController::class, 'getCliente'])->name('ocrd.show');

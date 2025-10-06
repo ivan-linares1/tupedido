@@ -32,4 +32,22 @@ class VendedorController extends Controller
 
         return view('admin.catalogo_vendedores', compact('vendedores'));
     }
+    public function toggleActivo(Request $request)
+{
+    $vendedor = Vendedores::where('SlpCode', $request->id)->first();
+
+    if ($vendedor) {
+        // Cambiar valor Y ↔ N
+        $vendedor->Active = $vendedor->Active === 'Y' ? 'N' : 'Y';
+        $vendedor->save();
+
+        return response()->json([
+            'success' => true,
+            'estado' => $vendedor->Active
+        ]);
+    }
+
+    return response()->json(['success' => false], 404);
+}
+
 }

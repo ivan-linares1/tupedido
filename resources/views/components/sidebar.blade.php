@@ -58,7 +58,8 @@
                     </a>
                     <div class="collapse" id="submenuConfiguracionProductos" data-bs-parent="#submenuProductos">
                         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                            <li><a href="#" class="nav-link">Grupos de Productos</a></li>
+                        <li><a href="{{ route('admin.marcas.index') }}" class="nav-link">Grupos de Productos</a></li>
+    
                         </ul>
                     </div>
                 </li>@endif

@@ -15,20 +15,35 @@ class UsuarioController extends Controller
 {
     // Muestra la lista de usuarios
     public function index()
-    {
-        $usuarios = User::all();
+{
+    $usuarios = User::all();
 
-        // Traemos los clientes de OCRD
-        $clientes = DB::table('ocrd')->select('CardCode','CardName')->get();
+    // Clientes que ya tienen usuario
+    $clientesConUsuario = User::whereNotNull('codigo_cliente')
+                              ->pluck('codigo_cliente')
+                              ->toArray();
 
-        // Traemos los vendedores activos de OSLP
-        $vendedores = DB::table('oslp')
-            ->select('SlpCode','SlpName','Active')
-            ->where('Active','Y')
-            ->get();
+    // Vendedores que ya tienen usuario
+    $vendedoresConUsuario = User::whereNotNull('codigo_vendedor')
+                                ->pluck('codigo_vendedor')
+                                ->toArray();
 
-        return view('admin.user', compact('usuarios', 'clientes', 'vendedores'));
-    }
+    // Traemos los clientes de OCRD que aún no tienen usuario
+    $clientes = DB::table('ocrd')
+        ->select('CardCode','CardName')
+        ->whereNotIn('CardCode', $clientesConUsuario)
+        ->get();
+
+    // Traemos los vendedores activos de OSLP que aún no tienen usuario
+    $vendedores = DB::table('oslp')
+        ->select('SlpCode','SlpName','Active')
+        ->where('Active','Y')
+        ->whereNotIn('SlpCode', $vendedoresConUsuario)
+        ->get();
+
+    return view('admin.user', compact('usuarios', 'clientes', 'vendedores'));
+}
+
 
     // Guarda un nuevo usuario
     public function store(Request $request)
@@ -204,5 +219,17 @@ class UsuarioController extends Controller
 
         return redirect()->back()->with('success', implode(' ', $mensajes));
     }
+
+
+    public function activo_inactivo(Request $request)
+    {
+        $usuario = User::findOrFail($request->id);
+        $usuario->{$request->field} = $request->value; 
+        $usuario->save();
+
+        return response()->json(['success' => true]);
+    }
+
+
     
 }
