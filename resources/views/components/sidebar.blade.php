@@ -32,7 +32,7 @@
                     </a>
                     <div class="collapse" id="submenuConfiguracionVentas" data-bs-parent="#submenuVentas">
                         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
-                            <li><a href="#" class="nav-link">Zonas de venta</a></li>
+                            <li><a href="#" class="nav-link">Cartera de clientes</a></li>
                             <li><a href="{{ route('admin.catalogo.vendedores') }}" class="nav-link">Catálogo de vendedores</a></li>
                         </ul>
                     </div>
@@ -50,7 +50,6 @@
             <div class="collapse" id="submenuProductos" data-bs-parent=".sidebar">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                 <li><a href="{{ route('articulos', ['estatus' => 'Activos'])}}" class="nav-link">Productos</a></li>
-                <li><a href="#" class="nav-link">Lista de Precios</a></li>
                 @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)<li>
                     <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionProductos" role="button" aria-expanded="false" aria-controls="submenuConfiguracionProductos">
                     Configuración
@@ -59,7 +58,6 @@
                     <div class="collapse" id="submenuConfiguracionProductos" data-bs-parent="#submenuProductos">
                         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                         <li><a href="{{ route('admin.marcas.index') }}" class="nav-link">Grupos de Productos</a></li>
-    
                         </ul>
                     </div>
                 </li>@endif
@@ -78,7 +76,6 @@
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                 <li><a href="{{ route('configuracion') }}" class="nav-link">Configurar Sistema</a></li>
                 <li><a href="{{ route('usuarios') }}" class="nav-link">Usuarios</a></li>
-                <li><a href="#" class="nav-link">Perfiles</a></li>
             </ul>
             </div>
         </li>@endif
