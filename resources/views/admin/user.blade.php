@@ -4,6 +4,11 @@
 
 @section('contenido')
 
+ {{-- Contenedor para mensajes flash dinámicos --}}
+    <div id="flash-messages" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        {{-- Aquí se insertarán los alerts --}}
+    </div>
+
 <div class="card shadow-sm border-0 rounded-3">
     <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white rounded-top">
         <h5 class="mb-0">Usuarios</h5>
@@ -54,8 +59,10 @@
                         <th scope="col">Nombre</th>
                         <th scope="col">Rol</th>
                         <th scope="col">Status</th>
+                        <th scope="col" class="text-center">Acción</th> <!-- <-- nueva columna -->
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach ($usuarios as $usuario)
                         <tr>
@@ -63,6 +70,24 @@
                             <td>{{ $usuario->nombre }}</td>
                             <td>{{ $usuario->rol?->nombre }}</td>
                             <td>{{ $usuario->activo ? 'activo' : 'inactivo' }}</td>
+                            <td class="text-center">
+                                <label class="switch">
+                                    <input 
+                                        type="checkbox" 
+                                        class="toggle-estado-usuarios"
+                                        data-id="{{ $usuario->id }}"
+                                        data-field="activo"
+                                        data-url="{{ route('estado.Usuario') }}"
+                                        {{ $usuario->activo == 1 ? 'checked' : '' }}
+                                    >
+
+                                    <span class="slider round"></span>
+                                </label>
+                            </td>
+
+
+
+
                         </tr>
                     @endforeach
                 </tbody>
@@ -241,56 +266,67 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+    // fallback global por si el data-url no está disponible en el DOM re-renderizado
+    window.usuariosEstadoUrl = "{{ route('estado.Usuario') }}";
+</script>
+
+
 
 <!-- Select2 y lógica de filtros -->
 <script>
+
+
+
 $(document).ready(function() {
 
-    // <-- Seguridad: solo inicializa si existe la tabla en el DOM -->
+    // Inicializamos DataTable y guardamos la instancia en "table"
+    var table = null;
     if ($('#tablaUsuarios').length) {
-        // Inicializar DataTable (sin su buscador nativo)
-        let table = $('#tablaUsuarios').DataTable({
+        table = $('#tablaUsuarios').DataTable({
             pageLength: 25,
             lengthChange: false,
-            dom: 'rtip', // muestra solo tabla, info y paginación
+            dom: 'rtip',
             language: {
-                url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
-            }
+    url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+}
+
         });
 
-        // Mostrar N registros (parseamos a entero por seguridad)
+        // Mostrar N registros
         $('#mostrar').on('change', function() {
             const val = parseInt($(this).val()) || 25;
             table.page.len(val).draw();
         });
 
-        // Filtro estatus (hacemos match case-insensitive)
-        $('#estatus').on('change', function() {
+        // Filtro estatus (case-insensitive)
+       $('#estatus').on('change', function() {
             const raw = $(this).val();
             let filtro = '';
 
             if (!raw || raw.toLowerCase() === 'todos') {
                 filtro = '';
             } else if (raw.toLowerCase() === 'activo') {
-                filtro = 'activo';
+                filtro = '^activo$'; // regex exacto
             } else if (raw.toLowerCase() === 'inactivo') {
-                filtro = 'inactivo';
-            } else {
-                filtro = raw;
+                filtro = '^inactivo$'; // regex exacto
             }
 
-            // usamos search simple (no regex) y caseInsensitive = true (4º arg)
-            table.column(3).search(filtro, false, true, true).draw();
+            table.column(3).search(filtro, true, false, true).draw();
         });
 
-        // Buscar dinámico con tu input existente
+
+        // Buscar dinámico
         $('#buscar').on('keyup', function() {
             table.search(this.value).draw();
         });
     }
 
     // ============================
-    // CLIENTE - Select2 + AJAX
+    // Select2 y AJAX para modales (sin cambios)
     // ============================
     $('#cliente_usuario').select2({
         dropdownParent: $('#modalNuevoUsuario'),
@@ -310,9 +346,7 @@ $(document).ready(function() {
                     $('#apellido_paterno').val(data.ApellidoPaterno);
                     $('#apellido_materno').val(data.ApellidoMaterno);
                     $('#telefono').val(data.Telefono);
-                    //$('#email_contacto').val(data.EmailContacto);
-                    
-                    // Si es array, lo unimos por saltos de línea
+
                     if (Array.isArray(data.EmailContacto)) {
                         $('#email_contacto').val(data.EmailContacto.join("\n"));
                     } else {
@@ -323,16 +357,10 @@ $(document).ready(function() {
                 }
             });
         } else {
-            // limpiar campos si se deselecciona
-            //$('#codigo_cliente, #nombres, #apellido_paterno, #apellido_materno, #telefono, #telefono_celular, #direccion_fiscal, #direccion_envio').val('');
             $('#codigo_cliente, #nombres, #apellido_paterno, #apellido_materno, #telefono, #email_contacto, #direccion_fiscal, #direccion_envio').val('');
-
         }
     });
 
-    // ============================
-    // VENDEDORES - Select2 + AJAX
-    // ============================
     $('#slpcode').select2({
         dropdownParent: $('#modalNuevoVendedor'),
         placeholder: "Seleccione un vendedor",
@@ -355,6 +383,152 @@ $(document).ready(function() {
         }
     });
 
+
+    $.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+    }
 });
+
+
+     // Evento para toggle con confirmación y notificación
+    $(document).on('change', '.toggle-estado-usuarios', function () {
+        var $checkbox = $(this);
+        var id = $checkbox.data('id');
+        var url = $checkbox.data('url') || window.usuariosEstadoUrl;
+        var newState = $checkbox.is(':checked') ? 1 : 0;
+        var prevState = newState ? 0 : 1;
+        var $row = $checkbox.closest('tr');
+        var $statusCell = $row.find('td').eq(3);
+
+        // Detenemos el cambio hasta confirmar
+        $checkbox.prop('checked', prevState === 1);
+
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Vas a cambiar el estado del usuario a " + (newState ? "Activo" : "Inactivo"),
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#05564f',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, cambiar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $checkbox.prop('disabled', true);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        field: 'activo',
+                        value: newState
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $checkbox.prop('checked', newState === 1);
+                            $statusCell.text(newState ? 'activo' : 'inactivo');
+
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Estado actualizado correctamente',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        } else {
+                            Swal.fire('Error', 'No se pudo actualizar el estado en el servidor.', 'error');
+                            $checkbox.prop('checked', prevState === 1);
+                            $statusCell.text(prevState === 1 ? 'activo' : 'inactivo');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Ocurrió un error de conexión.', 'error');
+                        $checkbox.prop('checked', prevState === 1);
+                        $statusCell.text(prevState === 1 ? 'activo' : 'inactivo');
+                    },
+                    complete: function() {
+                        $checkbox.prop('disabled', false);
+                    }
+                });
+            } else {
+                // Si cancela, dejamos el estado anterior
+                $checkbox.prop('checked', prevState === 1);
+            }
+        });
+    });
+
+
+
+
+
+});
+
+
 </script>
+
+
+
+
+<style>
+/* Toggle switch estilo iOS */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 26px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #28a745; /* verde éxito */
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #28a745;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* redondeado */
+.slider.round {
+  border-radius: 26px;
+}
+</style>
 @endpush
+

@@ -25,6 +25,8 @@ class User extends Authenticatable
         'password',
         'activo',
         'rol_id',
+        'codigo_cliente',
+        'codigo_vendedor',
     ];
 
     /**
