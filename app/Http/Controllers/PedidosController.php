@@ -184,6 +184,7 @@ class PedidosController extends Controller
             'cliente' => $cotizacion->CardCode,
             'vendedor' => $cotizacion->SlpCode,
             'moneda' => $cotizacion->DocCur,
+            'comentario' =>$cotizacion->comment,
         ];
 
         // Retornar la vista
@@ -316,6 +317,7 @@ class PedidosController extends Controller
             'fecha'   => $cotizacion->DocDate,
             'vendedor' => $cotizacion->vendedor->SlpName,
             'moneda'   => $cotizacion->moneda->Currency,
+            'comentario' =>$cotizacion->comment,
             
 
             'cliente' => [

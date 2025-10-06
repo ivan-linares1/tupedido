@@ -512,7 +512,8 @@
                         </tr>
                         <tr>
                             <td class="info-details" style="height: 1.15cm !important; text-align: left !important;"> {{--dejarlo en 50--}}
-                                {{$vendedor}}
+                                {{$vendedor}} <br>
+                                {{$comentario}}
                             </td>
                         </tr>
                     </table>
