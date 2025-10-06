@@ -10,7 +10,7 @@
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <a href="{{ route('NuevaPedido') }}" class="btn btn-primary">Nuevo Pedido</a>
          <div class="d-flex gap-2">
-            <input type="text" id="buscarPedido" class="form-control" placeholder="Buscar por folio, cliente o zona...">
+            <input type="text" id="buscarPedido" class="form-control" placeholder="Buscar...">
             <input type="date" id="fechaPedido" class="form-control" max="{{ date('Y-m-d') }}">
         </div>
     </div>
