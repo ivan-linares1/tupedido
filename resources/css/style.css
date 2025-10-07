@@ -95,6 +95,38 @@ body {
     box-shadow: 10px 0 20px rgba(0,0,0,0.2);
 }
 
+.logo-section {
+    display: flex;
+    flex-direction: column; /* Apilar verticalmente */
+    align-items: center;    /* Centrar horizontalmente */
+    margin-bottom: 2rem;    /* Separación del menú */
+}
+
+.logo-section .logo-img {
+    width: 130px;       /* Ajusta según tu logo */
+    height: 130px;      /* Mantener proporción cuadrada */
+    object-fit: contain;
+    border-radius: 50%; /* Opcional, hace el logo circular */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.logo-section .logo-img:hover {
+    transform: scale(1.1);
+}
+
+.logo-section .brand-text {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.logo-section .brand-text:hover {
+    color: var(--color-secundario);
+}
+
 /***************************** Header *****************************/
 .header {
     height: 60px;
@@ -133,9 +165,18 @@ body {
 
 /***************************** Contenido principal *****************************/
 .content {
-    margin-left: 250px;
+    margin-left: 0;
     padding: 2rem;
     transition: margin-left 0.3s ease;
+}
+
+.sidebar ~ .content {
+    margin-left: 250px !important; /* espacio del sidebar */
+}
+
+.navbar-horizontal ~ .content {
+    margin-left: 0;       /* nada a la izquierda */
+    padding-top: 0px;    /* espacio de la barra horizontal */
 }
 
 .content-body {

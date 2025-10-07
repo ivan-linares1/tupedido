@@ -11,67 +11,91 @@ $(document).on('keydown', '.cantidad, #telefono', function(e) {
 });
 
 
-document.addEventListener("DOMContentLoaded", function () {
-    const flashContainer = document.getElementById("flash-messages");
 
-    // Función para mostrar mensajes tipo Bootstrap
+$(document).ready(function() {
+
     function showFlash(message, type = "success") {
-        const div = document.createElement("div");
-        div.className = `alert alert-${type} alert-dismissible fade show mt-2`;
-        div.setAttribute("role", "alert");
-        div.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        flashContainer.appendChild(div);
-
-        // Quitar después de 3s
-        setTimeout(() => {
-            div.classList.remove("show");
-            div.classList.add("fade");
-            setTimeout(() => div.remove(), 300);
-        }, 3000);
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: type,
+            title: message,
+            showConfirmButton: false,
+            timer: 2000
+        });
     }
 
+    // Toggle estado con confirmación SweetAlert2
+    $('.toggle-estado').on('change', function () {
+        const $this = $(this);
+        const id = $this.data('id');
+        const url = $this.data('url');
+        const field = $this.data('field');
+        const newValue = $this.is(':checked') ? 'Y' : 'N';
+        const prevState = !$this.is(':checked');
 
-    document.querySelectorAll(".toggle-estado").forEach(input => {
-        input.addEventListener("change", function () {
-            const id = this.dataset.id;           // id del registro
-            const url = this.dataset.url;         // ruta del controlador
-            const field = this.dataset.field;     // campo a actualizar
-            const value = this.checked ? 'Y' : 'N'; // valor Y/N
+        // Detener el toggle hasta confirmar
+        $this.prop('checked', prevState);
 
-            // Confirmación antes de enviar
-            if (!confirm("¿Seguro que deseas cambiar el estado?")) {
-                this.checked = !this.checked; // revertir si cancela
-                return;
-            }
-
-            fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: new URLSearchParams({
-                    id: id,
-                    field: field,
-                    value: value
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: `Vas a cambiar el estado a ${newValue === 'Y' ? 'Activo' : 'Inactivo'}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#05564f',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, cambiar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $this.prop('disabled', true);
+                $.post(url, {_token: document.querySelector('meta[name="csrf-token"]').content, id: id, field: field, value: newValue})
+                .done(function(response){
+                    if(response.success){
+                        $this.prop('checked', newValue === 'Y');
+                        $this.closest('tr').attr('data-status', newValue);
+                        showFlash("✅ Estado actualizado correctamente", "success");
+                    } else {
+                        showFlash("❌ Error al actualizar", "error");
+                    }
                 })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) {
-                    this.checked = !this.checked;
-                    showFlash("❌ Error al actualizar", "danger");
-                } else {
-                    showFlash("✅ Estado actualizado correctamente", "success");
-                }
-            })
-            .catch(() => {
-                this.checked = !this.checked;
-                showFlash("⚠️ Error de conexión", "danger");
-            });
+                .fail(function(){
+                    showFlash("⚠️ Error de conexión", "error");
+                })
+                .always(function(){
+                    $this.prop('disabled', false);
+                });
+            }
         });
     });
+
+    // Búsqueda dinámica
+    $('#buscarCliente').on('keyup', function() {
+        const valor = $(this).val().toLowerCase();
+        $('#tablaClientes tbody tr').filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+        });
+    });
+
+    // Filtro Mostrar y Estatus
+    $('#mostrar').on('change', function(){
+        let val = $(this).val();
+        $('#tablaClientes tbody tr').slice(val).hide();
+        $('#tablaClientes tbody tr').slice(0, val).show();
+    });
+
+    $('#estatus').on('change', function(){
+        let val = $(this).val();
+        $('#tablaClientes tbody tr').each(function(){
+            let status = $(this).attr('data-status');
+            if(val === "" || status === val){
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+
+    // Inicial: aplicar filtro mostrar
+    $('#mostrar').trigger('change');
 });

@@ -4,8 +4,10 @@
         <i class="bi bi-arrow-left"></i>
     </button>
 
-    <h1>Tu pedido</h1>
-    <a href="https://www.kombitec.com.mx/" target="_blank" class="fs-4">KOMBITEC</a>
+    <div class="logo-section text-center">
+        <img src="{{ asset('storage/logos/logocarrito.jpg') }}" alt="Logo" class="logo-img mb-2">
+        <a href="{{ route('dashboard') }}" class="brand-text d-block">KOMBITEC</a>
+    </div>
 
     <ul class="nav flex-column px-2">
         <li class="nav-item">
