@@ -66,6 +66,11 @@ CREATE TABLE OCRN(
   Currency VARCHAR(3) UNIQUE NOT NULL
 );
 
+INSERT INTO OCRN(Currency) VALUES
+("MXN"),
+("USD"),
+("EUR");
+
 /* Listas de precios */
 CREATE TABLE OPLN(
   ListNum INT PRIMARY KEY,
@@ -192,13 +197,15 @@ CREATE TABLE users (
 );
 
 CREATE TABLE configuracion(
-  iva INT DEFAULT '16',
-  ruta_logo VARCHAR(255) DEFAULT '',
-  nombre_empresa VARCHAR(255) DEFAULT 'KOMBITEC, S.A. DE C.V',
-  calle VARCHAR(150) DEFAULT 'AV. DR. SALVADOR NAVA MARTÍNEZ 232' ,
-  colonia VARCHAR (50) DEFAULT 'COL. EL PASEO, SAN LUIS POTOSÍ' ,
-  CP VARCHAR (10) DEFAULT 'C.P. 78320 ' ,
-  ciudad VARCHAR (30) DEFAULT 'San Luis Potosí ' ,
-  telefono VARCHAR(15) DEFAULT '',
-  pais VARCHAR(30) DEFAULT 'MEXICO'
+  iva INT 
+  ruta_logo VARCHAR(255),
+  nombre_empresa VARCHAR(255),
+  calle VARCHAR(150),
+  colonia VARCHAR (50),
+  CP VARCHAR (10),
+  ciudad VARCHAR (30),
+  telefono VARCHAR(15),
+  pais VARCHAR(30),
+  MonedaPrincipal INT
+  FOREIGN KEY(MonedaPrincipal) REFERENCES OCRN(Currency_ID)
 );

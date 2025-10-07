@@ -98,7 +98,7 @@
                 <label>Moneda</label>
                 <select class="form-select" name="currency_id" id="selectMoneda"
                     data-monedas='@json($monedas)' data-iva='@json($IVA)'
-                    @if(isset($modo) && $modo == 1) disabled @endif>
+                    @if((isset($modo) && $modo == 1) ||  (Auth::user()->rol_id == 3 || Auth::user()->rol_id == 4)) disabled @endif>
                     <option value="" selected disabled>Selecciona una moneda</option>
                     @foreach($monedas as $moneda)
                         <option value="{{ $moneda->Currency_ID }}" @if($moneda->cambios->isEmpty()) disabled @endif 
@@ -107,19 +107,18 @@
                             @if($moneda->cambios->isEmpty() && isset($modo) && $modo == 0) (Sin tipo de cambio) @endif
                         </option>
                     @endforeach
-                </select>
+                </select>                
             </div>
 
-            @if( $vendedores )
+            @if($preseleccionados['vendedor'] != NULL && Auth::user()->rol_id !=3)
                 <div class="mb-3">
-                    <label>Vendedores</label>
-                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"  @if(isset($modo) && $modo == 1) disabled @endif>
-                        <option value="" selected disabled>Selecciona un Vendedor</option>
+                    <label>Vendedor</label>
+                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"  @if((isset($modo) && $modo == 1) ||  (Auth::user()->rol_id == 3 || Auth::user()->rol_id == 4)) disabled @endif>
                         @foreach($vendedores as $vendedor)
                             <option value="{{ $vendedor->SlpCode }}" 
                                 @if(isset($preseleccionados['vendedor']) && $preseleccionados['vendedor'] == $vendedor->SlpCode) selected @endif
                                 data-SlpName="{{ $vendedor->SlpName }}">
-                                {{ $vendedor->SlpCode. ' - ' .$vendedor->SlpName }}
+                                {{ $vendedor->SlpName }}
                             </option>
                         @endforeach
                     </select>

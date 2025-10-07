@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\configuracion;
+use App\Models\Moneda;
 use Illuminate\Http\Request;
 
 class configuracionController extends Controller
@@ -11,6 +12,7 @@ class configuracionController extends Controller
     {
         // Traemos la primera fila
         $configuracion = Configuracion::first();
+        $monedas = Moneda::all();
 
         // Si no existe, crear un registro por defecto
         if (!$configuracion) {
@@ -27,7 +29,7 @@ class configuracionController extends Controller
             ]);
         }
 
-        return view('admin.configuracion', compact('configuracion'));
+        return view('admin.configuracion', compact('configuracion', 'monedas'));
     }
 
     public function update(Request $request)
@@ -44,6 +46,7 @@ class configuracionController extends Controller
             'telefono' => 'nullable|string|max:15',
             'pais' => 'nullable|string|max:30',
             'ruta_logo' => 'nullable|image|mimes:jpg,jpeg,png,gif,svg|max:2048',
+            'MonedaPrincipal' => 'nullable',
         ]);
 
         $data = $request->except('ruta_logo');

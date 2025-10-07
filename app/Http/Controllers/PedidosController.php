@@ -34,6 +34,13 @@ class PedidosController extends Controller
             });
         }
 
+        // Si el usuario es vendedor, filtrar por su código de cliente
+        if ($user->rol_id == 4) {
+            $query->whereHas('cotizacionBase', function($q) use ($user) {
+                $q->where('SlpCode', $user->codigo_vendedor);
+            });
+        }
+
         $pedidos = $query->get();
 
         // Transformar para la vista
@@ -52,10 +59,7 @@ class PedidosController extends Controller
         });
 
         return view('users.pedidos', ['pedidos' => $pedidosList]);
-    }
-
-
-    
+    }   
 
     public function NuevoPedido ($DocEntry = null)
     {
@@ -68,12 +72,10 @@ class PedidosController extends Controller
         $fechaCreacion = $hoy;
         $fechaEntrega  = $mañana;
 
-        $clientes = Clientes::with('descuentos.detalles.marca')->get();
+        $clientes = Clientes::with('descuentos.detalles.marca')->where('Active', 'Y')->get();
 
         $user = Auth::user();
-        $vendedores = ($user->rol_id == 1 || $user->rol_id == 2)
-            ? Vendedores::all()
-            : null;
+        $vendedores = Vendedores::where('Active', 'Y')->get();
 
         // Monedas con cambios del día
         $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
@@ -94,9 +96,9 @@ class PedidosController extends Controller
 
         // Valores por defecto
         $preseleccionados = [
-            'cliente' => null,
-            'vendedor' => null,
-            'moneda' => null,
+           'cliente' => ($user->rol_id == 3) ? $user->codigo_cliente : null,
+            'vendedor' => ($user->rol_id == 4) ? $user->codigo_vendedor : null,
+            'moneda' => configuracion::firstOrFail()->MonedaPrincipal,
             'comentario' =>null,
         ];
 
@@ -178,7 +180,7 @@ class PedidosController extends Controller
         // Clientes y vendedores
         $clientes = Clientes::with('descuentos.detalles.marca')->get();
         $user = Auth::user();
-        $vendedores = ($user->rol_id == 1 || $user->rol_id == 2) ? Vendedores::all() : [];
+       $vendedores = Vendedores::where('Active', 'Y')->get();
 
         // Monedas
         $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
@@ -216,7 +218,6 @@ class PedidosController extends Controller
                 'fechaCreacion'    => 'required',
                 'fechaEntrega'     => 'required',
                 'CardName'         => 'required',
-                'SlpCode'          => 'required',
                 'phone1'           => 'required',
                 'email'            => 'required',
                 'DocCur'           => 'required',

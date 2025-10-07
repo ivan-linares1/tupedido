@@ -39,6 +39,11 @@ class CotizacionesController extends Controller
             $query->where('OQUT.CardCode', $user->codigo_cliente);
         }
 
+        // Si el usuario es vendedor, filtramos por su código
+        if ($user->rol_id == 4) {
+            $query->where('OQUT.SlpCode', $user->codigo_vendedor);
+        }
+
         $cotizaciones = $query->get();
 
         return view('users.cotizaciones', compact('cotizaciones'));
@@ -57,12 +62,10 @@ class CotizacionesController extends Controller
         $fechaCreacion = $hoy;
         $fechaEntrega  = $mañana;
 
-        $clientes = Clientes::with('descuentos.detalles.marca')->get();
+        $clientes = Clientes::with('descuentos.detalles.marca')->where('Active', 'Y')->get();
 
         $user = Auth::user();
-        $vendedores = ($user->rol_id == 1 || $user->rol_id == 2)
-            ? Vendedores::all()
-            : null;
+        $vendedores = Vendedores::where('Active', 'Y')->get();
 
         // Monedas con cambios del día
         $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
@@ -83,9 +86,9 @@ class CotizacionesController extends Controller
 
         // Valores por defecto
         $preseleccionados = [
-            'cliente' => null,
-            'vendedor' => null,
-            'moneda' => null,
+           'cliente' => ($user->rol_id == 3) ? $user->codigo_cliente : null,
+           'vendedor' => ($user->rol_id == 4) ? $user->codigo_vendedor : null,
+           'moneda' => configuracion::firstOrFail()->MonedaPrincipal,
         ];
 
         $lineasComoArticulos = [];
@@ -163,7 +166,6 @@ class CotizacionesController extends Controller
                 'fechaCreacion'    => 'required',
                 'fechaEntrega'     => 'required',
                 'CardName'         => 'required',
-                'SlpCode'          => 'required',
                 'phone1'           => 'required',
                 'email'            => 'required',
                 'DocCur'           => 'required',
@@ -266,7 +268,7 @@ class CotizacionesController extends Controller
         // Clientes y vendedores
         $clientes = Clientes::with('descuentos.detalles.marca')->get();
         $user = Auth::user();
-        $vendedores = ($user->rol_id == 1 || $user->rol_id == 2) ? Vendedores::all() : [];
+        $vendedores = Vendedores::where('Active', 'Y')->get();
 
         // Monedas
         $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
@@ -308,6 +310,7 @@ class CotizacionesController extends Controller
             'fecha'   => $cotizacion->DocDate,
             'vendedor' => $cotizacion->vendedor->SlpName,
             'moneda'   => $cotizacion->moneda->Currency,
+            'comentario' =>$cotizacion->comment,
 
             'cliente' => [
                 'codigo'  => $cotizacion->CardCode,

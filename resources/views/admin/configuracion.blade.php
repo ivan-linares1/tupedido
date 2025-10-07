@@ -44,6 +44,7 @@
                         <li class="mb-2"><i class="bi bi-building-check text-warning me-2"></i><strong>Ciudad:</strong> {{ $configuracion->ciudad }}</li>
                         <li class="mb-2"><i class="bi bi-globe2 text-dark me-2"></i><strong>País:</strong> {{ $configuracion->pais }}</li>
                         <li class="mb-2"><i class="bi bi-telephone-fill text-success me-2"></i><strong>Teléfono:</strong> {{ $configuracion->telefono }}</li>
+                        <li class="mb-2"><i class="bi bi-cash-coin text-warning me-2"></i><strong>Moneda Principal:</strong> {{ $configuracion->monedaPrincipal->Currency ?? 'No asignada' }}</li>
                     </ul>
                 </div>
 
@@ -52,7 +53,7 @@
                     @if($configuracion->ruta_logo)
                         <div class="bg-light rounded-3 shadow-sm "> 
                             <img src="{{ asset('storage/' . $configuracion->ruta_logo) }}" 
-                                 alt="Logo" class="img-fluid" style="width: 100%;  height: 200px;">
+                                 alt="Logo" class="img-fluid" style="width: 100%;  height: 100%;">
                         </div>
                     @else
                         <div class="border rounded-3 py-5 text-muted bg-light shadow-sm">
@@ -130,16 +131,33 @@
                 </div>
             </div>
 
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="MonedaPrincipal" class="form-label fw-bold">
+                        <i class="bi bi-cash-coin me-1"></i> Moneda Principal
+                    </label>
+                    <select name="MonedaPrincipal" id="MonedaPrincipal" class="form-select">
+                        <option value="" disabled selected>Selecciona una moneda</option>
+                        @foreach($monedas as $moneda)
+                            <option value="{{ $moneda->Currency_ID }}"
+                                @if(old('MonedaPrincipal', $configuracion->MonedaPrincipal) == $moneda->Currency_ID) selected @endif>
+                                {{ $moneda->Currency }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
 
             <div class="col-md-8">
-                    <label for="ruta_logo" class="form-label fw-bold"><i class="bi bi-image me-1"></i> Logo</label>
-                    <input type="file" name="ruta_logo" id="ruta_logo" class="form-control">
-                    @if($configuracion->ruta_logo)
-                        <div class="mt-2">
-                            <img src="{{ asset('storage/' . $configuracion->ruta_logo) }}" alt="Logo" height="80" class="rounded shadow-sm border">
-                        </div>
-                    @endif
-                </div>
+                <label for="ruta_logo" class="form-label fw-bold"><i class="bi bi-image me-1"></i> Logo</label>
+                <input type="file" name="ruta_logo" id="ruta_logo" class="form-control">
+                @if($configuracion->ruta_logo)
+                    <div class="mt-2">
+                        <img src="{{ asset('storage/' . $configuracion->ruta_logo) }}" alt="Logo" height="80" class="rounded shadow-sm border">
+                    </div>
+                @endif
+            </div>
         </div>
 
           <div class="modal-footer">
