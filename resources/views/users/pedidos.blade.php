@@ -15,7 +15,7 @@
         </div>
     </div>
 
-    <table class="table table-bordered table-striped m-3">
+    <table class="table table-bordered table-striped m-8">
         <thead class="table-info  text-center">
             <tr>
                 <th>Folio</th>

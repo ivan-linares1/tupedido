@@ -21,7 +21,7 @@
     
 
     <!-- Importación de CSS -->
-    @vite(['resources/css/variables.css', 'resources/css/style.css', 'resources/js/validaciones.js'])
+    @vite(['resources/css/variables.css', 'resources/css/style.css', 'resources/js/validaciones.js', 'resources/css/catalogos.css'])
 </head>
 <body>
 
@@ -30,6 +30,8 @@
 
     {{-- Header --}}
     @include('components.header')
+    {{--@include('components.navBar')--}}
+
 
     {{-- Contenido principal --}}
     <main class="content content-body">
