@@ -29,7 +29,7 @@ class AuthenticatedSessionController extends Controller
 
             $user = Auth::user();
 
-            if ($user->activo !== 'Y') {
+            if ($user->activo != 1) {
                 Auth::logout(); // cerrar sesión
                 return back()->withErrors([
                     'email' => 'Tu cuenta ha sido desactivada. Ya no tienes acceso al sistema.',
