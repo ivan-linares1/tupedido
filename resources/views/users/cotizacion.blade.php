@@ -97,7 +97,7 @@
                 <label>Moneda</label>
                 <select class="form-select" name="currency_id" id="selectMoneda"
                     data-monedas='@json($monedas)' data-iva='@json($IVA)'
-                    @if(isset($modo) && $modo == 1) disabled @endif>
+                    @if((isset($modo) && $modo == 1) ||  (Auth::user()->rol_id == 3 || Auth::user()->rol_id == 4)) disabled @endif>
                     <option value="" selected disabled>Selecciona una moneda</option>
                     @foreach($monedas as $moneda)
                         <option value="{{ $moneda->Currency_ID }}" @if($moneda->cambios->isEmpty()) disabled @endif 
@@ -106,25 +106,23 @@
                             @if($moneda->cambios->isEmpty() && isset($modo) && $modo == 0) (Sin tipo de cambio) @endif
                         </option>
                     @endforeach
-                </select>
+                </select>                
             </div>
 
-            @if( $vendedores )
+            @if(Auth::user()->rol_id !=3)
                 <div class="mb-3">
-                    <label>Vendedores</label>
-                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"  @if(isset($modo) && $modo == 1) disabled @endif>
-                        <option value="" selected disabled>Selecciona un Vendedor</option>
+                    <label>Vendedor</label>
+                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"  @if((isset($modo) && $modo == 1) ) disabled @endif>
                         @foreach($vendedores as $vendedor)
                             <option value="{{ $vendedor->SlpCode }}" 
                                 @if(isset($preseleccionados['vendedor']) && $preseleccionados['vendedor'] == $vendedor->SlpCode) selected @endif
                                 data-SlpName="{{ $vendedor->SlpName }}">
-                                {{ $vendedor->SlpCode. ' - ' .$vendedor->SlpName }}
+                                {{ $vendedor->SlpName }}
                             </option>
                         @endforeach
                     </select>
                 </div>
             @endif
-
         </div>
     </div>
 </div>
@@ -234,18 +232,52 @@
             <i class="bi bi-filetype-pdf"></i> PDF
         </button>
 
-        <!-- Botón Editar -->
-        <a href="{{ route('NuevaCotizacion', ['DocEntry' => $cotizacion->DocEntry]) }}" class="btn btn-secondary">
-            <i class="bi bi-pencil-square"></i> Editar
-        </a>
-        
-        <a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry]) }}" class="btn btn-success">
-            <i class="bi bi-bag"></i> Pedido
-        </a>
+        @if($moneda->cambios->isEmpty())
+         <div class="d-inline-block position-relative">
+            <button class="btn btn-secondary" disabled><i class="bi bi-pencil-square"></i> Editar</button>
+            <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>
+            <small class="mensaje-cambio text-danger">⚠️ Contacte a soporte: <br> no existen tipos de cambio registrados para hoy.</small>
+        </div>
+        @else
+          <!-- Botón Editar -->
+            <a href="{{ route('NuevaCotizacion', ['DocEntry' => $cotizacion->DocEntry]) }}" class="btn btn-secondary">
+                <i class="bi bi-pencil-square"></i> Editar
+            </a>
+
+            <a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry]) }}" class="btn btn-success">
+                <i class="bi bi-bag"></i> Pedido
+            </a>
+        @endif
     @endif
     
 
     
 </div>
+  <style>
+    .mensaje-cambio {
+    position: absolute;
+    top: 105%;
+    left: 0;
+    background: rgba(255, 245, 245, 0.95);
+    border: 1px solid #dc3545;
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    color: #dc3545;
+    font-weight: 500;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
 
+/* Efecto al pasar el mouse sobre los botones */
+.d-inline-block:hover .mensaje-cambio {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+  </style>
 @endsection

@@ -2057,7 +2057,7 @@ INSERT INTO OITM(ItemCode, ItemName, FrgnName, SalUnitMsr, Id_imagen) VALUES
 /*************************************************************************/
 /*tabla de prueba corregir depues para mejor uso o puede que quede asi ya*/
 INSERT INTO OCRN(Currency) VALUES
-("MXM"),
+("MXN"),
 ("USD"),
 ("EUR");
 /*tabla de prueba corregir depues para mejor uso*/

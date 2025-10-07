@@ -19,5 +19,11 @@ class configuracion extends Model
         'ciudad',
         'telefono',
         'pais',
+        'MonedaPrincipal',
     ];
+
+    public function monedaPrincipal()
+    {
+        return $this->belongsTo(Moneda::class, 'MonedaPrincipal', 'Currency_ID');
+    }
 }

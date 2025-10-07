@@ -27,7 +27,9 @@
         {{-- Mensajes de error --}}
         @if ($errors->any())
             <div class="alert alert-danger">
-                <p class="mb-0"> Correo y/o Contraseña inválidas</p>
+                 @foreach ($errors->all() as $error)
+                    <p class="mb-0">{{ $error }}</p>
+                @endforeach
             </div>
         @endif
         
