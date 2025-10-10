@@ -3,6 +3,8 @@
 @section('title', 'Cotizaciones')
 @section('contenido')
 
+@vite(['resources/css/tablas.css'])
+
 <div class="table-responsive mt-4">
     <h3 class="mb-3 fw-bold">PEDIDOS</h3>
 

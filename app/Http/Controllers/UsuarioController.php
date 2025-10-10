@@ -171,7 +171,7 @@ class UsuarioController extends Controller
     }
 
     // Borrar cuando esté en producción
-    public function insertarMonedas()
+    public function insertarMonedas($cli = false)
     {
         $hoy = now()->format('Y-m-d');
 
@@ -181,12 +181,20 @@ class UsuarioController extends Controller
         ]);
 
         if ($response->failed()) {
+            if ($cli) {
+                echo "Error: No se pudo obtener el tipo de cambio.\n";
+                return;
+            }
             return redirect()->back()->with('error', 'No se pudo obtener el tipo de cambio.');
         }
 
         $rates = $response->json()['rates'] ?? null;
 
         if (!$rates) {
+            if ($cli) {
+                echo "Error: No se encontraron tipos de cambio.\n";
+                return;
+            }
             return redirect()->back()->with('error', 'No se encontraron tipos de cambio.');
         }
 
@@ -228,8 +236,13 @@ class UsuarioController extends Controller
             $mensajes[] = 'EUR→MXN ya existe para hoy.';
         }
 
-        return redirect()->back()->with('success', implode(' ', $mensajes));
+        if ($cli) {
+            echo implode(' ', $mensajes) . "\n";
+        } else {
+            return redirect()->back()->with('success', implode(' ', $mensajes));
+        }
     }
+
 
     public function activo_inactivo(Request $request)
     {

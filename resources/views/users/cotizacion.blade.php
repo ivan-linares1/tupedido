@@ -4,8 +4,9 @@
 
 @section('contenido')
 
- <!-- Importación de JS -->
-@vite(['resources/js/cotizaciones.js'])
+ <!-- Importación de JS y css-->
+@vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
+
 <div class="container my-4">
     <h3 class="mb-3 fw-bold">
         @if($modo == 0)
@@ -67,16 +68,23 @@
                     @endif
                 </span><br>
             </div>
+            
+           <div class="row direccion-container">
+                <div class="col-md-6 col-sm-12 mb-3">
+                    <label>Dirección Fiscal</label>
+                    <span id="direccionFiscal" class="form-control" style="white-space: pre-wrap; display: block;">
+                        {{ $cotizacion->Address ?? '' }}
+                    </span>
+                </div>
 
-            <div class="mb-3">
-                <label>Dirección Fiscal</label>
-                <span id="direccionFiscal" class="form-control" style="white-space: pre-wrap; display: block;"> {{ $cotizacion->Address ?? '' }} </span>
+                <div class="col-md-6 col-sm-12 mb-3">
+                    <label>Dirección de Entrega</label>
+                    <span id="direccionEntrega" class="form-control" style="white-space: pre-wrap; display: block;">
+                        {{ $cotizacion->Address2 ?? '' }}
+                    </span>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label>Dirección de Entrega</label>
-                <span id="direccionEntrega" class="form-control" style="white-space: pre-wrap; display: block;"> {{ $cotizacion->Address2 ?? '' }} </span>
-            </div>
         </div>
 
         <!-- COLUMNA DERECHA: Datos Generales -->
@@ -112,7 +120,8 @@
             @if(Auth::user()->rol_id !=3)
                 <div class="mb-3">
                     <label>Vendedor</label>
-                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"  @if((isset($modo) && $modo == 1) ) disabled @endif>
+                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"  @if((isset($modo) && $modo == 1) ||  (Auth::user()->rol_id == 4) ) disabled @endif>
+                         <option value="" selected disabled>Selecciona un vendedor</option>
                         @foreach($vendedores as $vendedor)
                             <option value="{{ $vendedor->SlpCode }}" 
                                 @if(isset($preseleccionados['vendedor']) && $preseleccionados['vendedor'] == $vendedor->SlpCode) selected @endif
@@ -232,11 +241,11 @@
             <i class="bi bi-filetype-pdf"></i> PDF
         </button>
 
-        @if($moneda->cambios->isEmpty())
+        @if($moneda->cambios->isEmpty() || $pedido)
          <div class="d-inline-block position-relative">
             <button class="btn btn-secondary" disabled><i class="bi bi-pencil-square"></i> Editar</button>
             <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>
-            <small class="mensaje-cambio text-danger">⚠️ Contacte a soporte: <br> no existen tipos de cambio registrados para hoy.</small>
+            <small class="mensaje-cambio text-danger">⚠️ {!! $pedido ? 'Ya tiene un pedido creado.' : 'Contacte a soporte: <br> no existen tipos de cambio registrados para hoy.' !!}</small>
         </div>
         @else
           <!-- Botón Editar -->
