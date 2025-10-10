@@ -2,7 +2,7 @@
 body {
     height: 100%;
     font-family: 'Arial', sans-serif;
-    background-color: #f0f2f5;
+    background-color: rgb(204, 203, 203);
     margin: 0;
 }
 
@@ -112,7 +112,8 @@ body {
 }
 
 .logo-section .logo-img:hover {
-    transform: scale(1.1);
+    transform: scale(1.2);
+    border: 5px solid var(--color-secundario);
 }
 
 .logo-section .brand-text {
@@ -155,6 +156,7 @@ body {
     font-size: 1.2rem;
     border-radius: 0.25rem;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+
 }
 
 .header span {
@@ -168,16 +170,17 @@ body {
     margin-left: 0;
     padding: 2rem;
     transition: margin-left 0.3s ease;
+    margin-left: 250px;
 }
 
-.sidebar ~ .content {
-    margin-left: 250px !important; /* espacio del sidebar */
+/*.sidebar ~ .content {
+    margin-left: 250px !important; /* espacio del sidebar 
 }
 
 .navbar-horizontal ~ .content {
-    margin-left: 0;       /* nada a la izquierda */
-    padding-top: 0px;    /* espacio de la barra horizontal */
-}
+    margin-left: 0;       /* nada a la izquierda 
+    padding-top: 0px;    /* espacio de la barra horizontal 
+}*/
 
 .content-body {
     margin-top: 60px;
@@ -242,5 +245,7 @@ body {
 
     .content {
         margin-left: 0;
+        margin-left: 0; /* quitar espacio reservado para sidebar */
+        transition: margin-left 0.3s ease;
     }
 }

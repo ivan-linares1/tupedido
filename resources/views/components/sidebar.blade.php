@@ -5,8 +5,8 @@
     </button>
 
     <div class="logo-section text-center">
-        <img src="{{ asset('storage/logos/logocarrito.jpg') }}" alt="Logo" class="logo-img mb-2">
-        <a href="{{ route('dashboard') }}" class="brand-text d-block">KOMBITEC</a>
+        <a href="{{ route('dashboard') }}"><img src="{{ asset('storage/logos/logocarrito.jpg') }}" alt="Logo" class="logo-img mb-2"></a>
+        <a href="https://www.kombitec.com.mx/" class="brand-text d-block">KOMBITEC</a>
     </div>
 
     <ul class="nav flex-column px-2">
@@ -87,6 +87,7 @@
         @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
         <li>
             <a href="{{ route ('insertar.monedas') }}"  class="nav-link">Insertar monedas</a>
+            <a href="{{ route ('ws') }}"  class="nav-link">WS</a>
         </li>
         @endif
     </ul>

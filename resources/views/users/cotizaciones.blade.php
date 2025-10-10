@@ -4,6 +4,8 @@
 
 @section('contenido')
 
+@vite(['resources/css/tablas.css'])
+
 <div class="table-responsive mt-4">
     <h3 class="mb-3 fw-bold">COTIZACIONES</h3>
 
@@ -16,7 +18,7 @@
     </div>
 
     <table class="table table-bordered table-striped m-8">
-        <thead class="table-info  text-center">
+        <thead class="text-center">
             <tr>
                 <th>Folio</th>
                 <th>Fecha</th>

@@ -1,0 +1,231 @@
+/* =================== TÍTULOS =================== */
+h3, h4, h5 {
+    font-family: var(--fuente-principal);
+    color: var(--color-primario);
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+h3 {
+    border-left: 6px solid var(--color-secundario);
+    padding-left: 12px;
+    font-size: 1.8rem;
+    margin-top: 1.5rem;
+}
+
+h4 {
+    font-size: 1.25rem;
+    margin-top: 15px;
+}
+
+h5 {
+    font-size: 1.05rem;
+    margin-top: 15px;
+}
+
+/* =================== FORM CONTROLS =================== */
+input.form-control,
+select.form-select,
+span.form-control {
+    font-family: var(--fuente-secundaria);
+    font-size: 0.95rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 0.45rem 0.65rem;
+    background-color: #fff;
+    transition: all 0.2s ease-in-out;
+    width: 100%;
+}
+
+input.form-control:focus,
+select.form-select:focus {
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 0.2rem rgba(5, 86, 79, 0.15);
+    outline: none;
+}
+
+span.form-control {
+    display: block;
+    background-color: #f8f9fa;
+    cursor: default;
+    min-height: 38px;
+    white-space: pre-wrap;
+}
+
+/* =================== CONTAINERS =================== */
+.container {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+    border: 1px solid #e2e2e2;
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.container:hover {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+
+/* =================== TABLA PRINCIPAL =================== */
+.table-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: auto;
+    white-space: nowrap;
+    border-radius: 10px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    border: 1px solid #d1d1d1;
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.table-scroll th,
+.table-scroll td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.55rem 0.8rem;
+    font-family: var(--fuente-secundaria);
+    font-size: 0.95rem;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.table-scroll th {
+    background-color: var(--color-primario);
+    color: #fff;
+    font-weight: 500;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.table-scroll tbody tr:nth-of-type(odd) {
+    background-color: #f8f9fa;
+}
+
+.table-scroll tbody tr:hover {
+    background-color: rgba(5, 86, 79, 0.08);
+    transition: background-color 0.25s ease;
+}
+
+.table-scroll img {
+    max-width: 50px;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* =================== TOTALES =================== */
+.row > .col-md-4 table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: var(--fuente-secundaria);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.row > .col-md-4 table th {
+    text-align: left;
+    font-weight: 500;
+    color: #495057;
+    padding: 0.5rem 0.75rem;
+}
+
+.row > .col-md-4 table td {
+    text-align: right;
+    padding: 0.5rem 0.75rem;
+}
+
+/* =================== MODAL ARTÍCULOS =================== */
+.modal-content {
+    border-radius: 12px;
+    max-width: 90%;
+}
+
+.modal-header {
+    border-bottom: none;
+    font-family: var(--fuente-principal);
+}
+
+.modal-header h5 {
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    color: #fff;
+}
+
+#tablaModalArticulos th, #tablaModalArticulos td {
+    text-align: center;
+    vertical-align: middle;
+    font-family: var(--fuente-secundaria);
+    font-size: 0.95rem;
+    padding: 0.45rem 0.6rem;
+    box-sizing: border-box;
+}
+
+#tablaModalArticulos tbody tr:nth-of-type(odd) {
+    background-color: #f8f9fa;
+}
+
+#tablaModalArticulos tbody tr:hover {
+    background-color: rgba(5, 86, 79, 0.08);
+    transition: background-color 0.25s ease;
+}
+
+#tablaModalArticulos img {
+    max-width: 50px;
+    height: auto;
+    border-radius: 4px;
+}
+
+#tablaModalArticulos td.descripcion,
+#tablaModalArticulos td.nombre {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 250px;
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+}
+
+#tablaModalArticulos td.precio-celda,
+#tablaModalArticulos td.cantidad-celda {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#tablaModalArticulos button {
+    font-family: var(--fuente-secundaria);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+#tablaModalArticulos button:hover {
+    opacity: 0.85;
+}
+
+#tablaModalArticulos_length select {
+    width: 80px;          /* más ancho para que se vea el número */
+    display: inline-block;
+    padding: 0.35rem 0.5rem; /* más espacio interno */
+    border-radius: 6px;
+    font-size: 0.95rem;    /* más legible */
+    border: 1px solid #ced4da;
+    box-sizing: border-box;
+}
+
+/* =================== RESPONSIVIDAD LIMITADA =================== */
+/* Solo ajustes menores, Bootstrap maneja todo lo demás */
+@media (max-width: 576px) {
+    .table-scroll {
+        max-height: 300px;
+        overflow-x: auto;
+    }
+
+    span.form-control {
+        white-space: pre-wrap;
+    }
+}

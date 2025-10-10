@@ -5,7 +5,7 @@
 @section('contenido')
 
  <!-- Importación de JS -->
-@vite(['resources/js/cotizaciones.js'])
+@vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
 
 <div class="container my-4">
     <h3 class="mb-3 fw-bold">
@@ -69,14 +69,20 @@
                 </span><br>
             </div>
 
-            <div class="mb-3">
-                <label>Dirección Fiscal</label>
-                <span id="direccionFiscal" class="form-control" style="white-space: pre-wrap; display: block;"> {{ $cotizacion->Address ?? '' }} </span>
-            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Dirección Fiscal</label>
+                    <span id="direccionFiscal" class="form-control" style="white-space: pre-wrap; display: block;">
+                        {{ $cotizacion->Address ?? '' }}
+                    </span>
+                </div>
 
-            <div class="mb-3">
-                <label>Dirección de Entrega</label>
-                <span id="direccionEntrega" class="form-control" style="white-space: pre-wrap; display: block;"> {{ $cotizacion->Address2 ?? '' }} </span>
+                <div class="col-md-6">
+                    <label>Dirección de Entrega</label>
+                    <span id="direccionEntrega" class="form-control" style="white-space: pre-wrap; display: block;">
+                        {{ $cotizacion->Address2 ?? '' }}
+                    </span>
+                </div>
             </div>
         </div>
 
@@ -110,10 +116,11 @@
                 </select>                
             </div>
 
-            @if($preseleccionados['vendedor'] != NULL && Auth::user()->rol_id !=3)
+            @if(Auth::user()->rol_id !=3)
                 <div class="mb-3">
                     <label>Vendedor</label>
-                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"  @if((isset($modo) && $modo == 1) ||  (Auth::user()->rol_id == 3 || Auth::user()->rol_id == 4)) disabled @endif>
+                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"  @if((isset($modo) && $modo == 1) ||  (Auth::user()->rol_id == 4) ) disabled @endif>
+                         <option value="" selected disabled>Selecciona un vendedor</option>
                         @foreach($vendedores as $vendedor)
                             <option value="{{ $vendedor->SlpCode }}" 
                                 @if(isset($preseleccionados['vendedor']) && $preseleccionados['vendedor'] == $vendedor->SlpCode) selected @endif

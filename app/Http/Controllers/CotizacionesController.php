@@ -308,7 +308,7 @@ class CotizacionesController extends Controller
             'subtitulo'  => 'Cotización',
             'numero'  =>  $cotizacion->DocEntry,
             'fecha'   => $cotizacion->DocDate,
-            'vendedor' => $cotizacion->vendedor->SlpName,
+            'vendedor' => $cotizacion->vendedor->SlpName ?? '',
             'moneda'   => $cotizacion->moneda->Currency,
             'comentario' =>$cotizacion->comment,
 

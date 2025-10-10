@@ -1,99 +1,91 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArticuloController;
 use App\Http\Controllers\ClienteController;
-use App\Http\Controllers\configuracionController;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\CotizacionesController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\MarcaController;
-use App\Http\Controllers\OslpController;
-use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->route('dashboard');
-});
+Route::get('/', fn() => redirect()->route('dashboard'));
 
+// RUTAS PROTEGIDAS POR AUTENTICACIÓN
 Route::middleware('auth')->group(function () {
+    //DASHBOARD
+    Route::get('/Dashboard', fn() => view('admin.dashboard'))->name('dashboard');
 
-    //rutasGenerales ambos usuarios
-    Route::get('/Dashboard', function () { return view('admin.dashboard'); })->name('dashboard');
+   // COTIZACIONES (prefijo /Cotizaciones)
+    Route::prefix('Cotizaciones')->group(function () {
+        Route::get('/', [CotizacionesController::class, 'index'])->name('cotizaciones');
+        Route::post('/Guardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
+        Route::post('/GuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+    });
 
-    //cotizaciones
+    // Otras rutas relacionadas con cotizaciones
     Route::get('/NuevaCotizacion/{DocEntry?}', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
-    Route::get('/Cotizaciones', [CotizacionesController::class, 'index'])->name('cotizaciones');
     Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
-    Route::post('/CotizacionesGuardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
     Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])->name('detalles');
     Route::get('/cotizacion/pdf/{id}', [CotizacionesController::class, 'pdfCotizacion'])->name('cotizacion.pdf');
 
-    //Pedidos
-    Route::get('/NuevPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
-    Route::get('/Pedidos', [PedidosController::class, 'index'])->name('Pedidos');
-    Route::post('/CotizacionesGuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+   //PEDIDOS (prefijo /Pedidos)
+    Route::prefix('Pedidos')->group(function () {
+        Route::get('/', [PedidosController::class, 'index'])->name('Pedidos');
+    });
+    Route::get('/NuevoPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
     Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
     Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfCotizacion'])->name('pedido.pdf');
 
-    //Articulos
-    Route::get('/CatalogosArticulos', [ArticuloController::class, 'index'])->name('articulos'); 
-    Route::post('/Articulo/Estado', [ArticuloController::class, 'activo_inactivo'])->name('estado.Articulo');
+    //CATÁLOGOS (Artículos, Clientes)
+    Route::prefix('Catalogos')->group(function () {
+        // Artículos
+        Route::get('/Articulos', [ArticuloController::class, 'index'])->name('articulos');
+        Route::post('/Articulo/Estado', [ArticuloController::class, 'activo_inactivo'])->name('estado.Articulo');
 
+        // Clientes
+        Route::get('/Clientes', [ClienteController::class, 'index'])->name('clientes');
+        Route::post('/Clientes/Estado', [ClienteController::class, 'activo_inactivo'])->name('estado.Cliente');
+    });
 
-    // RUTAS PARA EL ADMIN
-    Route::middleware(['auth', 'role:1,2'])->group(function () {
+    //ADMINISTRACIÓN (Roles 1 y 2)
+    Route::middleware(['role:1,2'])->group(function () {
 
-        //Usuarios
+        /*---------------------- USUARIOS ----------------------*/
         Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
+        Route::post('/usuarios/estado', [UsuarioController::class, 'activo_inactivo'])->name('estado.Usuario');
 
-         Route::post('/usuarios/estado', [UsuarioController::class, 'activo_inactivo'])->name('estado.Usuario');
+        /*---------------------- ADMIN (prefijo /admin) ----------------------*/
+        Route::prefix('admin')->group(function () {
+            // Vendedores
+            Route::get('/catalogo-vendedores', [VendedorController::class, 'index'])->name('admin.catalogo.vendedores');
+            Route::post('/vendedores/toggle-estado', [VendedorController::class, 'toggleActivo'])->name('admin.vendedores.toggleActivo');
 
-        //Clientes
-        Route::get('/CatalogosClientes', [ClienteController::class, 'index'])->name('clientes'); 
-        Route::post('/Clientes/Estado', [ClienteController::class, 'activo_inactivo'])->name('estado.Cliente'); 
+            // Marcas
+            Route::get('/marcas', [MarcaController::class, 'index'])->name('admin.marcas.index');
 
+            // Usuarios (CRUD)
+            Route::get('/usuarios', [UsuarioController::class, 'index'])->name('admin.usuarios.index');
+            Route::post('/usuarios', [UsuarioController::class, 'store'])->name('admin.usuarios.store');
 
-        //Vendedores
-        Route::post('/admin/vendedores/toggle-estado', [VendedorController::class, 'toggleActivo'])
-            ->name('admin.vendedores.toggleActivo');
-        
+            // Consultas AJAX
+            Route::get('/ocrd/{cardCode}', [UsuarioController::class, 'getCliente'])->name('admin.ocrd.show');
+            Route::get('/oslp/{slpCode}', [UsuarioController::class, 'show'])->name('admin.oslp.show');
+        });
 
-        // Marcas
-       Route::get('/admin/marcas', [MarcaController::class, 'index'])->name('admin.marcas.index');
+        /*---------------------- CONFIGURACIÓN ----------------------*/
+        Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion');
+        Route::put('/configuracion', [ConfiguracionController::class, 'update'])->name('GuardarConfig');
 
-
-
-        //configuracion 
-        Route::get('/configuracion', [configuracionController::class, 'index'])->name('configuracion');
-        Route::put('/configuracion', [configuracionController::class, 'update'])->name('GuardarConfig');
-
-
-        // Borrar cuando este en producción *****************
+        /*---------------------- UTILIDADES (SOLO DESARROLLO) ----------------------*/
         Route::get('/insertar-monedas', [UsuarioController::class, 'insertarMonedas'])->name('insertar.monedas');
-
-        //Ruta Catálogo de Vendedores (solo admin)
-        Route::get('/admin/catalogo-vendedores', [VendedorController::class, 'index'])->name('admin.catalogo.vendedores');
+        Route::get('/probarXML', [ App\Http\Controllers\SincronizacionController::class, 'probarXML'])->name('ws');
     });
 
-    // RUTAS PARA USUARIOS NORMALES Y VENDEDORES
-    Route::middleware(['auth', 'role:3,4'])->group(function () { 
+    // USUARIOS NORMALES Y VENDEDORES (Roles 3 y 4)
+    Route::middleware(['role:3,4'])->group(function () {
+       
     });
-    
 });
-
-// Grupo admin (recursos con prefijo admin)
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
-    Route::post('/usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
-   
-
-
-    // Ruta para obtener datos del cliente (AJAX) por cardCode
-    Route::get('/ocrd/{cardCode}', [UsuarioController::class, 'getCliente'])->name('ocrd.show');
-
-    // Ruta para obtener datos del vendedor (AJAX) por slpCode
-    Route::get('/oslp/{slpCode}', [UsuarioController::class, 'show'])->name('oslp.show');
-});
-
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

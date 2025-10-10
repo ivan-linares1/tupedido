@@ -331,7 +331,7 @@ class PedidosController extends Controller
             'subtitulo'  => 'Pedido',
             'numero'  =>  $pedido->DocEntry,
             'fecha'   => $cotizacion->DocDate,
-            'vendedor' => $cotizacion->vendedor->SlpName,
+            'vendedor' => $cotizacion->vendedor->SlpName ?? '',
             'moneda'   => $cotizacion->moneda->Currency,
             'comentario' =>$cotizacion->comment,
             

@@ -5,10 +5,13 @@
 CREATE TABLE OCRD(
   CardCode VARCHAR(15) PRIMARY KEY,
   CardName VARCHAR(100),
-  GroupNum INT
+  GroupNum INT,
+  phone1 VARCHAR(30),
+  `e-mail` VARCHAR(254),
+  Active VARCHAR(1) NOT NULL DEFAULT 'Y'
 );
 
-
+/*Marcas*/
 CREATE TABLE OITB(
   ItmsGrpCod VARCHAR(50) PRIMARY KEY,
   ItmsGrpNam VARCHAR(100),
@@ -62,20 +65,23 @@ CREATE TABLE CRD1(
 
 /*Monedas*/
 CREATE TABLE OCRN(
-  Currency_ID INT AUTO_INCREMENT PRIMARY KEY,
+  Currency_ID INT PRIMARY KEY,
   Currency VARCHAR(3) UNIQUE NOT NULL
 );
 
-INSERT INTO OCRN(Currency) VALUES
-("MXN"),
-("USD"),
-("EUR");
+INSERT INTO OCRN(Currency_ID, Currency) VALUES
+(1, "MXN"),
+(2, "USD"),
+(3, "EUR");
 
 /* Listas de precios */
 CREATE TABLE OPLN(
   ListNum INT PRIMARY KEY,
   ListName VARCHAR(32)
 );
+
+INSERT INTO OPLN (ListNum, ListName) VALUES
+(1, 'Lista General');
 
 /* Tipos de cambio */
 CREATE TABLE ORTT(
@@ -95,12 +101,12 @@ CREATE TABLE Imagenes(
 /* Productos */
 CREATE TABLE OITM(
   ItemCode VARCHAR(50) PRIMARY KEY,
-  ItemName VARCHAR(100),
-  FrgnName VARCHAR(100),
-  ItmsGrpCod VARCHAR(50),
+  ItemName VARCHAR(254),
+  FrgnName VARCHAR(254),
   SalUnitMsr VARCHAR(100),
   Id_imagen BIGINT NOT NULL,
   Active CHAR(1) NOT NULL DEFAULT 'Y',
+  ItmsGrpCod VARCHAR(50),
   FOREIGN KEY (ItmsGrpCod) REFERENCES OITB(ItmsGrpCod),
   FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
 );
@@ -137,6 +143,7 @@ CREATE TABLE OQUT(
     Subtotal DECIMAL(19,6),
     IVA DECIMAL(19,6),
     Total DECIMAL(19,6),
+    comment VARCHAR(254),
     FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
     FOREIGN KEY (SlpCode) REFERENCES OSLP(SlpCode)
 );
@@ -172,7 +179,7 @@ CREATE TABLE RDR1 (
 );
 
 /* =============================
-   Usuarios
+   CONFIGURACION DEL SISTEMA FUERA DE SAP
    ============================= */
 CREATE TABLE roles (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -180,11 +187,11 @@ CREATE TABLE roles (
 );
 
 /* Insertar roles */
-INSERT INTO roles (nombre) VALUES
-  ('Super Administrador'),
-  ('Administrador'),
-  ('Cliente'),
-  ('Vendedor');
+INSERT INTO roles (id, nombre) VALUES
+  (1, 'Super Administrador'),
+  (2, 'Administrador'),
+  (3, 'Cliente'),
+  (4, 'Vendedor');
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -197,7 +204,8 @@ CREATE TABLE users (
 );
 
 CREATE TABLE configuracion(
-  iva INT 
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  iva INT ,
   ruta_logo VARCHAR(255),
   nombre_empresa VARCHAR(255),
   calle VARCHAR(150),
@@ -206,6 +214,6 @@ CREATE TABLE configuracion(
   ciudad VARCHAR (30),
   telefono VARCHAR(15),
   pais VARCHAR(30),
-  MonedaPrincipal INT
+  MonedaPrincipal INT,
   FOREIGN KEY(MonedaPrincipal) REFERENCES OCRN(Currency_ID)
 );

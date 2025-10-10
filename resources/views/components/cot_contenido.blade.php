@@ -1,17 +1,3 @@
-<style>
-    .table-scroll {
-    max-height: 400px;      /* Scroll vertical */
-    overflow-y: auto;
-    overflow-x: auto;       /* Scroll horizontal */
-    white-space: nowrap;    /* Evita que los th se rompan en varias líneas */
-}
-
-.table-scroll th, 
-.table-scroll td {
-    white-space: nowrap;    /* Mantiene todo en una sola línea */
-}
-</style>
-
 <!-- Scripts necesarios -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>

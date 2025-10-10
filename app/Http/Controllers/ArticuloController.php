@@ -11,7 +11,7 @@ class ArticuloController extends Controller
     public function index (Request $request)
     {
         $articulo = Articulo::query();
-        $marcas = Marcas::all();
+        $marcas = Marcas::orderBy('ItmsGrpNam', 'asc')->get();
 
 
         // Filtro estatus

@@ -24,8 +24,9 @@ class configuracionController extends Controller
                 'colonia' => 'COL. EL PASEO, SAN LUIS POTOSÍ',
                 'CP' => '78320',
                 'ciudad' => 'San Luis Potosí',
-                'telefono' => '',
-                'pais' => 'MEXICO'
+                'telefono' => '4441370770',
+                'pais' => 'MEXICO',
+                'MonedaPrincipal' => 1
             ]);
         }
 
