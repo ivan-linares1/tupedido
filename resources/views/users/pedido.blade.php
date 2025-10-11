@@ -197,11 +197,17 @@
         <button type="button" class="btn btn-danger" onclick="window.location='{{ url('/') }}'">
             <i class="bi bi-x-circle"></i> Cancelar
         </button>
-
-        <!-- Botón Guardar -->
-        <button type="button" id="btnPedido" class="btn btn-success">
-            <i class="bi bi-save"></i> Crear Pedido
-        </button>
+         @if($moneda->cambios->isEmpty())
+              <div class="d-inline-block position-relative">
+                <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>
+                <small class="mensaje-cambio text-danger">⚠️ {!! 'Contacte a soporte: <br> no existen tipos de cambio registrados para hoy.' !!}</small>
+               </div>
+         @else
+            <!-- Botón Guardar -->
+            <button type="button" id="btnPedido" class="btn btn-success">
+                <i class="bi bi-save"></i> Crear Pedido
+            </button>
+        @endif
     @else
         <!-- Botón PDF -->
         <button type="button" class="btn btn-danger" onclick="window.open('{{ route('pedido.pdf', $cotizacion->DocEntry) }}', '_blank')">
@@ -210,4 +216,30 @@
     @endif
 </div>
 
+<style>
+    .mensaje-cambio {
+        position: absolute;
+        top: 105%;
+        left: 0;
+        background: rgba(255, 245, 245, 0.95);
+        border: 1px solid #dc3545;
+        border-radius: 10px;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        color: #dc3545;
+        font-weight: 500;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        white-space: nowrap;
+        z-index: 10;
+        opacity: 0;
+        transform: translateY(5px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    /* Efecto al pasar el mouse sobre los botones */
+    .d-inline-block:hover .mensaje-cambio {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
 @endsection

@@ -32,8 +32,8 @@ class Articulos extends Command
         $controller = new SincronizacionController();
 
         // Llamar al método (ajusta el nombre si tu método se llama distinto)
-        $controller->probarXML(true);
+        $controller->Articulos(true);
 
-        $this->info('✅ Sincronización completada.');
+        $this->info('✅ Proceso de Sincronizacion Finalizado.');
     }
 }

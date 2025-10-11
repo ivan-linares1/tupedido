@@ -7,10 +7,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-// Borrar al poner en producción
-use App\Models\MonedaCambio;
-use Illuminate\Support\Facades\Http;
-
 class UsuarioController extends Controller
 {
     // Muestra la lista de usuarios
@@ -169,81 +165,7 @@ class UsuarioController extends Controller
 
         return response()->json($vendedor);
     }
-
-    // Borrar cuando esté en producción
-    public function insertarMonedas($cli = false)
-    {
-        $hoy = now()->format('Y-m-d');
-
-        $response = Http::get('https://api.frankfurter.app/latest', [
-            'from' => 'MXN',
-            'to'   => 'USD,EUR'
-        ]);
-
-        if ($response->failed()) {
-            if ($cli) {
-                echo "Error: No se pudo obtener el tipo de cambio.\n";
-                return;
-            }
-            return redirect()->back()->with('error', 'No se pudo obtener el tipo de cambio.');
-        }
-
-        $rates = $response->json()['rates'] ?? null;
-
-        if (!$rates) {
-            if ($cli) {
-                echo "Error: No se encontraron tipos de cambio.\n";
-                return;
-            }
-            return redirect()->back()->with('error', 'No se encontraron tipos de cambio.');
-        }
-
-        $usdToMxn = 1 / $rates['USD'];
-        $eurToMxn = 1 / $rates['EUR'];
-
-        $mensajes = [];
-
-        if (!MonedaCambio::where('Currency_ID', 1)->where('RateDate', $hoy)->exists()) {
-            MonedaCambio::create([
-                'Currency_ID' => 1,
-                'RateDate'    => $hoy,
-                'Rate'        => 1.0
-            ]);
-            $mensajes[] = 'MXN agregado.';
-        } else {
-            $mensajes[] = 'MXN ya existe para hoy.';
-        }
-
-        if (!MonedaCambio::where('Currency_ID', 2)->where('RateDate', $hoy)->exists()) {
-            MonedaCambio::create([
-                'Currency_ID' => 2,
-                'RateDate'    => $hoy,
-                'Rate'        => $usdToMxn
-            ]);
-            $mensajes[] = 'USD→MXN agregado.';
-        } else {
-            $mensajes[] = 'USD→MXN ya existe para hoy.';
-        }
-
-        if (!MonedaCambio::where('Currency_ID', 3)->where('RateDate', $hoy)->exists()) {
-            MonedaCambio::create([
-                'Currency_ID' => 3,
-                'RateDate'    => $hoy,
-                'Rate'        => $eurToMxn
-            ]);
-            $mensajes[] = 'EUR→MXN agregado.';
-        } else {
-            $mensajes[] = 'EUR→MXN ya existe para hoy.';
-        }
-
-        if ($cli) {
-            echo implode(' ', $mensajes) . "\n";
-        } else {
-            return redirect()->back()->with('success', implode(' ', $mensajes));
-        }
-    }
-
-
+    
     public function activo_inactivo(Request $request)
     {
         $usuario = User::findOrFail($request->id);

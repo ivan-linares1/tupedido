@@ -6,7 +6,7 @@
 
 <div id="flash-messages" class="alert-top-end"></div>
 
-<div class="card shadow-sm border-0 rounded-3 mt-4">
+<div class="card shadow-sm border-0 rounded-3 mt-4" id="inicio">
     <div class="card-header d-flex justify-content-between align-items-center bg-success text-white rounded-top">
         <h5 class="mb-0">
             <i class="bi bi-box-seam me-2"></i> Catálogo de Productos / Servicios
@@ -52,7 +52,7 @@
                 <div class="col-md-3 ms-auto">
                     <label for="buscarArticulo" class="form-label fw-semibold">Buscar</label>
                     <div class="input-group input-group-sm rounded-3">
-                        <input type="text" id="buscarArticulo" class="form-control rounded-start" placeholder="Buscar producto...">
+                        <input type="text" id="buscarArticulo" name="buscar" class="form-control rounded-start" placeholder="Buscar producto...">
                         <span class="input-group-text bg-white rounded-end"><i class="bi bi-search"></i></span>
                     </div>
                 </div>
@@ -60,56 +60,10 @@
         </form>
 
         <!-- Tabla -->
-        <div class="table-responsive">
-            <table id="tablaArticulos" class="table table-hover table-striped align-middle">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th>Clave</th>
-                        <th>Producto / Servicio</th>
-                        <th>Descripción</th>
-                        <th>Grupo de Productos</th>
-                        <th>Imagen</th>
-                        @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
-                            <th>Activo</th>
-                        @endif
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($articulos as $articulo)
-                    <tr data-status="{{ $articulo->Active }}">
-                        <td>{{ $articulo->ItemCode }}</td>
-                        <td class="text-primary fw-semibold">{{ $articulo->ItemName }}</td>
-                        <td>{{ $articulo->FrgnName }}</td>
-                        <td>{{ $articulo->marca->ItmsGrpNam }}</td>
-                        <td><img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:70px;height:auto;"></td>
-                        @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
-                        <td class="text-center">
-                            <label class="switch">
-                                <input 
-                                    type="checkbox" 
-                                    class="toggle-estado" 
-                                    data-id="{{ $articulo->ItemCode }}"
-                                    data-field="Active"
-                                    data-url="{{ route('estado.Articulo') }}"
-                                    {{ $articulo->Active == 'Y' ? 'checked' : '' }}>
-                                <span class="slider round"></span>
-                            </label>
-                        </td>
-                        @endif
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="6" class="text-center text-muted">No se encontraron resultados</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="table-responsive" id="tabla-container">
+            @include('partials.tabla_articulos')
         </div>
 
-        <!-- Paginación -->
-        <div class="d-flex justify-content-center mt-3">
-            {{ $articulos->appends(request()->query())->links('pagination::bootstrap-5') }}
-        </div>
     </div>
 </div>
 
@@ -126,12 +80,44 @@
 <script>
     // Filtro de búsqueda
     $(document).ready(function() {
-        $('#buscarArticulo').on('keyup', function() {
-            const valor = $(this).val().toLowerCase();
-            $('#tablaArticulos tbody tr').filter(function() {
-                $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
-            });
+    function fetchArticulos() {
+        const buscar = $('#buscarArticulo').val();
+        const estatus = $('select[name="estatus"]').val();
+        const grupo = $('select[name="grupo"]').val();
+        const mostrar = $('select[name="mostrar"]').val();
+
+        $.ajax({
+            url: "{{ route('articulos') }}",
+            method: "GET",
+            data: { buscar, estatus, grupo, mostrar },
+            success: function(data) {
+                $('#tabla-container').html(data);
+            }
+        });
+    }
+
+    // Búsqueda al escribir
+    $('#buscarArticulo').on('keyup', function() {
+        fetchArticulos();
+    });
+
+    // Filtros de selects
+    $('select[name="estatus"], select[name="grupo"], select[name="mostrar"]').on('change', function() {
+        fetchArticulos();
+    });
+
+    // Paginación AJAX
+    $(document).on('click', '#tabla-container .pagination a', function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        $.get(url, function(data) {
+            $('#tabla-container').html(data);
+            
+            // Mover scroll al inicio del contenedor o de la página
+            $('html, body').animate({ scrollTop: $('#inicio').offset().top }, 0);
         });
     });
+});
+
 </script>
 @endpush

@@ -10,8 +10,25 @@ $(document).on('keydown', '.cantidad, #telefono', function(e) {
     }
 });
 
+//acciones de las alerts
+document.addEventListener('DOMContentLoaded', function() {
+    // Cerrar manualmente
+    document.querySelectorAll('.panel-alert .close-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            this.parentElement.remove();
+        });
+    });
+
+    // Cerrar automáticamente después de 10 segundos
+    setTimeout(() => {
+        document.querySelectorAll('.panel-alert').forEach(function(alert){
+            alert.remove();
+        });
+    }, 6000);
+});
 
 
+//acciones de los cambios de estado de los catalogos de clientes y productos
 $(document).ready(function() {
 
     function showFlash(message, type = "success") {

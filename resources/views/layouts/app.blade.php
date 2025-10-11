@@ -37,16 +37,23 @@
     <main class="content content-body">
         {{--muestra los mensajes de errrores en todas las vistas--}}
         @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="panel-alert success">
                 {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button class="close-btn">&times;</button>
+            </div>
+        @endif
+
+        @if(session('warning'))
+            <div class="panel-alert warning">
+                {{ session('warning') }}
+                <button class="close-btn">&times;</button>
             </div>
         @endif
 
         @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="panel-alert error">
                 {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button class="close-btn">&times;</button>
             </div>
         @endif
 

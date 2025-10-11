@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Console\Commands\Articulos;
+
 use App\Models\Articulo;
-use Illuminate\Http\Request;
+use App\Models\MonedaCambio;
+use Illuminate\Support\Facades\Http;
 
 class SincronizacionController extends Controller
 {
-    
-    public function probarXML($cli = false)
+    // Conexión al Web Service con manejo de errores
+    private function ConexionWBS()
     {
         $url = "http://10.10.1.116:8083/KombiService.asmx?wsdl";
 
@@ -19,42 +20,156 @@ class SincronizacionController extends Controller
                 'exceptions' => true,
             ]);
 
+           return [
+                'success' => true,
+                'client' => $client,
+                'message' => '✅ Conexión al WS establecida correctamente.'
+            ];
+
+        } catch (\SoapFault $e) {
+            return [
+                'success' => false,
+                'client' => null,
+                'message' => "❌ ERROR SOAP: Falla en la conexion al Servicio Web" //. $e->getMessage()
+            ];
+        }catch (\Exception $e) {
+            return [
+                'success' => false,
+                'client' => null,
+                'message' => "❌ Error general: " . $e->getMessage()
+            ];
+        }
+    }
+    
+    public function Articulos($cli = false)
+    {
+        $conexion = $this->ConexionWBS();
+
+        if (!$conexion['success']) {
+            if ($cli) {
+                echo $conexion['message'] . "\n";
+                return;
+            }
+            return redirect()->back()->with('error', $conexion['message']);
+        }
+        $client = $conexion['client'];
+
+        try {
             $response = $client->SBOArticulos(['parameters' => []]);
             $xmlResponse = $response->SBOArticulosResult;
 
-            // $xmlResponse->Articulo ya es un array
-            $articulos = [];
             foreach ($xmlResponse->Articulo as $art) {
-                $articulos[] = [
-                    'ItemCode'   => (string) $art->ItemCode,
-                    'ItemName'   => (string) $art->ItemName,
-                    'FrgnName'   => (string) $art->FrgnName,
-                    'SalUnitMsr' => (string) $art->SalUnitMsr,
-                    'Active'     => (string) $art->validFor,
-                    'ItmsGrpCod' => (int) $art->ItmsGrpCod,
-                    'Id_imagen'  => 1,
-                ];
-            }
-            $total = count($articulos);
-            $guardados = 0;
-
-            if ($cli) echo "📦 Total de artículos recibidos: {$total}\n";
-
-            // Insertar o actualizar cada registro
-            foreach ($articulos as $art) {
-                Articulo::updateOrCreate(
-                    ['ItemCode' => $art['ItemCode']], // clave primaria
-                    $art,
-                    $guardados++
+                Articulo::updateOrCreate( 
+                    ['ItemCode' => (string) $art->ItemCode],
+                    [
+                        'ItemName'   => (string) $art->ItemName,
+                        'FrgnName'   => (string) $art->FrgnName,
+                        'SalUnitMsr' => (string) $art->SalUnitMsr,
+                        'Active'     => (string) ($art->validFor ?? 'Y'),
+                        'ItmsGrpCod' => (int) $art->ItmsGrpCod,
+                        'Id_imagen'  => 1,
+                    ],
                 );
             }
-             echo"✅ Sincronización completada. Total guardados: {$guardados} de {$total} \n";
+                 $msg = '✅ Sincronización de artículos completada correctamente.';
+                if ($cli) {
+                    echo $msg . "\n";
+                } else {
+                    return redirect()->back()->with('success', $msg);
+                }
+        } catch (\Throwable $e) {
+            $msg = "❌ Error al sincronizar artículos: " . $e->getMessage();
 
-
-        } catch (\SoapFault $e) {
-            echo "❌ Error SOAP: " . $e->getMessage();
-        }catch (\Exception $e) {
-            echo"❌ Error general: " . $e->getMessage();
+            if ($cli) {
+                echo $msg . "\n";
+            } else {
+                return redirect()->back()->with('error', $msg);
+            }
         }
     }
+
+    public function insertarMonedas($cli = false)
+    {
+        $hoy = now()->format('Y-m-d');
+
+        try {
+            $response = Http::get('https://api.frankfurter.app/latest', [
+                'from' => 'MXN',
+                'to'   => 'USD,EUR'
+            ]);
+
+            if ($response->failed()) {
+                throw new \Exception('No se pudo obtener el tipo de cambio.');
+            }
+
+            $rates = $response->json()['rates'] ?? null;
+            if (!$rates) {
+                throw new \Exception('No se encontraron tipos de cambio.');
+            }
+
+            $usdToMxn = 1 / $rates['USD'];
+            $eurToMxn = 1 / $rates['EUR'];
+
+            $successMessages = [];
+            $warningMessages = [];
+
+            // MXN
+            if (!MonedaCambio::where('Currency_ID', 1)->where('RateDate', $hoy)->exists()) {
+                MonedaCambio::create([
+                    'Currency_ID' => 1,
+                    'RateDate'    => $hoy,
+                    'Rate'        => 1.0
+                ]);
+                $successMessages[] = 'MXN agregado.';
+            } else {
+                $warningMessages[] = 'MXN ya existe para hoy.';
+            }
+
+            // USD
+            if (!MonedaCambio::where('Currency_ID', 2)->where('RateDate', $hoy)->exists()) {
+                MonedaCambio::create([
+                    'Currency_ID' => 2,
+                    'RateDate'    => $hoy,
+                    'Rate'        => $usdToMxn
+                ]);
+                $successMessages[] = 'USD→MXN agregado.';
+            } else {
+                $warningMessages[] = 'USD→MXN ya existe para hoy.';
+            }
+
+            // EUR
+            if (!MonedaCambio::where('Currency_ID', 3)->where('RateDate', $hoy)->exists()) {
+                MonedaCambio::create([
+                    'Currency_ID' => 3,
+                    'RateDate'    => $hoy,
+                    'Rate'        => $eurToMxn
+                ]);
+                $successMessages[] = 'EUR→MXN agregado.';
+            } else {
+                $warningMessages[] = 'EUR→MXN ya existe para hoy.';
+            }
+
+            // Preparar mensajes finales
+            $finalMessage = implode(' ', $successMessages);
+            $finalWarning = implode(' ', $warningMessages);
+
+            if ($cli) {
+                if ($finalMessage) echo "✅ $finalMessage\n";
+                if ($finalWarning) echo "⚠️ $finalWarning\n";
+            } else {
+                if ($finalMessage) session()->flash('success', $finalMessage);
+                if ($finalWarning) session()->flash('warning', $finalWarning);
+                return redirect()->back();
+            }
+
+        } catch (\Exception $e) {
+            $msg = "❌ Error al sincronizar monedas: " . $e->getMessage();
+            if ($cli) {
+                echo $msg . "\n";
+            } else {
+                return redirect()->back()->with('error', $msg);
+            }
+        }
+    }
+
 }

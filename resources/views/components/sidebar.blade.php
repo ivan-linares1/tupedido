@@ -78,17 +78,11 @@
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
                 <li><a href="{{ route('configuracion') }}" class="nav-link">Configurar Sistema</a></li>
                 <li><a href="{{ route('usuarios') }}" class="nav-link">Usuarios</a></li>
+                @if (Auth::user()->rol_id == 1)
+                <li><a href="{{ route('sincronizadores') }}" class="nav-link">Sincronizadores</a></li>
+                @endif
             </ul>
             </div>
         </li>@endif
-
-
-        {{--Boton auxiliar para mandar las monedas a la base del dia de hoy //borrar cuando este en produccion*****************--}}
-        @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
-        <li>
-            <a href="{{ route ('insertar.monedas') }}"  class="nav-link">Insertar monedas</a>
-            <a href="{{ route ('ws') }}"  class="nav-link">WS</a>
-        </li>
-        @endif
     </ul>
 </nav>

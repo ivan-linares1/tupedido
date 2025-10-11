@@ -6,6 +6,47 @@ body {
     margin: 0;
 }
 
+/***************************** Diseño de los Alerts *****************************/
+/* ALERTAS FLOTA EN TODAS LAS VISTAS */
+.panel-alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 25px;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 300px;
+}
+
+/* Colores por tipo */
+.panel-alert.success { background-color: #28a745; }
+.panel-alert.warning { background-color: #ffc107; color: #212529; }
+.panel-alert.error { background-color: #dc3545; }
+
+/* Botón de cerrar */
+.panel-alert .close-btn {
+    background: transparent;
+    border: none;
+    color: red;
+    font-size: 1.3rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 15px;
+}
+
+.panel-alert .close-btn:hover {
+    opacity: 0.8;
+}
+
+
 /***************************** Sidebar *****************************/
 .sidebar {
     height: 100vh;

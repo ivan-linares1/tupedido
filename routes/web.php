@@ -48,7 +48,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/Clientes', [ClienteController::class, 'index'])->name('clientes');
         Route::post('/Clientes/Estado', [ClienteController::class, 'activo_inactivo'])->name('estado.Cliente');
     });
-
+/*****************************************************************************************************************************************************/
+/*****************************************************************************************************************************************************/
+/*****************************************************************************************************************************************************/
+/*****************************************************************************************************************************************************/
     //ADMINISTRACIÓN (Roles 1 y 2)
     Route::middleware(['role:1,2'])->group(function () {
 
@@ -72,15 +75,16 @@ Route::middleware('auth')->group(function () {
             // Consultas AJAX
             Route::get('/ocrd/{cardCode}', [UsuarioController::class, 'getCliente'])->name('admin.ocrd.show');
             Route::get('/oslp/{slpCode}', [UsuarioController::class, 'show'])->name('admin.oslp.show');
+            route::view('/sincronizadores', 'admin.SincronizadoresManuales')->name('sincronizadores');
         });
 
         /*---------------------- CONFIGURACIÓN ----------------------*/
         Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion');
         Route::put('/configuracion', [ConfiguracionController::class, 'update'])->name('GuardarConfig');
 
-        /*---------------------- UTILIDADES (SOLO DESARROLLO) ----------------------*/
-        Route::get('/insertar-monedas', [UsuarioController::class, 'insertarMonedas'])->name('insertar.monedas');
-        Route::get('/probarXML', [ App\Http\Controllers\SincronizacionController::class, 'probarXML'])->name('ws');
+        /*---------------------- UTILIDADES  (SOLO DESARROLLO) ----------------------*/ /*************************************************************************/
+        Route::post('/monedas', [ App\Http\Controllers\SincronizacionController::class, 'insertarMonedas'])->name('monedas'); //POSIBLEMETE BORRAR
+        Route::post('/Articulos', [ App\Http\Controllers\SincronizacionController::class, 'Articulos'])->name('articulosWeb');
     });
 
     // USUARIOS NORMALES Y VENDEDORES (Roles 3 y 4)
