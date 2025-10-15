@@ -37,24 +37,15 @@
     <main class="content content-body">
         {{--muestra los mensajes de errrores en todas las vistas--}}
         @if(session('success'))
-            <div class="panel-alert success">
-                {{ session('success') }}
-                <button class="close-btn">&times;</button>
-            </div>
+            <div class="panel-alert success"> {{ session('success') }} </div>
         @endif
 
         @if(session('warning'))
-            <div class="panel-alert warning">
-                {{ session('warning') }}
-                <button class="close-btn">&times;</button>
-            </div>
+            <div class="panel-alert warning"> {{ session('warning') }} </div>
         @endif
 
-        @if(session('error'))
-            <div class="panel-alert error">
-                {{ session('error') }}
-                <button class="close-btn">&times;</button>
-            </div>
+        @if(session('error')) 
+            <div class="panel-alert error"> {{ session('error') }} </div>
         @endif
 
         @yield('contenido')

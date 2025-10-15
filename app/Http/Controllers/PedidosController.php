@@ -27,19 +27,21 @@ class PedidosController extends Controller
         $query = pedidos::with(['cotizacionBase.vendedor', 'cotizacionBase.moneda'])
             ->orderBy('DocEntry', 'desc');
 
+        // Si el usuario es superAdministrador o Administrador
+        if ($user->rol_id == 1 || $user->rol_id == 2) { /* No filtramos, ven todo */ }
         // Si el usuario es cliente, filtrar por su código de cliente
-        if ($user->rol_id == 3) {
+        else if ($user->rol_id == 3) {
             $query->whereHas('cotizacionBase', function($q) use ($user) {
                 $q->where('CardCode', $user->codigo_cliente);
             });
         }
-
         // Si el usuario es vendedor, filtrar por su código de cliente
-        if ($user->rol_id == 4) {
+        else if ($user->rol_id == 4) {
             $query->whereHas('cotizacionBase', function($q) use ($user) {
                 $q->where('SlpCode', $user->codigo_vendedor);
             });
         }
+         else { abort(403, 'Rol no permitido'); }
 
         $pedidos = $query->get();
 
@@ -169,8 +171,27 @@ class PedidosController extends Controller
 
     public function detallesPedido($DocEntry)
     {
+        $user = Auth::user();
         // Obtener la cotización con sus líneas
         $cotizacion = Cotizacion::with('lineas')->findOrFail($DocEntry);
+
+        //Validar permisos según rol
+        if (in_array($user->rol_id, [1, 2])) {
+            // Admin y super admin pueden ver todo
+        } elseif ($user->rol_id == 3) {
+            // Cliente: solo puede ver sus propias cotizaciones
+            if ($cotizacion->CardCode != $user->codigo_cliente) {
+                abort(403, 'No tienes permiso para ver esta cotización.');
+            }
+        } elseif ($user->rol_id == 4) {
+            // Vendedor: solo puede ver sus propias cotizaciones
+            if ($cotizacion->SlpCode != $user->codigo_vendedor) {
+                abort(403, 'No tienes permiso para ver esta cotización.');
+            }
+        } else {
+            abort(403, 'Rol no permitido.');
+        }
+
         $idPedido = pedidos::where('BaseEntry', $DocEntry)->first()?->DocEntry;
 
         // Datos adicionales para la vista
@@ -249,7 +270,7 @@ class PedidosController extends Controller
             // Guardar líneas de cotización
             $articulos = json_decode($request->articulos, true);
             if (is_array($articulos) && count($articulos) < 1){
-                return back()->with('error', 'Ocurrio un error no puedes guardar cotizaciones sin articulos');
+                return back()->with('error', 'Ocurrio un error no puedes guardar el pedido sin articulos');
             }
 
             // Limpiar valores numéricos

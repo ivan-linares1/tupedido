@@ -19,6 +19,7 @@ class ArticuloController extends Controller
             $articulo->where('Active', 'Y'); 
         } elseif ($request->estatus == 'Inactivos') {
             $articulo->where('Active', 'N');
+        }elseif($request->estatus == 'Todos'){
         }
 
 

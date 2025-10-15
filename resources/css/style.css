@@ -27,24 +27,9 @@ body {
 }
 
 /* Colores por tipo */
-.panel-alert.success { background-color: #28a745; }
-.panel-alert.warning { background-color: #ffc107; color: #212529; }
-.panel-alert.error { background-color: #dc3545; }
-
-/* Botón de cerrar */
-.panel-alert .close-btn {
-    background: transparent;
-    border: none;
-    color: red;
-    font-size: 1.3rem;
-    font-weight: bold;
-    cursor: pointer;
-    margin-left: 15px;
-}
-
-.panel-alert .close-btn:hover {
-    opacity: 0.8;
-}
+.panel-alert.success { background-color: #26a845; color: white;}
+.panel-alert.warning { background-color: #fcbd00; color: black; }
+.panel-alert.error { background-color: #f50000; color: white;}
 
 
 /***************************** Sidebar *****************************/

@@ -10,6 +10,12 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\MarcaController;
 
+// Enviar monedas
+Route::post('/enviar-monedas', [App\Http\Controllers\EnvioDatosController::class, 'enviarMonedasExternas'])->withoutMiddleware('web');
+
+// Receptor de prueba
+Route::post('/receptor', [App\Http\Controllers\EnvioDatosController::class, 'receptor'])->withoutMiddleware('web');
+
 Route::get('/', fn() => redirect()->route('dashboard'));
 
 // RUTAS PROTEGIDAS POR AUTENTICACIÓN
@@ -18,25 +24,25 @@ Route::middleware('auth')->group(function () {
     Route::get('/Dashboard', fn() => view('admin.dashboard'))->name('dashboard');
 
    // COTIZACIONES (prefijo /Cotizaciones)
-    Route::prefix('Cotizaciones')->group(function () {
+   Route::prefix('Cotizaciones')->group(function () {
         Route::get('/', [CotizacionesController::class, 'index'])->name('cotizaciones');
         Route::post('/Guardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
-        Route::post('/GuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+        Route::get('/NuevaCotizacion/{DocEntry?}', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
+        Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
+        Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])->name('detalles');
+        Route::get('/cotizacion/pdf/{id}', [CotizacionesController::class, 'pdfCotizacion'])->name('cotizacion.pdf');
     });
 
-    // Otras rutas relacionadas con cotizaciones
-    Route::get('/NuevaCotizacion/{DocEntry?}', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
-    Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
-    Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])->name('detalles');
-    Route::get('/cotizacion/pdf/{id}', [CotizacionesController::class, 'pdfCotizacion'])->name('cotizacion.pdf');
 
    //PEDIDOS (prefijo /Pedidos)
     Route::prefix('Pedidos')->group(function () {
         Route::get('/', [PedidosController::class, 'index'])->name('Pedidos');
+        Route::get('/NuevoPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
+        Route::post('/GuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+        Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
+        Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfCotizacion'])->name('pedido.pdf');
     });
-    Route::get('/NuevoPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
-    Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
-    Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfCotizacion'])->name('pedido.pdf');
+
 
     //CATÁLOGOS (Artículos, Clientes)
     Route::prefix('Catalogos')->group(function () {

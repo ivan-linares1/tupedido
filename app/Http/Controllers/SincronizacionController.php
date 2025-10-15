@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\Articulo;
 use App\Models\MonedaCambio;
 use Illuminate\Support\Facades\Http;
@@ -23,20 +22,23 @@ class SincronizacionController extends Controller
            return [
                 'success' => true,
                 'client' => $client,
-                'message' => '✅ Conexión al WS establecida correctamente.'
+                'type' => 'success',
+                'message' => 'Conexión al WS establecida correctamente.'
             ];
 
         } catch (\SoapFault $e) {
             return [
                 'success' => false,
                 'client' => null,
-                'message' => "❌ ERROR SOAP: Falla en la conexion al Servicio Web" //. $e->getMessage()
+                'type' => 'warning',
+                'message' => "ERROR SOAP: Falla en la conexion al Servicio Web" //. $e->getMessage()
             ];
         }catch (\Exception $e) {
             return [
                 'success' => false,
                 'client' => null,
-                'message' => "❌ Error general: " . $e->getMessage()
+                'type' => 'error',
+                'message' => "Error general: " . $e->getMessage()
             ];
         }
     }
@@ -50,7 +52,7 @@ class SincronizacionController extends Controller
                 echo $conexion['message'] . "\n";
                 return;
             }
-            return redirect()->back()->with('error', $conexion['message']);
+            return redirect()->back()->with($conexion['type'], $conexion['message']);
         }
         $client = $conexion['client'];
 
@@ -65,20 +67,20 @@ class SincronizacionController extends Controller
                         'ItemName'   => (string) $art->ItemName,
                         'FrgnName'   => (string) $art->FrgnName,
                         'SalUnitMsr' => (string) $art->SalUnitMsr,
-                        'Active'     => (string) ($art->validFor ?? 'Y'),
+                        'Active'     => (string) ($art->validFor),
                         'ItmsGrpCod' => (int) $art->ItmsGrpCod,
                         'Id_imagen'  => 1,
                     ],
                 );
             }
-                 $msg = '✅ Sincronización de artículos completada correctamente.';
+                 $msg = 'Sincronización de artículos completada correctamente.';
                 if ($cli) {
                     echo $msg . "\n";
                 } else {
                     return redirect()->back()->with('success', $msg);
                 }
         } catch (\Throwable $e) {
-            $msg = "❌ Error al sincronizar artículos: " . $e->getMessage();
+            $msg = "Error al sincronizar artículos: " . $e->getMessage();
 
             if ($cli) {
                 echo $msg . "\n";
@@ -154,8 +156,8 @@ class SincronizacionController extends Controller
             $finalWarning = implode(' ', $warningMessages);
 
             if ($cli) {
-                if ($finalMessage) echo "✅ $finalMessage\n";
-                if ($finalWarning) echo "⚠️ $finalWarning\n";
+                if ($finalMessage) echo "$finalMessage\n";
+                if ($finalWarning) echo "$finalWarning\n";
             } else {
                 if ($finalMessage) session()->flash('success', $finalMessage);
                 if ($finalWarning) session()->flash('warning', $finalWarning);
@@ -163,7 +165,7 @@ class SincronizacionController extends Controller
             }
 
         } catch (\Exception $e) {
-            $msg = "❌ Error al sincronizar monedas: " . $e->getMessage();
+            $msg = "Error al sincronizar monedas: " . $e->getMessage();
             if ($cli) {
                 echo $msg . "\n";
             } else {
@@ -172,4 +174,5 @@ class SincronizacionController extends Controller
         }
     }
 
+    
 }

@@ -105,7 +105,7 @@ CREATE TABLE OITM(
   FrgnName VARCHAR(254),
   SalUnitMsr VARCHAR(100),
   Id_imagen BIGINT NOT NULL,
-  Active CHAR(1) NOT NULL DEFAULT 'Y',
+  Active CHAR(1) NOT NULL,
   ItmsGrpCod VARCHAR(50),
   FOREIGN KEY (ItmsGrpCod) REFERENCES OITB(ItmsGrpCod),
   FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)

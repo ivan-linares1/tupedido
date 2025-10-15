@@ -26,9 +26,9 @@
             <div class="col-md-2">
                 <label for="estatus" class="form-label fw-semibold">Estatus</label>
                 <select id="estatus" class="form-select form-select-sm rounded-3">
-                    <option value="">Todos</option>
-                    <option value="Y" {{ request('estatus') == 'Y' ? 'selected' : '' }}>Activos</option>
-                    <option value="N" {{ request('estatus') == 'N' ? 'selected' : '' }}>Inactivos</option>
+                    <option value="Todos">Todos</option>
+                    <option value="Activos" {{ request('estatus') == 'Y' ? 'selected' : '' }}>Activos</option>
+                    <option value="Inactivos" {{ request('estatus') == 'N' ? 'selected' : '' }}>Inactivos</option>
                 </select>
             </div>
             <div class="col-md-4 ms-auto">
@@ -41,51 +41,10 @@
         </div>
 
         <!-- Tabla -->
-        <div class="table-responsive">
-            <table id="tablaClientes" class="table table-hover table-striped align-middle">
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th>Codigo</th>
-                        <th>Nombre</th>
-                        <th>Telefono</th>
-                        <th>E-mail</th>
-                        <th>Activo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($clientes as $cliente)
-                    <tr data-status="{{ $cliente->Active }}">
-                        <td>{{ $cliente->CardCode }}</td>
-                        <td>{{ $cliente->CardName }}</td>
-                        <td>{{ $cliente->phone1}}</td>
-                        <td>{{ $cliente->{'e-mail'} }}</td>
-                        <td class="text-center">
-                            <label class="switch">
-                                <input 
-                                    type="checkbox" 
-                                    class="toggle-estado" 
-                                    data-id="{{ $cliente->CardCode }}"
-                                    data-field="Active"
-                                    data-url="{{ route('estado.Cliente') }}"
-                                    {{ $cliente->Active == 'Y' ? 'checked' : '' }}>
-                                <span class="slider round"></span>
-                            </label>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">No se encontraron resultados</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="table-responsive" id="tabla-container">
+            @include('partials.tabla_cliente')
         </div>
-
-        <!-- Paginación -->
-        <div class="d-flex justify-content-center mt-3">
-            {{ $clientes->appends(request()->query())->links('pagination::bootstrap-5') }}
-        </div>
-
+        
     </div>
 </div>
 @endsection
@@ -99,4 +58,46 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="{{ asset('js/clientes.js') }}"></script>
+<script>
+    // Filtro de búsqueda
+    $(document).ready(function() {
+        function fetchClientes(url = "{{ route('clientes') }}") {
+            const buscar = $('#buscarCliente').val();
+            const estatus = $('#estatus').val();
+            const mostrar = $('#mostrar').val();
+
+            $.ajax({
+                url: url,
+                method: "GET",
+                data: { buscar, estatus, mostrar },
+                success: function(data) {
+                    $('#tabla-container').html(data);
+                },
+                error: function() {
+                    alert('Error al cargar los clientes.');
+                }
+            });
+        }
+
+        // Búsqueda al escribir
+        $('#buscarCliente').on('keyup', function() {
+            fetchClientes();
+        });
+
+        // Filtros de selects
+        $('#estatus, #mostrar').on('change', function() {
+            fetchClientes();
+        });
+
+        // Paginación AJAX
+        $(document).on('click', '#tabla-container .pagination a', function(e) {
+            e.preventDefault();
+            const url = $(this).attr('href');
+            fetchClientes(url);
+            $('html, body').animate({ scrollTop: 0 }, 200);
+        });
+    });
+
+
+</script>
 @endpush

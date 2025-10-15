@@ -71,13 +71,13 @@ $(document).ready(function() {
                     if(response.success){
                         $this.prop('checked', newValue === 'Y');
                         $this.closest('tr').attr('data-status', newValue);
-                        showFlash("✅ Estado actualizado correctamente", "success");
+                        showFlash("Estado actualizado correctamente", "success");
                     } else {
-                        showFlash("❌ Error al actualizar", "error");
+                        showFlash("Error al actualizar", "error");
                     }
                 })
                 .fail(function(){
-                    showFlash("⚠️ Error de conexión", "error");
+                    showFlash("Error de conexión", "error");
                 })
                 .always(function(){
                     $this.prop('disabled', false);

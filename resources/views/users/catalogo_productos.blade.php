@@ -6,7 +6,7 @@
 
 <div id="flash-messages" class="alert-top-end"></div>
 
-<div class="card shadow-sm border-0 rounded-3 mt-4" id="inicio">
+<div class="card shadow-sm border-0 rounded-3 mt-4">
     <div class="card-header d-flex justify-content-between align-items-center bg-success text-white rounded-top">
         <h5 class="mb-0">
             <i class="bi bi-box-seam me-2"></i> Catálogo de Productos / Servicios
@@ -92,6 +92,9 @@
             data: { buscar, estatus, grupo, mostrar },
             success: function(data) {
                 $('#tabla-container').html(data);
+            },
+            error: function() {
+                alert('Error al cargar los clientes.');
             }
         });
     }
@@ -112,9 +115,8 @@
         const url = $(this).attr('href');
         $.get(url, function(data) {
             $('#tabla-container').html(data);
-            
             // Mover scroll al inicio del contenedor o de la página
-            $('html, body').animate({ scrollTop: $('#inicio').offset().top }, 0);
+            $('html, body').animate({ scrollTop: 0 }, 200);
         });
     });
 });

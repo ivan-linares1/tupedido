@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\SincronizacionController;
 
 class EjecutarSincronizacion extends Command
 {
@@ -25,7 +25,7 @@ class EjecutarSincronizacion extends Command
         $this->info('Iniciando sincronización...');
 
         // Instancia del controlador
-        $controller = new UsuarioController();
+        $controller = new SincronizacionController();
 
         // Llamar al método (ajusta el nombre si tu método se llama distinto)
         $controller->insertarMonedas(true);

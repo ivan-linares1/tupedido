@@ -122,6 +122,22 @@
                 </div>
             </form>
         </div>
+
+        <!-- Botón WS - Otro sincronizador -->
+        <div class="col-md-3">
+            <form action="#" method="POST">
+                @csrf
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-emoji-sunglasses"></i>
+                        <h5 class="card-title">OTRO SINCRONIZADOR</h5>
+                        <p class="card-text">Sincroniza otro sincronziador.</p>
+                        <button type="submit" class="btn btn-success w-100">Ejecutar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
     </div>
 </div>
 @endsection
