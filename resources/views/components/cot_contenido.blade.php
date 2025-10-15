@@ -12,16 +12,16 @@
                 <th>Clave</th>
                 <th>Producto</th>
                 <th>Imagen</th>
-                <th>Unidad de medida</th>
+                <th style="text-align: center">Unidad de medida</th>
                 <th>Precio</th>
                 <th>Moneda</th>
                 <th>Impuesto</th>
                 <th>Cantidad</th>
                 <th>Promociones</th>
                 <th>SubTotal</th>
-                <th>% Descuento</th>
-                <th>Descuento del</th>
-                <th>Total (doc)</th>
+                <th style="text-align: center">% Descuento</th>
+                <th style="text-align: center">Descuento del</th>
+                <th style="text-align: center">Total (doc)</th>
             </tr>
         </thead>
 
@@ -64,13 +64,12 @@
             <!-- Botón para agregar nuevos artículos -->
             <tr>
                 <td>
-                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalArticulos">+</button>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalArticulos"  @if($moneda->cambios->isEmpty()) disabled @endif><b>+</b></button>
                 </td>
                 <td colspan="26"></td>
             </tr>
             @endif
         </tbody>
-
     </table>
 </div>
 

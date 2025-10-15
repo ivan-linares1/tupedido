@@ -80,21 +80,21 @@
 <script>
     // Filtro de búsqueda
     $(document).ready(function() {
-    function fetchArticulos() {
+    function fetchArticulos( url = "{{ route('articulos') }}") {
         const buscar = $('#buscarArticulo').val();
         const estatus = $('select[name="estatus"]').val();
         const grupo = $('select[name="grupo"]').val();
         const mostrar = $('select[name="mostrar"]').val();
 
         $.ajax({
-            url: "{{ route('articulos') }}",
+            url: url,
             method: "GET",
             data: { buscar, estatus, grupo, mostrar },
             success: function(data) {
                 $('#tabla-container').html(data);
             },
             error: function() {
-                alert('Error al cargar los clientes.');
+                alert('Error al cargar los articulos.');
             }
         });
     }
@@ -113,11 +113,9 @@
     $(document).on('click', '#tabla-container .pagination a', function(e) {
         e.preventDefault();
         const url = $(this).attr('href');
-        $.get(url, function(data) {
-            $('#tabla-container').html(data);
-            // Mover scroll al inicio del contenedor o de la página
-            $('html, body').animate({ scrollTop: 0 }, 200);
-        });
+        fetchArticulos(url);
+        // Mover scroll al inicio del contenedor o de la página
+        $('html, body').animate({ scrollTop: 0 }, 200);
     });
 });
 

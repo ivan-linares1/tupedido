@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Articulo;
 use App\Models\Marcas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ArticuloController extends Controller
 {
@@ -13,9 +14,10 @@ class ArticuloController extends Controller
         $articulo = Articulo::query();
         $marcas = Marcas::orderBy('ItmsGrpNam', 'asc')->get();
 
+        $user = Auth::user();
 
-        // Filtro estatus
-        if ($request->estatus == 'Activos') {
+        // Filtro estatus ny tambien filtra cuando los activos cuando sea un cliente o un vendedor
+        if ($request->estatus == 'Activos' || in_array($user->rol_id, [3, 4])) {
             $articulo->where('Active', 'Y'); 
         } elseif ($request->estatus == 'Inactivos') {
             $articulo->where('Active', 'N');
