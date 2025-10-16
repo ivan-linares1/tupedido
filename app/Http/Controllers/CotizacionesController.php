@@ -23,6 +23,7 @@ class CotizacionesController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $configuracionVacia = configuracion::count() === 0;//Variable booleana si es true significa que no tenemos configuracion y si es false si exite la configuracion
 
         // Base de la consulta: cotizaciones con sus relaciones
         $query = Cotizacion::select(
@@ -48,7 +49,7 @@ class CotizacionesController extends Controller
 
         $cotizaciones = $query->get();
 
-        return view('users.cotizaciones', compact('cotizaciones'));
+        return view('users.cotizaciones', compact('cotizaciones','configuracionVacia'));
     }
 
 

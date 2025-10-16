@@ -22,6 +22,7 @@ class PedidosController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $configuracionVacia = configuracion::count() === 0;//Variable booleana si es true significa que no tenemos configuracion y si es false si exite la configuracion
 
         // Obtener todos los pedidos con su cotización asociada
         $query = pedidos::with(['cotizacionBase.vendedor', 'cotizacionBase.moneda'])
@@ -60,7 +61,7 @@ class PedidosController extends Controller
             ];
         });
 
-        return view('users.pedidos', ['pedidos' => $pedidosList]);
+        return view('users.pedidos', ['pedidos' => $pedidosList, 'configuracionVacia' => $configuracionVacia]);
     }   
 
     public function NuevoPedido ($DocEntry = null)

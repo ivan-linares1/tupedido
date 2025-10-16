@@ -3,15 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Articulo;
-use App\Models\MonedaCambio;
-use Illuminate\Support\Facades\Http;
+use App\Models\Clientes;
+use App\Models\DireccionesClientes;
+use App\Models\Marcas;
+use App\Models\Moneda;
+use App\Models\Precios;
+use Illuminate\Support\Facades\DB;
 
 class SincronizacionController extends Controller
 {
     // Conexión al Web Service con manejo de errores
     private function ConexionWBS()
     {
-        $url = "http://10.10.1.116:8083/KombiService.asmx?wsdl";
+        $url = "http://10.10.1.107:8083/KombiService.asmx?wsdl";
 
         try {
             $client = new \SoapClient($url, [
@@ -42,8 +46,11 @@ class SincronizacionController extends Controller
             ];
         }
     }
-    
-    public function Articulos($cli = false)
+
+    //$servicio, es el nombre con el que se llenaran los mensajes 
+    //$metodo, Es el nombre del metodo del servico web al que se accedera
+    //$cli es la bandera para saber si es por consola o por sistema web
+    public function ServicioWeb($servicio, $metodo, $cli = false) 
     {
         $conexion = $this->ConexionWBS();
 
@@ -57,122 +64,170 @@ class SincronizacionController extends Controller
         $client = $conexion['client'];
 
         try {
-            $response = $client->SBOArticulos(['parameters' => []]);
-            $xmlResponse = $response->SBOArticulosResult;
+            $response = $client->$metodo(['parameters' => []]);
+            $xmlResponse = $response->{$metodo.'Result'};
 
-            foreach ($xmlResponse->Articulo as $art) {
-                Articulo::updateOrCreate( 
-                    ['ItemCode' => (string) $art->ItemCode],
+            switch($servicio){
+                case 'Monedas': $this->Monedas($xmlResponse); break;
+                case 'Articulos': $this->Articulos($xmlResponse); break;
+                case 'Categoria_Lista_Precios': $this->Categoria_Lista_Precios($xmlResponse); break;
+                case 'Marcas': $this->Marcas($xmlResponse); break;
+                case 'ListaPrecios': $this->ListaPrecio($xmlResponse); break;
+                case 'Clientes': $this->Clientes($xmlResponse); break;
+                case 'Direcciones': $this->Direcciones($xmlResponse); break;
+            }
+
+            $msg = 'Sincronización de '.$servicio.' completada correctamente.';
+
+            if ($cli) {
+                echo $msg . "\n";
+            } else {
+                return redirect()->back()->with('success', $msg);
+            }
+
+        } catch (\Throwable $e) {//Marca errores que esten por mala recepcion de datos
+            $msg = "Error al sincronizar ".$servicio . $e->getMessage();
+
+            if ($cli) {
+                echo $msg . "\n";
+            } else {
+                return redirect()->back()->with('error', $msg);
+            }
+        }
+    }
+
+    private function Monedas($xmlResponse) //OCRN
+    {
+        foreach ($xmlResponse->Moneda as $moneda) {
+                Moneda::updateOrCreate( 
+                    ['Currency' => (string) $moneda->CurrCode],
                     [
-                        'ItemName'   => (string) $art->ItemName,
-                        'FrgnName'   => (string) $art->FrgnName,
-                        'SalUnitMsr' => (string) $art->SalUnitMsr,
-                        'Active'     => (string) ($art->validFor),
-                        'ItmsGrpCod' => (int) $art->ItmsGrpCod,
-                        'Id_imagen'  => 1,
+                        'CurrName'   => (string) $moneda->CurrName,
                     ],
                 );
             }
-                 $msg = 'Sincronización de artículos completada correctamente.';
-                if ($cli) {
-                    echo $msg . "\n";
-                } else {
-                    return redirect()->back()->with('success', $msg);
-                }
-        } catch (\Throwable $e) {
-            $msg = "Error al sincronizar artículos: " . $e->getMessage();
-
-            if ($cli) {
-                echo $msg . "\n";
-            } else {
-                return redirect()->back()->with('error', $msg);
-            }
-        }
     }
-
-    public function insertarMonedas($cli = false)
-    {
-        $hoy = now()->format('Y-m-d');
-
-        try {
-            $response = Http::get('https://api.frankfurter.app/latest', [
-                'from' => 'MXN',
-                'to'   => 'USD,EUR'
-            ]);
-
-            if ($response->failed()) {
-                throw new \Exception('No se pudo obtener el tipo de cambio.');
-            }
-
-            $rates = $response->json()['rates'] ?? null;
-            if (!$rates) {
-                throw new \Exception('No se encontraron tipos de cambio.');
-            }
-
-            $usdToMxn = 1 / $rates['USD'];
-            $eurToMxn = 1 / $rates['EUR'];
-
-            $successMessages = [];
-            $warningMessages = [];
-
-            // MXN
-            if (!MonedaCambio::where('Currency_ID', 1)->where('RateDate', $hoy)->exists()) {
-                MonedaCambio::create([
-                    'Currency_ID' => 1,
-                    'RateDate'    => $hoy,
-                    'Rate'        => 1.0
-                ]);
-                $successMessages[] = 'MXN agregado.';
-            } else {
-                $warningMessages[] = 'MXN ya existe para hoy.';
-            }
-
-            // USD
-            if (!MonedaCambio::where('Currency_ID', 2)->where('RateDate', $hoy)->exists()) {
-                MonedaCambio::create([
-                    'Currency_ID' => 2,
-                    'RateDate'    => $hoy,
-                    'Rate'        => $usdToMxn
-                ]);
-                $successMessages[] = 'USD→MXN agregado.';
-            } else {
-                $warningMessages[] = 'USD→MXN ya existe para hoy.';
-            }
-
-            // EUR
-            if (!MonedaCambio::where('Currency_ID', 3)->where('RateDate', $hoy)->exists()) {
-                MonedaCambio::create([
-                    'Currency_ID' => 3,
-                    'RateDate'    => $hoy,
-                    'Rate'        => $eurToMxn
-                ]);
-                $successMessages[] = 'EUR→MXN agregado.';
-            } else {
-                $warningMessages[] = 'EUR→MXN ya existe para hoy.';
-            }
-
-            // Preparar mensajes finales
-            $finalMessage = implode(' ', $successMessages);
-            $finalWarning = implode(' ', $warningMessages);
-
-            if ($cli) {
-                if ($finalMessage) echo "$finalMessage\n";
-                if ($finalWarning) echo "$finalWarning\n";
-            } else {
-                if ($finalMessage) session()->flash('success', $finalMessage);
-                if ($finalWarning) session()->flash('warning', $finalWarning);
-                return redirect()->back();
-            }
-
-        } catch (\Exception $e) {
-            $msg = "Error al sincronizar monedas: " . $e->getMessage();
-            if ($cli) {
-                echo $msg . "\n";
-            } else {
-                return redirect()->back()->with('error', $msg);
-            }
-        }
-    }
-
     
+    private function Articulos($xmlResponse) //OITM
+    {
+        foreach ($xmlResponse->Articulo as $art) {
+            Articulo::updateOrCreate( 
+                ['ItemCode' => (string) $art->ItemCode],
+                [
+                    'ItemName'   => (string) $art->ItemName,
+                    'FrgnName'   => (string) $art->FrgnName,
+                    'SalUnitMsr' => (string) $art->SalUnitMsr,
+                    'Active'     => (string) ($art->validFor),
+                    'ItmsGrpCod' => (int) $art->ItmsGrpCod,
+                    'Id_imagen'  => 1,
+                ],
+            );
+        }
+    }
+
+    private function Categoria_Lista_Precios($xmlResponse) //OPLN
+    {
+        foreach ($xmlResponse->CAT_LP as $lista) {
+            DB::table('OPLN')->updateOrInsert(
+                ['ListNum' => (int) $lista->ListNum],
+                ['ListName' => (string) $lista->ListName]
+            );
+        }
+    }
+
+    private function Marcas($xmlResponse) //OITB
+    {
+        foreach ($xmlResponse->Marcas as $marca) {
+            Marcas::updateOrCreate(
+                ['ItmsGrpCod' => (string) $marca->ItmsGrpCod],
+                [
+                    'ItmsGrpNam' => (string) $marca->ItmsGrpNam,
+                    'Locked'     => (string) $marca->Locked,
+                    'Object'     => (string) $marca->Object,
+                ]
+            );
+        }
+    }
+
+    private function ListaPrecio($xmlResponse)//ITM1
+    {
+        foreach ($xmlResponse->ListaP as $precio) {
+            // Obtener Currency_ID desde OCRN
+            $currency = Moneda::where('Currency', (string)$precio->Currency)->first();
+            if (!$currency) {
+                // Si no existe la moneda, puedes saltarla o manejar el error
+                continue;
+            }
+
+            // Insertar o actualizar precio
+            Precios::updateOrInsert(
+                [
+                    'ItemCode' => (string)$precio->ItemCode,
+                    'PriceList' => (int)$precio->PriceList
+                ],
+                [
+                    'Price' => (float)$precio->Price,
+                    'Currency_ID' => $currency->Currency_ID
+                ]
+            );
+        }
+    }
+
+    private function Clientes($xmlResponse)//OCRD
+    {
+        foreach ($xmlResponse->Clientes as $cliente) {
+            // Insertar o actualizar registro
+            Clientes::updateOrInsert(
+                ['CardCode' => (string)$cliente->CardCode],
+                [
+                    'CardName' => (string)$cliente->CardName,
+                    'GroupNum' => (int)$cliente->GroupNum,
+                    'phone1'   => (string)$cliente->Phone1,
+                    'e-mail'   => (string)$cliente->E_Mail,
+                    'Active'   => (string)$cliente->validFor,
+                ]
+            );
+        }
+    }
+
+    private function Direcciones($xmlResponse) // CRD1
+    {
+        try {
+            foreach ($xmlResponse->Direcciones as $direccion) {
+
+                // Verificar que el cliente exista en OCRD
+                $clienteExiste = DB::table('OCRD')
+                    ->where('CardCode', (string)$direccion->CardCode)
+                    ->exists();
+
+                if (!$clienteExiste) {
+                    // Si no existe, lo omitimos y seguimos con el siguiente
+                    continue;
+                }
+
+                // Insertar o actualizar dirección
+                DB::table('CRD1')->updateOrInsert(
+                    [
+                        'CardCode'  => (string)$direccion->CardCode,
+                        'Address'   => (string)$direccion->Address,
+                        'AdresType' => (string)$direccion->AdresType
+                    ],
+                    [
+                        'Street'   => (string)$direccion->Street,
+                        'Block'    => (string)$direccion->Block,
+                        'ZipCode'  => (string)$direccion->ZipCode,
+                        'City'     => (string)$direccion->City,
+                        'Country'  => (string)$direccion->Country,
+                        'County'   => (string)$direccion->County,
+                        'State'    => (string)$direccion->State
+                    ]
+                );
+            }
+
+            return true; // ✅ Sincronización exitosa
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
 }

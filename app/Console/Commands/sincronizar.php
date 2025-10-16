@@ -14,43 +14,40 @@ class Sincronizar extends Command
     {
         $tipo = $this->argument('tipo'); 
         $controller = new SincronizacionController();
-        $error = false; 
 
-        switch ($tipo) {
-            case 'monedas':
-                $this->info('🔄 Iniciando sincronización de monedas...');
-                try {
-                    $controller->insertarMonedas(true); // true indica CLI
-                } catch (\Throwable $e) {
-                    $error = true;
-                }
-            break;
-
-            case 'articulos':
-                $this->info('🔄 Iniciando sincronización de artículos...');
-                try {
-                    $controller->Articulos(true); // true indica CLI
-                } catch (\Throwable $e) {
-                    $error = true;
-                }
-            break;
-
-            case null:
-                $this->warn('No se especificó tipo de sincronización.');
-                $error = true;
-            break;
-
-            default:
-                $this->warn("Tipo de sincronización '$tipo' no reconocido.");
-                $error = true;
-            break;
+        if (!$tipo) {
+            $this->warn('⚠️ No se especificó tipo de sincronización.');
+            return;
         }
 
-        // Mensaje final resumido
-        if ($error) {
-            $this->error('Comando finalizado con errores.');
-        } else {
-            $this->info('Comando finalizado exitosamente.');
+        $this->info("🔄 Iniciando sincronización de: $tipo ...");
+
+        // Llamamos al método general ServicioWeb
+        // El método ahora retorna true o false según el éxito
+        $metodo = [
+            'Monedas' => 'SBOMonedas_OCRN',
+            'Articulos' => 'SBOArticulos_OITM',
+            'Marcas' => 'SBO_GPO_Articulo_OITB',
+            'Categoria_Lista_Precios' => 'SBO_CAT_LP_OPLN',
+            'Lista_Precios' => 'SBOListaPrecios_ITM1',
+            'Clientes' =>'SBO_Clientes_OCRD'
+        ];
+
+        if (!isset($metodo[$tipo])) {
+            $this->warn("⚠️ Tipo de sincronización '$tipo' no reconocido.");
+            return;
         }
+
+        $servicio = $tipo;
+        $metodo = $metodo[$tipo];
+
+        try {
+            $controller->ServicioWeb($servicio, $metodo, true); // true = CLI
+            $this->info("✅ Finalizacion de la sincronización de: $tipo ...");
+        } catch (\Throwable $e) {
+            $this->error("❌ Error ejecutando la sincronización de $tipo: " . $e->getMessage());
+        }
+
+        return;
     }
 }

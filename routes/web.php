@@ -9,6 +9,8 @@ use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\MarcaController;
+use App\Http\Controllers\SincronizacionController;
+use App\Models\configuracion;
 
 // Enviar monedas
 Route::post('/enviar-monedas', [App\Http\Controllers\EnvioDatosController::class, 'enviarMonedasExternas'])->withoutMiddleware('web');
@@ -21,7 +23,13 @@ Route::get('/', fn() => redirect()->route('dashboard'));
 // RUTAS PROTEGIDAS POR AUTENTICACIÓN
 Route::middleware('auth')->group(function () {
     //DASHBOARD
-    Route::get('/Dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+    //Route::get('/Dashboard', fn() => view('users.dashboard'))->name('dashboard');
+
+    Route::get('/Dashboard', function () {
+        $configuracionVacia = configuracion::count() === 0;//Variable booleana si es true significa que no tenemos configuracion y si es false si exite la configuracion
+        
+        return view('users.dashboard', compact('configuracionVacia'));
+    })->name('dashboard');
 
    // COTIZACIONES (prefijo /Cotizaciones)
    Route::prefix('Cotizaciones')->group(function () {
@@ -81,6 +89,8 @@ Route::middleware('auth')->group(function () {
             // Consultas AJAX
             Route::get('/ocrd/{cardCode}', [UsuarioController::class, 'getCliente'])->name('admin.ocrd.show');
             Route::get('/oslp/{slpCode}', [UsuarioController::class, 'show'])->name('admin.oslp.show');
+
+            //Sincronizadores
             route::view('/sincronizadores', 'admin.SincronizadoresManuales')->name('sincronizadores');
         });
 
@@ -88,9 +98,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion');
         Route::put('/configuracion', [ConfiguracionController::class, 'update'])->name('GuardarConfig');
 
-        /*---------------------- UTILIDADES  (SOLO DESARROLLO) ----------------------*/ /*************************************************************************/
-        Route::post('/monedas', [ App\Http\Controllers\SincronizacionController::class, 'insertarMonedas'])->name('monedas'); //POSIBLEMETE BORRAR
-        Route::post('/Articulos', [ App\Http\Controllers\SincronizacionController::class, 'Articulos'])->name('articulosWeb');
+        /*---------------------- SERVICIOS WEB ----------------------*/ 
+        Route::post('ServiciosWEB/{servicio}/{metodo}', [ SincronizacionController::class, 'ServicioWeb'])->name('Sincronizar');
+
     });
 
     // USUARIOS NORMALES Y VENDEDORES (Roles 3 y 4)

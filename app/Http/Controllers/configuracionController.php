@@ -13,12 +13,21 @@ class configuracionController extends Controller
         // Traemos la primera fila
         $configuracion = Configuracion::first();
         $monedas = Moneda::all();
+        
+        //si no existen monedas manda a la vista de los sincronizadores para ejecutarlo manualmente 
+        if($monedas->isEmpty())
+        {
+            return redirect()->route('sincronizadores')->with('error', 'Faltan monedas para iniciar el sistema. Por favor, agregue al menos una moneda antes de continuar.');
+        }
 
         // Si no existe, crear un registro por defecto
         if (!$configuracion) {
+            // Obtener el primer registro de monedas (o null si no hay ninguno)
+            $moneda = Moneda::first();
+          
             $configuracion = Configuracion::create([
                 'iva' => 16,
-                'ruta_logo' => '',
+                'ruta_logo' => 'logos/logo.png',
                 'nombre_empresa' => 'KOMBITEC, S.A. DE C.V',
                 'calle' => 'AV. DR. SALVADOR NAVA MARTÍNEZ 232',
                 'colonia' => 'COL. EL PASEO, SAN LUIS POTOSÍ',
@@ -26,7 +35,7 @@ class configuracionController extends Controller
                 'ciudad' => 'San Luis Potosí',
                 'telefono' => '4441370770',
                 'pais' => 'MEXICO',
-                'MonedaPrincipal' => 1
+                'MonedaPrincipal' => $moneda ? $moneda->Currency_ID : null,
             ]);
         }
 

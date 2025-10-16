@@ -19,7 +19,8 @@ class Moneda extends Model
 
     // Campos asignables masivamente
     protected $fillable = [
-        'Currency'
+        'Currency',
+        'CurrName'
     ];
 
     //Relacion de moneda con los precios (ITM1)
