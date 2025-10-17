@@ -8,7 +8,7 @@ CREATE TABLE OCRD(
   GroupNum INT,
   phone1 VARCHAR(30),
   `e-mail` VARCHAR(254),
-  Active VARCHAR(1) NOT NULL DEFAULT 'Y'
+  Active VARCHAR(1) NOT NULL
 );
 
 /*Marcas*/
@@ -16,7 +16,7 @@ CREATE TABLE OITB(
   ItmsGrpCod VARCHAR(50) PRIMARY KEY,
   ItmsGrpNam VARCHAR(100),
   Locked CHAR(1),
-  Object VARCHAR(20) DEFAULT '52'
+  Object VARCHAR(20)
 );
 
 /*Descuentos por cliente*/
@@ -44,7 +44,7 @@ CREATE TABLE EDG1(
 CREATE TABLE OSLP(
   SlpCode INT PRIMARY KEY,
   SlpName VARCHAR(155) NOT NULL,
-  Active CHAR(1) DEFAULT 'Y'
+  Active CHAR(1)
 );
 
 /* Direcciones de clientes */
@@ -65,23 +65,16 @@ CREATE TABLE CRD1(
 
 /*Monedas*/
 CREATE TABLE OCRN(
-  Currency_ID INT PRIMARY KEY,
-  Currency VARCHAR(3) UNIQUE NOT NULL
-);
-
-INSERT INTO OCRN(Currency_ID, Currency) VALUES
-(1, "MXN"),
-(2, "USD"),
-(3, "EUR");
+  Currency_ID INT AUTO_INCREMENT PRIMARY KEY,
+  Currency VARCHAR(3) UNIQUE NOT NULL,
+  CurrName VARCHAR(100) NOT NULL
+); 
 
 /* Listas de precios */
 CREATE TABLE OPLN(
   ListNum INT PRIMARY KEY,
   ListName VARCHAR(32)
 );
-
-INSERT INTO OPLN (ListNum, ListName) VALUES
-(1, 'Lista General');
 
 /* Tipos de cambio */
 CREATE TABLE ORTT(
@@ -105,7 +98,7 @@ CREATE TABLE OITM(
   FrgnName VARCHAR(254),
   SalUnitMsr VARCHAR(100),
   Id_imagen BIGINT NOT NULL,
-  Active CHAR(1) NOT NULL DEFAULT 'Y',
+  Active CHAR(1) NOT NULL,
   ItmsGrpCod VARCHAR(50),
   FOREIGN KEY (ItmsGrpCod) REFERENCES OITB(ItmsGrpCod),
   FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
@@ -152,7 +145,7 @@ CREATE TABLE OQUT(
 CREATE TABLE QUT1(
   DocEntry INT NOT NULL,
   LineNum INT NOT NULL,
-  ObjType VARCHAR(20) DEFAULT '23',
+  ObjType VARCHAR(20),
   ItemCode VARCHAR(50) NOT NULL,
   U_Dscr VARCHAR(250),
   unitMsr2 VARCHAR(100),
@@ -173,7 +166,7 @@ CREATE TABLE RDR1 (
   TargetType INT,
   TrgetEntry INT,
   BaseRef VARCHAR(16),
-  BaseType INT DEFAULT '23',
+  BaseType INT,
   BaseEntry INT,
   FOREIGN KEY (BaseEntry) REFERENCES OQUT(DocEntry)
 );
@@ -185,13 +178,6 @@ CREATE TABLE roles (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50)
 );
-
-/* Insertar roles */
-INSERT INTO roles (id, nombre) VALUES
-  (1, 'Super Administrador'),
-  (2, 'Administrador'),
-  (3, 'Cliente'),
-  (4, 'Vendedor');
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,

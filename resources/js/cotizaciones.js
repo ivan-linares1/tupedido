@@ -53,7 +53,7 @@ function actualizarDatosCliente() {
 
     // Consultar direcciones del cliente vía AJAX
     $.ajax({
-        url: `/cliente/${cardCode}/direcciones`,
+        url: `/Cotizaciones/cliente/${cardCode}/direcciones`,
         type: 'GET',
         success: function (data) {
             $('#direccionFiscal').text(data.fiscal);

@@ -1,4 +1,4 @@
-/* catalogo.css */
+/*ESTOS ESTILOS SE APLICAN A TODO EL CONTENIDO DE LAS PAGINAS DE CATALOGOS DE CLIENTES Y ARTICULOS*/
 
 /* Toggle estilo iOS */
 .switch {
@@ -73,4 +73,27 @@ input:checked + .slider:before {
     top: 1rem;
     right: 1rem;
     z-index: 9999;
+}
+
+/* Estructura fija para evitar que cambien los tamaños */
+#tablaArticulos {
+    table-layout: auto;
+    width: 100%;
+}
+
+/* Fijar padding uniforme y alineación */
+#tablaArticulos th,
+#tablaArticulos td {
+    padding: 8px !important; /* Tamaño fijo, ajustable a gusto */
+    white-space: normal;     /* Permite múltiples líneas */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    vertical-align: middle;
+    text-align: left;
+}
+
+/* Asegura que las imágenes no alteren la altura */
+#tablaArticulos .col-img img {
+    display: block;
+    margin: 0 auto;
 }

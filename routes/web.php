@@ -9,34 +9,48 @@ use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\MarcaController;
+use App\Http\Controllers\SincronizacionController;
+use App\Models\configuracion;
+
+// Enviar monedas
+Route::post('/enviar-monedas', [App\Http\Controllers\EnvioDatosController::class, 'enviarMonedasExternas'])->withoutMiddleware('web');
+
+// Receptor de prueba
+Route::post('/receptor', [App\Http\Controllers\EnvioDatosController::class, 'receptor'])->withoutMiddleware('web');
 
 Route::get('/', fn() => redirect()->route('dashboard'));
 
 // RUTAS PROTEGIDAS POR AUTENTICACIÓN
 Route::middleware('auth')->group(function () {
     //DASHBOARD
-    Route::get('/Dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+    //Route::get('/Dashboard', fn() => view('users.dashboard'))->name('dashboard');
+
+    Route::get('/Dashboard', function () {
+        $configuracionVacia = configuracion::count() === 0;//Variable booleana si es true significa que no tenemos configuracion y si es false si exite la configuracion
+        
+        return view('users.dashboard', compact('configuracionVacia'));
+    })->name('dashboard');
 
    // COTIZACIONES (prefijo /Cotizaciones)
-    Route::prefix('Cotizaciones')->group(function () {
+   Route::prefix('Cotizaciones')->group(function () {
         Route::get('/', [CotizacionesController::class, 'index'])->name('cotizaciones');
         Route::post('/Guardar', [CotizacionesController::class, 'GuardarCotizacion'])->name('cotizacionSave');
-        Route::post('/GuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+        Route::get('/NuevaCotizacion/{DocEntry?}', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
+        Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
+        Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])->name('detalles');
+        Route::get('/cotizacion/pdf/{id}', [CotizacionesController::class, 'pdfCotizacion'])->name('cotizacion.pdf');
     });
 
-    // Otras rutas relacionadas con cotizaciones
-    Route::get('/NuevaCotizacion/{DocEntry?}', [CotizacionesController::class, 'NuevaCotizacion'])->name('NuevaCotizacion');
-    Route::get('/cliente/{cardCode}/direcciones', [CotizacionesController::class, 'ObtenerDirecciones'])->name('ObtenerDirecciones');
-    Route::get('/cotizacion/{id}', [CotizacionesController::class, 'detalles'])->name('detalles');
-    Route::get('/cotizacion/pdf/{id}', [CotizacionesController::class, 'pdfCotizacion'])->name('cotizacion.pdf');
 
    //PEDIDOS (prefijo /Pedidos)
     Route::prefix('Pedidos')->group(function () {
         Route::get('/', [PedidosController::class, 'index'])->name('Pedidos');
+        Route::get('/NuevoPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
+        Route::post('/GuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+        Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
+        Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfCotizacion'])->name('pedido.pdf');
     });
-    Route::get('/NuevoPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
-    Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
-    Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfCotizacion'])->name('pedido.pdf');
+
 
     //CATÁLOGOS (Artículos, Clientes)
     Route::prefix('Catalogos')->group(function () {
@@ -48,7 +62,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/Clientes', [ClienteController::class, 'index'])->name('clientes');
         Route::post('/Clientes/Estado', [ClienteController::class, 'activo_inactivo'])->name('estado.Cliente');
     });
-
+/*****************************************************************************************************************************************************/
+/*****************************************************************************************************************************************************/
+/*****************************************************************************************************************************************************/
+/*****************************************************************************************************************************************************/
     //ADMINISTRACIÓN (Roles 1 y 2)
     Route::middleware(['role:1,2'])->group(function () {
 
@@ -72,15 +89,18 @@ Route::middleware('auth')->group(function () {
             // Consultas AJAX
             Route::get('/ocrd/{cardCode}', [UsuarioController::class, 'getCliente'])->name('admin.ocrd.show');
             Route::get('/oslp/{slpCode}', [UsuarioController::class, 'show'])->name('admin.oslp.show');
+
+            //Sincronizadores
+            route::view('/sincronizadores', 'admin.SincronizadoresManuales')->name('sincronizadores');
         });
 
         /*---------------------- CONFIGURACIÓN ----------------------*/
         Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion');
         Route::put('/configuracion', [ConfiguracionController::class, 'update'])->name('GuardarConfig');
 
-        /*---------------------- UTILIDADES (SOLO DESARROLLO) ----------------------*/
-        Route::get('/insertar-monedas', [UsuarioController::class, 'insertarMonedas'])->name('insertar.monedas');
-        Route::get('/probarXML', [ App\Http\Controllers\SincronizacionController::class, 'probarXML'])->name('ws');
+        /*---------------------- SERVICIOS WEB ----------------------*/ 
+        Route::post('ServiciosWEB/{servicio}/{metodo}', [ SincronizacionController::class, 'ServicioWeb'])->name('Sincronizar');
+
     });
 
     // USUARIOS NORMALES Y VENDEDORES (Roles 3 y 4)

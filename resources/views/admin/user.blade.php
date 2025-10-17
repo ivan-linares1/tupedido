@@ -71,23 +71,19 @@
                             <td>{{ $usuario->rol?->nombre }}</td>
                             <td>{{ $usuario->activo ? 'activo' : 'inactivo' }}</td>
                             <td class="text-center">
-                                <label class="switch">
-                                    <input 
-                                        type="checkbox" 
-                                        class="toggle-estado-usuarios"
-                                        data-id="{{ $usuario->id }}"
-                                        data-field="activo"
-                                        data-url="{{ route('estado.Usuario') }}"
-                                        {{ $usuario->activo == 1 ? 'checked' : '' }}
-                                    >
-
-                                    <span class="slider round"></span>
-                                </label>
-                            </td>
-
-
-
-
+                                @if ($usuario->rol_id != 1)
+                                    <label class="switch">
+                                        <input 
+                                            type="checkbox" 
+                                            class="toggle-estado-usuarios"
+                                            data-id="{{ $usuario->id }}"
+                                            data-field="activo"
+                                            data-url="{{ route('estado.Usuario') }}"
+                                            {{ $usuario->activo == 1 ? 'checked' : '' }}>
+                                        <span class="slider round"></span>
+                                    </label>
+                                @endif
+                            </td>                            
                         </tr>
                     @endforeach
                 </tbody>
@@ -162,9 +158,9 @@
                             <input type="text" id="telefono" name="telefono" class="form-control" readonly>
                         </div>
                         <div class="col-md-6">
-    <label class="form-label fw-semibold">Email de contacto</label>
-    <textarea id="email_contacto" name="email_contacto" class="form-control" rows="3" readonly></textarea>
-</div>
+                            <label class="form-label fw-semibold">Email de contacto</label>
+                            <textarea id="email_contacto" name="email_contacto" class="form-control" rows="3" readonly></textarea>
+                        </div>
 
 
                     </div>

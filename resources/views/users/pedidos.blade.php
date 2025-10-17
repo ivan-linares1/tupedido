@@ -10,7 +10,38 @@
 
     
     <div class="mb-3 d-flex justify-content-between align-items-center">
-        <a href="{{ route('NuevaPedido') }}" class="btn btn-primary">Nuevo Pedido</a>
+        @if($configuracionVacia == true && (Auth::user()->rol_id == 3 || Auth::user()->rol_id == 4))
+        <div class="d-inline-block position-relative">
+            <button class="btn btn-primary" disabled>Nuevo Pedido</button>
+            <small class="mensaje-cambio text-danger">⚠️ {!! 'Contacte a soporte: <br> Problema de configuracion.' !!}</small>
+        </div>
+        @elseif($configuracionVacia == true && (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2))
+            <div class="d-inline-block position-relative">
+                <button class="btn btn-primary" onclick="alertConfig()">Nuevo Pedido</button>
+            </div>
+
+            <script>
+                function alertConfig() {
+                    Swal.fire({
+                        title: '⚠️ Configuración incompleta',
+                        html: `Debes terminar de configurar el sistema.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ir a Configuración',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#05564f',
+                        cancelButtonColor: '#d33'
+                    }).then((result) => {
+                        if(result.isConfirmed){
+                            window.location.href = "{{ route('configuracion') }}";
+                        }
+                    });
+                }
+            </script>
+        @else
+            <a href="{{ route('NuevaPedido') }}" class="btn btn-primary">Nuevo Pedido</a>
+        @endif
+        
          <div class="d-flex gap-2">
             <input type="text" id="buscarPedido" class="form-control" placeholder="Buscar...">
             <input type="date" id="fechaPedido" class="form-control" max="{{ date('Y-m-d') }}">

@@ -51,6 +51,12 @@ return [
     */
 
     'channels' => [
+        'sync' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/sync.log'),
+            'level' => 'debug',
+        ],
+
 
         'stack' => [
             'driver' => 'stack',

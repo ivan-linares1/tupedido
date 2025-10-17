@@ -23,6 +23,7 @@ class CotizacionesController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $configuracionVacia = configuracion::count() === 0;//Variable booleana si es true significa que no tenemos configuracion y si es false si exite la configuracion
 
         // Base de la consulta: cotizaciones con sus relaciones
         $query = Cotizacion::select(
@@ -33,20 +34,22 @@ class CotizacionesController extends Controller
             ->leftJoin('OSLP', 'OQUT.SlpCode', '=', 'OSLP.SlpCode')
             ->leftJoin('OCRN', 'OQUT.DocCur', '=', 'OCRN.Currency_ID')
             ->orderBy('OQUT.DocEntry', 'desc');
-
+        
+        // Si el usuario es superAdministrador o Administrador
+        if ($user->rol_id == 1 || $user->rol_id == 2) { /* No filtramos, ven todo */ }
         // Si el usuario es cliente, filtramos por su código
-        if ($user->rol_id == 3) {
+        else if ($user->rol_id == 3) {
             $query->where('OQUT.CardCode', $user->codigo_cliente);
         }
-
         // Si el usuario es vendedor, filtramos por su código
-        if ($user->rol_id == 4) {
+        else if ($user->rol_id == 4) {
             $query->where('OQUT.SlpCode', $user->codigo_vendedor);
         }
+        else { abort(403, 'Rol no permitido'); }
 
         $cotizaciones = $query->get();
 
-        return view('users.cotizaciones', compact('cotizaciones'));
+        return view('users.cotizaciones', compact('cotizaciones','configuracionVacia'));
     }
 
 
@@ -257,8 +260,27 @@ class CotizacionesController extends Controller
 
     public function detalles($DocEntry)
     {
+        $user = Auth::user();
         // Obtener la cotización con sus líneas
         $cotizacion = Cotizacion::with('lineas')->findOrFail($DocEntry);
+
+        //Validar permisos según rol
+        if (in_array($user->rol_id, [1, 2])) {
+            // Admin y super admin pueden ver todo
+        } elseif ($user->rol_id == 3) {
+            // Cliente: solo puede ver sus propias cotizaciones
+            if ($cotizacion->CardCode != $user->codigo_cliente) {
+                abort(403, 'No tienes permiso para ver esta cotización.');
+            }
+        } elseif ($user->rol_id == 4) {
+            // Vendedor: solo puede ver sus propias cotizaciones
+            if ($cotizacion->SlpCode != $user->codigo_vendedor) {
+                abort(403, 'No tienes permiso para ver esta cotización.');
+            }
+        } else {
+            abort(403, 'Rol no permitido.');
+        }
+
         $pedido = pedidos::where('BaseEntry', $cotizacion->DocEntry)->first();
 
         // Datos adicionales para la vista

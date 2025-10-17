@@ -18,6 +18,9 @@
 
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!--  Swal.fire alertas con estilos -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
 
     <!-- Importación de CSS -->
@@ -37,17 +40,15 @@
     <main class="content content-body">
         {{--muestra los mensajes de errrores en todas las vistas--}}
         @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+            <div class="panel-alert success"> {{ session('success') }} </div>
         @endif
 
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+        @if(session('warning'))
+            <div class="panel-alert warning"> {{ session('warning') }} </div>
+        @endif
+
+        @if(session('error')) 
+            <div class="panel-alert error"> {{ session('error') }} </div>
         @endif
 
         @yield('contenido')
