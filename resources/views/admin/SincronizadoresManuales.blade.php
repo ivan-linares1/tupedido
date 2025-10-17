@@ -67,7 +67,8 @@
 .icon-precios { background: #dc3545; }       /* Rojo */
 .icon-clientes { background: #0dcaf0; }   /* Celeste / Turquesa */
 .icon-direcciones { background: #20c997; }  /* Verde azulado tipo */
-
+.icon-descuentos {background: #ffc107; }/* Amarillo dorado */
+.icon-descuento {background: #28a745; }/* verde claro*/
 
 
 .sincronizadores-panel .card:hover i {
@@ -133,7 +134,7 @@
 
     <div class="row g-4 justify-content-center">
 
-        <!-- Monedas -->
+        <!-- Monedas OCRN-->
         <div class="col-md-3 col-sm-6">
             <form action="{{ route('Sincronizar', ['servicio'=>'Monedas', 'metodo'=>'SBOMonedas_OCRN']) }}" method="POST">
                 @csrf
@@ -148,13 +149,13 @@
             </form>
         </div>
 
-        <!-- Marcas -->
+        <!-- Marcas OITB-->
         <div class="col-md-3 col-sm-6">
             <form action="{{ route('Sincronizar', ['servicio'=>'Marcas', 'metodo'=>'SBO_GPO_Articulo_OITB']) }}" method="POST">
                 @csrf
                 <div class="card text-center">
                     <div class="card-body">
-                        <i class="bi bi-tags icon-marcas"></i>
+                        <i class="bi bi-grid-1x2-fill icon-marcas"></i>
                         <h5 class="card-title">Grupos de Artículos</h5>
                         <p class="card-text">Sincroniza los grupos de artículos o marcas.</p>
                         <button type="submit" class="btn btn-success w-100">Ejecutar</button>
@@ -163,7 +164,7 @@
             </form>
         </div>
 
-        <!-- Categorías Lista Precios -->
+        <!-- Categorías Lista Precios OPLN-->
         <div class="col-md-3 col-sm-6">
             <form action="{{ route('Sincronizar', ['servicio'=>'Categoria_Lista_Precios', 'metodo'=>'SBO_CAT_LP_OPLN']) }}" method="POST">
                 @csrf
@@ -178,7 +179,7 @@
             </form>
         </div>
 
-        <!-- Artículos -->
+        <!-- Artículos OITM-->
         <div class="col-md-3 col-sm-6">
             <form action="{{ route('Sincronizar', ['servicio'=>'Articulos', 'metodo'=>'SBOArticulos_OITM']) }}" method="POST">
                 @csrf
@@ -232,6 +233,36 @@
                         <i class="bi bi-geo-alt-fill icon-direcciones"></i>
                         <h5 class="card-title">Direcciones de Clientes</h5>
                         <p class="card-text">Sincroniza la direccion de Clientes.</p>
+                        <button type="submit" class="btn btn-success w-100">Ejecutar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Grupos de Desceuntos OEDG-->
+        <div class="col-md-3 col-sm-6">
+            <form action="{{ route('Sincronizar', ['servicio'=>'Grupo_Descuentos', 'metodo'=>'SBO_Grupos_Descuentos_OEDG']) }}" method="POST">
+                @csrf
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-tags-fill icon-descuentos"></i>
+                        <h5 class="card-title">Grupos de Descuentos</h5>
+                        <p class="card-text">Sincroniza grupos de descuentos.</p>
+                        <button type="submit" class="btn btn-success w-100">Ejecutar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Desceuntos EDG1-->
+        <div class="col-md-3 col-sm-6">
+            <form action="{{ route('Sincronizar', ['servicio'=>'Descuentos_Detalle', 'metodo'=>'SBO_Grupos_Descuentos_EDG1']) }}" method="POST">
+                @csrf
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-percent icon-descuento"></i>
+                        <h5 class="card-title">Descuentos</h5>
+                        <p class="card-text">Sincroniza los descuentos.</p>
                         <button type="submit" class="btn btn-success w-100">Ejecutar</button>
                     </div>
                 </div>

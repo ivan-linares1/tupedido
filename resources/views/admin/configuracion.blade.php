@@ -44,7 +44,9 @@
                         <li class="mb-2"><i class="bi bi-building-check text-warning me-2"></i><strong>Ciudad:</strong> {{ $configuracion->ciudad }}</li>
                         <li class="mb-2"><i class="bi bi-globe2 text-dark me-2"></i><strong>País:</strong> {{ $configuracion->pais }}</li>
                         <li class="mb-2"><i class="bi bi-telephone-fill text-success me-2"></i><strong>Teléfono:</strong> {{ $configuracion->telefono }}</li>
-                        <li class="mb-2"><i class="bi bi-cash-coin text-warning me-2"></i><strong>Moneda Principal:</strong> {{ $configuracion->monedaPrincipal->Currency ?? 'No asignada' }}</li>
+                        <li class="mb-2"><i class="bi bi-cash-coin text-warning me-2"></i><strong>Moneda Principal:</strong> 
+                           {{ $configuracion->monedaPrincipal ? $configuracion->monedaPrincipal->Currency . ' - ' . $configuracion->monedaPrincipal->CurrName : 'No asignada' }}
+                        </li>
                     </ul>
                 </div>
 
@@ -141,7 +143,7 @@
                         @foreach($monedas as $moneda)
                             <option value="{{ $moneda->Currency_ID }}"
                                 @if(old('MonedaPrincipal', $configuracion->MonedaPrincipal) == $moneda->Currency_ID) selected @endif>
-                                {{ $moneda->Currency }}
+                                {{ $moneda->Currency.' - '.$moneda->CurrName }}
                             </option>
                         @endforeach
                     </select>

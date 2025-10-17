@@ -23,14 +23,16 @@ class Sincronizar extends Command
         $this->info("🔄 Iniciando sincronización de: $tipo ...");
 
         // Llamamos al método general ServicioWeb
-        // El método ahora retorna true o false según el éxito
         $metodo = [
             'Monedas' => 'SBOMonedas_OCRN',
             'Articulos' => 'SBOArticulos_OITM',
             'Marcas' => 'SBO_GPO_Articulo_OITB',
             'Categoria_Lista_Precios' => 'SBO_CAT_LP_OPLN',
             'Lista_Precios' => 'SBOListaPrecios_ITM1',
-            'Clientes' =>'SBO_Clientes_OCRD'
+            'Clientes' =>'SBO_Clientes_OCRD',
+            'Direcciones' => 'SBO_Clientes_Direcciones_CRD1',
+            'Grupo_Descuentos' => 'SBO_Grupos_Descuentos_OEDG',
+            'Descuentos_Detalle' => 'SBO_Grupos_Descuentos_EDG1',
         ];
 
         if (!isset($metodo[$tipo])) {

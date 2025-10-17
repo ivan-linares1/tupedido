@@ -109,7 +109,7 @@
                     @foreach($monedas as $moneda)
                         <option value="{{ $moneda->Currency_ID }}" @if($moneda->cambios->isEmpty()) disabled @endif 
                             @if(isset($preseleccionados['moneda']) && $preseleccionados['moneda'] == $moneda->Currency_ID) selected @endif > {{--si no hay monedas de cambio disponibles se inhabilita--}}
-                            {{ $moneda->Currency }}
+                            {{ $moneda->Currency.' - '.$moneda->CurrName }}
                             @if($moneda->cambios->isEmpty() && isset($modo) && $modo == 0) (Sin tipo de cambio) @endif
                         </option>
                     @endforeach
