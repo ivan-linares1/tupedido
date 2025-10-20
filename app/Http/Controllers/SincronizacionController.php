@@ -22,12 +22,24 @@ class SincronizacionController extends Controller
     // Conexión al Web Service con manejo de errores
     private function ConexionWBS()
     {
-        $url = "http://10.10.1.107:8083/KombiService.asmx?wsdl";
+        $url = "http://10.10.1.123:8083/KombiService.asmx?wsdl";
 
         try {
+
+            $opts = [
+                'http' => [
+                    'user_agent' => 'PHPSoapClient',
+                    'timeout' => 600, // tiempo máximo para recibir toda la respuesta
+                ]
+            ];
+            $context = stream_context_create($opts);
+
             $client = new \SoapClient($url, [
                 'trace' => true,
                 'exceptions' => true,
+                'connection_timeout' => 120,
+                'stream_context' => $context,
+                'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP, 
             ]);
 
            return [
@@ -59,18 +71,18 @@ class SincronizacionController extends Controller
     //$servicio, es el nombre con el que se llenaran los mensajes 
     //$metodo, Es el nombre del metodo del servico web al que se accedera
     //$cli es la bandera para saber si es por consola o por sistema web
-    public function ServicioWeb($servicio, $metodo, $cli = false) 
+    public function ServicioWeb($servicio, $metodo, $cli = false, $returnvalor = false) 
     {
         $conexion = $this->ConexionWBS();
 
         if (!$conexion['success']) {
             Log::channel('sync')->error("Fallo de conexión con el servicio web: {$conexion['error']}"); //Guarda el mensaje de error en los logs
-            if ($cli) {
-                echo $conexion['message'] . "\n";
-                return;
-            }
+            
+            if ($cli) { echo $conexion['message'] . "\n"; return; }
+            if ($returnvalor) { return ['tipo' => $conexion['type'], 'msg' => $conexion['message']]; }
             return redirect()->back()->with($conexion['type'], $conexion['message']); //Regresa a la pantalla la alerta del error
         }
+
         $client = $conexion['client'];
 
         try {
@@ -87,13 +99,16 @@ class SincronizacionController extends Controller
                 case 'Direcciones': $valor = $this->Direcciones($xmlResponse); break;
                 case 'Grupo_Descuentos': $valor = $this->Grupo_Descuentos($xmlResponse); break;
                 case 'Descuentos_Detalle': $valor = $this->DescuentosDetalle($xmlResponse); break;
+                default:
+                    $valor = ['tipo' => 'warning', 'msg' => "Servicio no reconocido: {$servicio}"];
             }
 
-            if ($cli) {
-                echo $valor['msg'] . "\n";
-            } else {
-                return redirect()->back()->with($valor['tipo'], $valor['msg']);
-            }
+            if ($returnvalor) { return $valor; } // Devuelve array en lugar de redirect
+            
+
+            if ($cli) { echo $valor['msg'] . "\n"; } 
+            else if ($returnvalor) { return ['tipo' => $conexion['type'], 'msg' => $conexion['message']]; }
+            else { return redirect()->back()->with($valor['tipo'], $valor['msg']); }
 
         } catch (\Throwable $e) {//Marca errores que esten por mala recepcion de datos
             $msg = "Error al sincronizar ".$servicio ;//. $e->getMessage();
@@ -105,11 +120,8 @@ class SincronizacionController extends Controller
                 'error' => $e->getMessage()
             ]);
 
-            if ($cli) {
-                echo $msg . "\n";
-            } else {
-                return redirect()->back()->with('error', $msg);
-            }
+            if ($cli) { echo $msg . "\n"; }
+            else { return redirect()->back()->with('error', $msg); }
         }
     }
 
@@ -359,6 +371,41 @@ class SincronizacionController extends Controller
          return $this->aux('GruposDescuento', $total, $insertados, $errores, $warnings, $excluidos );
     }
 
+    public function ServicioWebAux($servicio, $metodo, $cli = false)
+    {
+        try {
+            // Ejecuta los dos métodos SOAP
+           $valor1 =  $this->ServicioWeb($servicio, $metodo.'_1', $cli, true);
+           //dd($valor1);
+           $valor2 = $this->ServicioWeb($servicio, $metodo.'_2', $cli, true);
+           //dd($valor1, $valor2);
+           if ($cli) {
+                // Para CLI solo mostramos en consola
+                if ($valor1['msg'] === $valor2['msg']) { echo "{$valor1['msg']}\n"; }
+                else { echo "1.- {$valor1['msg']}\n2.- {$valor2['msg']}\n"; }
+                return;
+            } else {
+                // Para web
+                $mensaje = ($valor1['msg'] === $valor2['msg'])
+                    ? "{$valor1['msg']}"
+                    : "1.- {$valor1['msg']}<br>2.- {$valor2['msg']}";
+
+                $tipo = ($valor1['tipo'] === $valor2['tipo']) ? $valor1['tipo'] : 'warning';
+                
+                return redirect()->back()->with($tipo, $mensaje);
+            }
+
+        } catch (\Throwable $e) {
+            Log::channel('sync')->error("Error al sincronizar ambos EDG1: " . $e->getMessage());
+            if ($cli) {
+                echo "Error al ejecutar la sincronización de {$metodo}_1 y {$metodo}_2\n";
+                return;
+            } else {
+                return redirect()->back()->with('Error', "Error al ejecutar la sincronización de {$metodo}_1 y {$metodo}_2");
+            }
+        }
+    }
+
     private function DescuentosDetalle($xmlResponse) //EDG1 PENDIENTE **************************************
     {
         $total = count($xmlResponse->GPO_DescuentosEDG1); // Total elementos del XML
@@ -401,7 +448,7 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("EDG1_DescuentosDetalle: Error con registro AbsEntry '{$absEntry}' ObjKey '{$objKey}' => ".$e->getMessage());
             }
         }
-
+        $insertados += $warnings; $warnings = 0;
         return $this->aux('Descuentos_Detalle', $total, $insertados, $errores, $warnings);
     }
 

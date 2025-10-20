@@ -100,6 +100,7 @@ Route::middleware('auth')->group(function () {
 
         /*---------------------- SERVICIOS WEB ----------------------*/ 
         Route::post('ServiciosWEB/{servicio}/{metodo}', [ SincronizacionController::class, 'ServicioWeb'])->name('Sincronizar');
+        Route::post('ServiciosWEB_Aux/{servicio}/{metodo}', [ SincronizacionController::class, 'ServicioWebAux'])->name('SincronizarAux');
 
     });
 

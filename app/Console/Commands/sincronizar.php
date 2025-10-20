@@ -21,6 +21,7 @@ class Sincronizar extends Command
         }
 
         $this->info("🔄 Iniciando sincronización de: $tipo ...");
+        $this->comment('⏳ Por favor espere...');
 
         // Llamamos al método general ServicioWeb
         $metodo = [

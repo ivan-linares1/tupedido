@@ -21,8 +21,7 @@ class ArticuloController extends Controller
             $articulo->where('Active', 'Y'); 
         } elseif ($request->estatus == 'Inactivos') {
             $articulo->where('Active', 'N');
-        }elseif($request->estatus == 'Todos'){
-        }
+        }elseif($request->estatus == 'Todos'){ /*SIN FILTRO MUESTRA TODOS*/  }
 
 
         //filtro de marca
