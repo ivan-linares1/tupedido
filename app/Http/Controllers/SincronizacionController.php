@@ -11,35 +11,19 @@ use App\Models\ListaPrecio;
 use App\Models\Marcas;
 use App\Models\Moneda;
 use App\Models\Precios;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use PhpParser\Node\Stmt\TryCatch;
-
-use function Laravel\Prompts\warning;
 
 class SincronizacionController extends Controller
 {
     // Conexión al Web Service con manejo de errores
     private function ConexionWBS()
     {
-        $url = "http://10.10.1.123:8083/KombiService.asmx?wsdl";
+        $url = "http://10.10.1.13:8083/KombiService.asmx?wsdl";
 
         try {
-
-            $opts = [
-                'http' => [
-                    'user_agent' => 'PHPSoapClient',
-                    'timeout' => 600, // tiempo máximo para recibir toda la respuesta
-                ]
-            ];
-            $context = stream_context_create($opts);
-
             $client = new \SoapClient($url, [
                 'trace' => true,
                 'exceptions' => true,
-                'connection_timeout' => 120,
-                'stream_context' => $context,
-                'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP, 
             ]);
 
            return [
@@ -120,8 +104,53 @@ class SincronizacionController extends Controller
                 'error' => $e->getMessage()
             ]);
 
+            if ($returnvalor) { return ['tipo' => 'error', 'msg' => $msg . ': ' . $e->getMessage()]; }
+
             if ($cli) { echo $msg . "\n"; }
             else { return redirect()->back()->with('error', $msg); }
+        }
+    }
+
+    public function ServicioWebAux($servicio, $metodo, $cli = false)
+    {
+        try {
+            // Ejecuta los dos métodos SOAP
+           Log::channel('sync')->notice("Inicio del servicio 1"); $valor1 =  $this->ServicioWeb($servicio, $metodo.'_1', $cli, true);
+           Log::channel('sync')->notice("Inicio del servicio 2"); $valor2 = $this->ServicioWeb($servicio, $metodo.'_2', $cli, true);
+           Log::channel('sync')->notice("Inicio del servicio 3"); $valor3 = $this->ServicioWeb($servicio, $metodo.'_3', $cli, true);
+           Log::channel('sync')->notice("Inicio del servicio 4"); $valor4 = $this->ServicioWeb($servicio, $metodo.'_4', $cli, true);
+
+           $tipos = [$valor1['tipo'], $valor2['tipo'], $valor3['tipo'], $valor4['tipo']];
+
+           if ($cli) {
+                // Para CLI solo mostramos en consola
+                if ( count(array_unique( $tipos)) === 1 ) { echo "{$valor1['msg']}\n"; }
+                else { echo "1.- {$valor1['msg']}\n2.- {$valor2['msg']}\n3.- {$valor3['msg']}\n4.- {$valor4['msg']}\n"; }
+                return;
+            } else { // Para web
+                if( count(array_unique( $tipos)) === 1 ){$tipo = $valor1['tipo']; $mensaje = $valor1['msg']; }
+                else{
+                    $tipo = 'warning';
+                    $msgs = [
+                        "Sub WS 1.- {$valor1['msg']}",
+                        "Sub WS 2.- {$valor2['msg']}",
+                        "Sub WS 3.- {$valor3['msg']}",
+                        "Sub WS 4.- {$valor4['msg']}"
+                    ];
+                    $unicos = array_unique($msgs);
+                    $mensaje = implode('<br>', $unicos);
+                }
+                return redirect()->back()->with($tipo, $mensaje);
+            }
+
+        } catch (\Throwable $e) {
+            Log::channel('sync')->error("Error al sincronizar EDG1: " . $e->getMessage());
+            if ($cli) {
+                echo "Error al ejecutar la sincronización de {$metodo}\n";
+                return;
+            } else {
+                return redirect()->back()->with('Error', "Error al ejecutar la sincronización de {$metodo}");
+            }
         }
     }
 
@@ -371,42 +400,7 @@ class SincronizacionController extends Controller
          return $this->aux('GruposDescuento', $total, $insertados, $errores, $warnings, $excluidos );
     }
 
-    public function ServicioWebAux($servicio, $metodo, $cli = false)
-    {
-        try {
-            // Ejecuta los dos métodos SOAP
-           $valor1 =  $this->ServicioWeb($servicio, $metodo.'_1', $cli, true);
-           //dd($valor1);
-           $valor2 = $this->ServicioWeb($servicio, $metodo.'_2', $cli, true);
-           //dd($valor1, $valor2);
-           if ($cli) {
-                // Para CLI solo mostramos en consola
-                if ($valor1['msg'] === $valor2['msg']) { echo "{$valor1['msg']}\n"; }
-                else { echo "1.- {$valor1['msg']}\n2.- {$valor2['msg']}\n"; }
-                return;
-            } else {
-                // Para web
-                $mensaje = ($valor1['msg'] === $valor2['msg'])
-                    ? "{$valor1['msg']}"
-                    : "1.- {$valor1['msg']}<br>2.- {$valor2['msg']}";
-
-                $tipo = ($valor1['tipo'] === $valor2['tipo']) ? $valor1['tipo'] : 'warning';
-                
-                return redirect()->back()->with($tipo, $mensaje);
-            }
-
-        } catch (\Throwable $e) {
-            Log::channel('sync')->error("Error al sincronizar ambos EDG1: " . $e->getMessage());
-            if ($cli) {
-                echo "Error al ejecutar la sincronización de {$metodo}_1 y {$metodo}_2\n";
-                return;
-            } else {
-                return redirect()->back()->with('Error', "Error al ejecutar la sincronización de {$metodo}_1 y {$metodo}_2");
-            }
-        }
-    }
-
-    private function DescuentosDetalle($xmlResponse) //EDG1 PENDIENTE **************************************
+    private function DescuentosDetalle($xmlResponse) //EDG1
     {
         $total = count($xmlResponse->GPO_DescuentosEDG1); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
@@ -448,7 +442,6 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("EDG1_DescuentosDetalle: Error con registro AbsEntry '{$absEntry}' ObjKey '{$objKey}' => ".$e->getMessage());
             }
         }
-        $insertados += $warnings; $warnings = 0;
         return $this->aux('Descuentos_Detalle', $total, $insertados, $errores, $warnings);
     }
 
@@ -460,11 +453,13 @@ class SincronizacionController extends Controller
     //$excluidos = esta variable es para los registros que usan clientes y entre sus datos traen datos de provedores esos son excluidos
     private function aux($servicio, $total, $insertados, $errores, $warnings=0, $excluidos=0)
     {
+        Log::channel('sync')->notice("Informacion de {$servicio}; Insertados={$insertados}; total={$total}; errores={$errores}");
+        
         // Caso 1: todo fue exitoso
         if ($total === $insertados && $errores === 0 && $warnings === 0) {
             return [
                 'tipo' => 'success',
-                'msg'  => "Sincronización de {$servicio} completada correctamente. Total: {$total} elementos."
+                'msg'  => "Sincronización de {$servicio} completada correctamente."
             ];
         }
 
@@ -472,7 +467,7 @@ class SincronizacionController extends Controller
         if($excluidos > 0 && ($excluidos + $insertados === $total)) {
             return [
                 'tipo' => 'success',
-                'msg'  => "Sincronización de {$servicio} completada correctamente. Total: {$insertados} elementos. Excluidos: {$excluidos} elementos."
+                'msg'  => "Sincronización de {$servicio} completada correctamente."
             ];
         }
 
