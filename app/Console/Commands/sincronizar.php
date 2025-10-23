@@ -21,6 +21,7 @@ class Sincronizar extends Command
         }
 
         $this->info("🔄 Iniciando sincronización de: $tipo ...");
+        $this->comment('⏳ Por favor espere...');
 
         // Llamamos al método general ServicioWeb
         $metodo = [
@@ -44,7 +45,11 @@ class Sincronizar extends Command
         $metodo = $metodo[$tipo];
 
         try {
-            $controller->ServicioWeb($servicio, $metodo, true); // true = CLI
+            if( $servicio === 'Descuentos_Detalle'){
+                $controller->ServicioWebAux($servicio, $metodo, true); // true = CLI
+            }
+            else{ $controller->ServicioWeb($servicio, $metodo, true);} // true = CLI}
+            
             $this->info("✅ Finalizacion de la sincronización de: $tipo ...");
         } catch (\Throwable $e) {
             $this->error("❌ Error ejecutando la sincronización de $tipo: " . $e->getMessage());

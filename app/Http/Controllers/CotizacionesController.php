@@ -15,6 +15,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 
 class CotizacionesController extends Controller
@@ -387,4 +389,38 @@ class CotizacionesController extends Controller
 
         return $pdf->stream("Cotizacion-{$cotizacion->DocEntry}.pdf");
     }
+
+    /*private function enviarCotizacionASMX($cotizacion, $articulos)
+    {
+        $xml = new \SimpleXMLElement('<Cotizacion/>');
+        $encabezado = $xml->addChild('Encabezado');
+        $encabezado->addChild('CardCode', $cotizacion->CardCode);
+        $encabezado->addChild('CardName', $cotizacion->CardName);
+        $encabezado->addChild('DocDate', $cotizacion->DocDate);
+        $encabezado->addChild('DocDueDate', $cotizacion->DocDueDate);
+        $encabezado->addChild('Total', $cotizacion->Total);
+
+        $lineas = $xml->addChild('Lineas');
+        foreach ($articulos as $index => $art) {
+            $linea = $lineas->addChild('Linea');
+            $linea->addChild('LineNum', $index + 1);
+            $linea->addChild('ItemCode', $art['itemCode']);
+            $linea->addChild('Descripcion', htmlspecialchars($art['descripcion']));
+            $linea->addChild('Cantidad', $art['cantidad']);
+            $linea->addChild('Precio', floatval(str_replace(',', '', $art['precio'])));
+        }
+
+        $xmlString = $xml->asXML();
+        
+        $url = 'http://10.10.1.12:8092//ServicioWeb.asmx/RecibirCotizacion';
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'text/xml; charset=utf-8',
+        ])->withBody($xmlString, 'text/xml')
+        ->post($url);
+
+        if (!$response->successful()) {
+            Log::channel('sync')->error('Error al enviar cotización: '.$response->status().' '.$response->body());
+        }
+    }*/
 }

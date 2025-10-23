@@ -21,8 +21,7 @@ class ArticuloController extends Controller
             $articulo->where('Active', 'Y'); 
         } elseif ($request->estatus == 'Inactivos') {
             $articulo->where('Active', 'N');
-        }elseif($request->estatus == 'Todos'){
-        }
+        }elseif($request->estatus == 'Todos'){ /*SIN FILTRO MUESTRA TODOS*/  }
 
 
         //filtro de marca
@@ -52,14 +51,5 @@ class ArticuloController extends Controller
         }
 
         return view('users.catalogo_productos', compact('articulos', 'marcas'));
-    }
-
-    public function activo_inactivo(Request $request)
-    {
-        $articulo = Articulo::findOrFail($request->id);
-        $articulo->{$request->field} = $request->value; //{$request->field es el nombre del campo a acualizar que se guarda como data en el html
-        $articulo->save();
-
-        return response()->json(['success' => true]);
     }
 }

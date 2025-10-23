@@ -12,22 +12,20 @@ use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\SincronizacionController;
 use App\Models\configuracion;
 
+//****************************************************************************************************************************************** */
 // Enviar monedas
 Route::post('/enviar-monedas', [App\Http\Controllers\EnvioDatosController::class, 'enviarMonedasExternas'])->withoutMiddleware('web');
 
 // Receptor de prueba
 Route::post('/receptor', [App\Http\Controllers\EnvioDatosController::class, 'receptor'])->withoutMiddleware('web');
-
+//****************************************************************************************************************************************** */
 Route::get('/', fn() => redirect()->route('dashboard'));
 
 // RUTAS PROTEGIDAS POR AUTENTICACIÓN
 Route::middleware('auth')->group(function () {
     //DASHBOARD
-    //Route::get('/Dashboard', fn() => view('users.dashboard'))->name('dashboard');
-
     Route::get('/Dashboard', function () {
         $configuracionVacia = configuracion::count() === 0;//Variable booleana si es true significa que no tenemos configuracion y si es false si exite la configuracion
-        
         return view('users.dashboard', compact('configuracionVacia'));
     })->name('dashboard');
 
@@ -56,11 +54,9 @@ Route::middleware('auth')->group(function () {
     Route::prefix('Catalogos')->group(function () {
         // Artículos
         Route::get('/Articulos', [ArticuloController::class, 'index'])->name('articulos');
-        Route::post('/Articulo/Estado', [ArticuloController::class, 'activo_inactivo'])->name('estado.Articulo');
 
         // Clientes
         Route::get('/Clientes', [ClienteController::class, 'index'])->name('clientes');
-        Route::post('/Clientes/Estado', [ClienteController::class, 'activo_inactivo'])->name('estado.Cliente');
     });
 /*****************************************************************************************************************************************************/
 /*****************************************************************************************************************************************************/
@@ -99,13 +95,13 @@ Route::middleware('auth')->group(function () {
         Route::put('/configuracion', [ConfiguracionController::class, 'update'])->name('GuardarConfig');
 
         /*---------------------- SERVICIOS WEB ----------------------*/ 
+        //Llama a la funcion de servicios web geeneral
         Route::post('ServiciosWEB/{servicio}/{metodo}', [ SincronizacionController::class, 'ServicioWeb'])->name('Sincronizar');
-
+        //ruta intermedia para el servicio de edg1 ya que esta en subservicios 
+        Route::post('ServiciosWEB_Aux/{servicio}/{metodo}', [ SincronizacionController::class, 'ServicioWebAux'])->name('SincronizarAux');
     });
 
     // USUARIOS NORMALES Y VENDEDORES (Roles 3 y 4)
-    Route::middleware(['role:3,4'])->group(function () {
-       
-    });
+    Route::middleware(['role:3,4'])->group(function () { });
 });
 require __DIR__ . '/auth.php';

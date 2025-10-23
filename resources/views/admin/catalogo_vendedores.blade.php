@@ -1,14 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Vendedores')
 
 @section('contenido')
+<div id="flash-messages" class="alert-top-end"></div>
 
-<div id="flash-messages" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-    {{-- Aquí se insertarán los alerts --}}
-</div>
-
-<div class="card shadow-sm border-0 rounded-3">
+<div class="card shadow-sm border-0 rounded-3 mt-4">
     <div class="card-header d-flex justify-content-between align-items-center bg-success text-white rounded-top">
         <h5 class="mb-0">
             <i class="bi bi-person-fill me-2"></i> Catálogo de Vendedores
@@ -16,75 +13,45 @@
     </div>
 
     <div class="card-body">
-        <div class="row mb-4 g-3 align-items-end">
+        <!-- Filtros -->
+        <div class="row mb-3 g-3 align-items-end">
             <div class="col-md-2">
                 <label for="mostrar" class="form-label fw-semibold">Mostrar</label>
                 <select id="mostrar" class="form-select form-select-sm rounded-3">
-                    <option>10</option>
-                    <option selected>25</option>
-                    <option>50</option>
+                    <option value="25" {{ request('mostrar') == 25 ? 'selected' : '' }}>25</option>
+                    <option value="50" {{ request('mostrar') == 50 ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ request('mostrar') == 100 ? 'selected' : '' }}>100</option>
                 </select>
             </div>
-            <div class="col-md-3">
+
+            <div class="col-md-2">
                 <label for="estatus" class="form-label fw-semibold">Estatus</label>
                 <select id="estatus" class="form-select form-select-sm rounded-3">
-                    <option selected>Todos</option>
-                    <option>Activo</option>
-                    <option>Inactivo</option>
+                    <option value="Todos">Todos</option>
+                    <option value="Y" {{ request('estatus') == 'Y' ? 'selected' : '' }}>Activos</option>
+                    <option value="N" {{ request('estatus') == 'N' ? 'selected' : '' }}>Inactivos</option>
                 </select>
             </div>
+
             <div class="col-md-4 ms-auto">
-                <label for="buscar" class="form-label fw-semibold">Buscar</label>
+                <label for="buscarVendedor" class="form-label fw-semibold">Buscar</label>
                 <div class="input-group input-group-sm rounded-3">
-                    <input type="text" id="buscar" class="form-control rounded-start" placeholder="Buscar Vendedor...">
+                    <input type="text" id="buscarVendedor" class="form-control rounded-start" placeholder="Buscar vendedor...">
                     <span class="input-group-text bg-white rounded-end"><i class="bi bi-search"></i></span>
                 </div>
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table id="tablaVendedores" class="table table-hover table-striped align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th>SlpCode</th>
-                        <th>SlpName</th>
-                        <th>Status</th>
-                        <th class="text-center">Acción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($vendedores as $item)
-                        <tr data-id="{{ $item->SlpCode }}">
-                            <td>{{ $item->SlpCode }}</td>
-                            <td>{{ $item->SlpName }}</td>
-                            <td class="status-text">{{ $item->Active == 'Y' ? 'Activo' : 'Inactivo' }}</td>
-                            <td class="text-center">
-                                {{-- Toggle estilo iOS --}}
-                                <label class="switch">
-                                    <input 
-                                        type="checkbox" 
-                                        class="toggle-estado-vendedor"
-                                        data-id="{{ $item->SlpCode }}"
-                                        data-url="{{ route('admin.vendedores.toggleActivo') }}"
-                                        {{ $item->Active == 'Y' ? 'checked' : '' }}
-                                    >
-                                    <span class="slider round"></span>
-                                </label>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <!-- Tabla -->
+        <div class="table-responsive" id="tabla-container">
+            @include('partials.tabla_vendedores')
         </div>
-
     </div>
 </div>
-
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
-
+<link rel="stylesheet" href="{{ asset('css/catalogo.css') }}">
 <style>
 /* Toggle estilo iOS */
 .switch {
@@ -93,13 +60,11 @@
   width: 50px;
   height: 26px;
 }
-
 .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .slider {
   position: absolute;
   cursor: pointer;
@@ -111,7 +76,6 @@
   transition: .4s;
   border-radius: 26px;
 }
-
 .slider:before {
   position: absolute;
   content: "";
@@ -123,68 +87,64 @@
   transition: .4s;
   border-radius: 50%;
 }
-
 input:checked + .slider {
-  background-color: #28a745; /* verde */
+  background-color: #28a745;
 }
-
 input:focus + .slider {
   box-shadow: 0 0 1px #28a745;
 }
-
 input:checked + .slider:before {
   transform: translateX(24px);
 }
-
 .slider.round {
   border-radius: 26px;
 }
-
-/* Paginación derecha */
-.dataTables_wrapper .dataTables_paginate {
-    float: right;
-}
 </style>
+@endpush
 
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
 $(document).ready(function() {
-    var table = $('#tablaVendedores').DataTable({
-        pageLength: 25,
-        lengthChange: false,
-        dom: 'rtip',
-        language: {
-            url: "//cdn.datatables.net/plug-ins/1.13.8/i18n/es-MX.json"
-        }
+
+    function fetchVendedores(url = "{{ route('admin.catalogo.vendedores') }}") {
+        const buscar = $('#buscarVendedor').val();
+        const estatus = $('#estatus').val();
+        const mostrar = $('#mostrar').val();
+
+        $.ajax({
+            url: url,
+            method: "GET",
+            data: { buscar, estatus, mostrar },
+            success: function(data) {
+                $('#tabla-container').html(data);
+            },
+            error: function() {
+                Swal.fire('Error', 'No se pudo cargar la lista de vendedores.', 'error');
+            }
+        });
+    }
+
+    // 🔍 Buscar mientras se escribe
+    $('#buscarVendedor').on('keyup', function() {
+        fetchVendedores();
     });
 
-    // Mostrar N registros
-    $('#mostrar').on('change', function() {
-        const val = parseInt($(this).val()) || 25;
-        table.page.len(val).draw();
+    // 🎚️ Filtrar por estatus o cantidad
+    $('#estatus, #mostrar').on('change', function() {
+        fetchVendedores();
     });
 
-    // Filtro estatus
-    $('#estatus').on('change', function() {
-        const raw = $(this).val();
-        let filtro = '';
-        if(!raw || raw.toLowerCase() === 'todos') filtro = '';
-        else if(raw.toLowerCase() === 'activo') filtro = '^Activo$';
-        else filtro = '^Inactivo$';
-        table.column(2).search(filtro, true, false, true).draw();
+    // 🔄 Paginación AJAX
+    $(document).on('click', '#tabla-container .pagination a', function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        fetchVendedores(url);
+        $('html, body').animate({ scrollTop: 0 }, 200);
     });
 
-    // Buscar dinámico
-    $('#buscar').on('keyup', function() {
-        table.search(this.value).draw();
-    });
-
-    // Toggle estado con confirmación
+    // ✅ Cambiar estado Activo/Inactivo
     $(document).on('change', '.toggle-estado-vendedor', function () {
         var $checkbox = $(this);
         var id = $checkbox.data('id');
@@ -194,12 +154,11 @@ $(document).ready(function() {
         var $row = $checkbox.closest('tr');
         var $statusCell = $row.find('.status-text');
 
-        // Detener cambio visual hasta confirmar
         $checkbox.prop('checked', prevState === 'Y');
 
         Swal.fire({
             title: '¿Estás seguro?',
-            text: "Vas a cambiar el estado del vendedor a " + (newState === 'Y' ? "Activo" : "Inactivo"),
+            text: "Cambiarás el estado del vendedor a " + (newState === 'Y' ? "Activo" : "Inactivo"),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#05564f',
@@ -209,18 +168,10 @@ $(document).ready(function() {
         }).then((result) => {
             if(result.isConfirmed){
                 $checkbox.prop('disabled', true);
-
                 $.post(url, {_token: "{{ csrf_token() }}", id: id}, function(response){
                     if(response.success){
-                        // Actualizar UI
                         $checkbox.prop('checked', newState === 'Y');
-                        var newText = (newState === 'Y' ? 'Activo' : 'Inactivo');
-                        $statusCell.text(newText);
-
-                        // 👉 Actualizar DataTables para que el filtro funcione correctamente
-                        table.cell($statusCell.get(0)).data(newText);
-                        table.row($row.get(0)).invalidate().draw(false);
-
+                        $statusCell.text(newState === 'Y' ? 'Activo' : 'Inactivo');
                         Swal.fire({
                             toast:true,
                             position:'top-end',
@@ -232,18 +183,11 @@ $(document).ready(function() {
                     } else {
                         Swal.fire('Error','No se pudo actualizar el estado','error');
                         $checkbox.prop('checked', prevState === 'Y');
-                        var prevText = (prevState === 'Y' ? 'Activo' : 'Inactivo');
-                        $statusCell.text(prevText);
-                        table.cell($statusCell.get(0)).data(prevText);
-                        table.row($row.get(0)).invalidate().draw(false);
+                        $statusCell.text(prevState === 'Y' ? 'Activo' : 'Inactivo');
                     }
                 }).fail(function(){
-                    Swal.fire('Error','Ocurrió un error de conexión','error');
+                    Swal.fire('Error','Error de conexión con el servidor','error');
                     $checkbox.prop('checked', prevState === 'Y');
-                    var prevText = (prevState === 'Y' ? 'Activo' : 'Inactivo');
-                    $statusCell.text(prevText);
-                    table.cell($statusCell.get(0)).data(prevText);
-                    table.row($row.get(0)).invalidate().draw(false);
                 }).always(function(){
                     $checkbox.prop('disabled', false);
                 });
@@ -255,5 +199,4 @@ $(document).ready(function() {
 
 });
 </script>
-
 @endpush

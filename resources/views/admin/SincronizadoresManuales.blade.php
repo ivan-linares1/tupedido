@@ -3,134 +3,12 @@
 @section('title', 'Panel de Sincronizadores')
 
 @section('contenido')
+    @vite(['resources/css/sincronizadores.css'])
 
-<style>
-/* Contenedor principal */
-.sincronizadores-panel {
-    max-width: 1400px;
-    padding: 50px 20px;
-    background-color: #f8f9fa;
-    border-radius: 20px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-}
-
-/* Título principal */
-.sincronizadores-panel h1 {
-    color: #343a40;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 50px;
-    text-align: center;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
-}
-
-/* Tarjetas */
-.sincronizadores-panel .card {
-    border-radius: 20px;
-    transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer;
-    overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    background: #ffffff;
-    min-height: 260px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-/* Hover en tarjetas */
-.sincronizadores-panel .card:hover {
-    transform: translateY(-10px) scale(1.03);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.25);
-}
-
-/* Iconos circulares */
-.sincronizadores-panel .card i {
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px auto;
-    border-radius: 50%;
-    font-size: 2.5rem;
-    color: #fff;
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-/* Diferentes iconos y colores por tipo */
-.icon-monedas { background: #0d6efd; }       /* Azul */
-.icon-marcas { background: #6f42c1; }        /* Morado */
-.icon-categorias { background: #198754; }    /* Verde */
-.icon-articulos { background: #fd7e14; }     /* Naranja */
-.icon-precios { background: #dc3545; }       /* Rojo */
-.icon-clientes { background: #0dcaf0; }   /* Celeste / Turquesa */
-.icon-direcciones { background: #20c997; }  /* Verde azulado tipo */
-.icon-descuentos {background: #ffc107; }/* Amarillo dorado */
-.icon-descuento {background: #28a745; }/* verde claro*/
-
-
-.sincronizadores-panel .card:hover i {
-    transform: scale(1.25);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-}
-
-/* Títulos y textos */
-.sincronizadores-panel .card-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #212529;
-    margin-bottom: 10px;
-    text-align: center;
-}
-
-.sincronizadores-panel .card-text {
-    font-size: 0.95rem;
-    color: #495057;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-/* Botones */
-.sincronizadores-panel .btn {
-    font-weight: 600;
-    padding: 12px 0;
-    border-radius: 12px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-    transition: all 0.3s;
-    font-size: 1rem;
-}
-
-.sincronizadores-panel .btn-success {
-    background-color: #20c997;
-    border: none;
-}
-
-.sincronizadores-panel .btn-success:hover {
-    background-color: #198754;
-    transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(25,135,84,0.4);
-}
-
-/* Responsive */
-@media (max-width: 992px) {
-    .sincronizadores-panel .card i { width: 70px; height: 70px; font-size: 2rem; }
-    .sincronizadores-panel .card-title { font-size: 1.2rem; }
-    .sincronizadores-panel .card-text { font-size: 0.9rem; }
-    .sincronizadores-panel .btn { font-size: 0.95rem; padding: 10px 0; }
-}
-
-@media (max-width: 576px) {
-    .sincronizadores-panel .card { min-height: 240px; }
-    .sincronizadores-panel .card i { width: 60px; height: 60px; font-size: 1.7rem; }
-    .sincronizadores-panel .card-title { font-size: 1.1rem; }
-    .sincronizadores-panel .card-text { font-size: 0.85rem; }
-}
-</style>
 
 <div class="container mt-5 sincronizadores-panel">
     <h1>Panel de Control de Sincronizadores Manuales</h1>
+    <x-loading />
 
     <div class="row g-4 justify-content-center">
 
@@ -256,13 +134,43 @@
 
         <!-- Desceuntos EDG1-->
         <div class="col-md-3 col-sm-6">
-            <form action="{{ route('Sincronizar', ['servicio'=>'Descuentos_Detalle', 'metodo'=>'SBO_Grupos_Descuentos_EDG1']) }}" method="POST">
+            <form action="{{ route('SincronizarAux', ['servicio'=>'Descuentos_Detalle', 'metodo'=>'SBO_Grupos_Descuentos_EDG1']) }}" method="POST">
                 @csrf
                 <div class="card text-center">
                     <div class="card-body">
                         <i class="bi bi-percent icon-descuento"></i>
                         <h5 class="card-title">Descuentos</h5>
                         <p class="card-text">Sincroniza los descuentos.</p>
+                        <button type="submit" class="btn btn-success w-100">Ejecutar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Cambios en las monedas ORTT-->
+        <div class="col-md-3 col-sm-6">
+            <form action="{{ route('Sincronizar', ['servicio'=>'Cambios_Monedas', 'metodo'=>'SBO_Tipo_Cambio_ORTT']) }}" method="POST">
+                @csrf
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi-currency-exchange icon-currency"></i>
+                        <h5 class="card-title">Divisas del Dia</h5>
+                        <p class="card-text">Sincroniza las divisas del dia.</p>
+                        <button type="submit" class="btn btn-success w-100">Ejecutar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Vendedores OSLP-->
+        <div class="col-md-3 col-sm-6">
+            <form action="{{ route('Sincronizar', ['servicio'=>'Vendedores', 'metodo'=>'#']) }}" method="POST">
+                @csrf
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-person-lines-fill icon-vendedor"></i>
+                        <h5 class="card-title">Vendedores</h5>
+                        <p class="card-text">Sincroniza los vendedores.</p>
                         <button type="submit" class="btn btn-success w-100">Ejecutar</button>
                     </div>
                 </div>

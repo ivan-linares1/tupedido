@@ -10,7 +10,7 @@ $(document).on('keydown', '.cantidad, #telefono', function(e) {
     }
 });
 
-//acciones de las alerts
+//acciones de las alerts 
 document.addEventListener('DOMContentLoaded', function() {
     // Cerrar manualmente
     document.querySelectorAll('.panel-alert .close-btn').forEach(function(btn){

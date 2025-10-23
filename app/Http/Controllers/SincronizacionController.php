@@ -10,19 +10,18 @@ use App\Models\DireccionesClientes;
 use App\Models\ListaPrecio;
 use App\Models\Marcas;
 use App\Models\Moneda;
+use App\Models\MonedaCambio;
 use App\Models\Precios;
-use Illuminate\Support\Facades\DB;
+use App\Models\Vendedores;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use PhpParser\Node\Stmt\TryCatch;
-
-use function Laravel\Prompts\warning;
 
 class SincronizacionController extends Controller
 {
     // Conexión al Web Service con manejo de errores
     private function ConexionWBS()
     {
-        $url = "http://10.10.1.107:8083/KombiService.asmx?wsdl";
+        $url = "http://10.10.1.13:8083/KombiService.asmx?wsdl";
 
         try {
             $client = new \SoapClient($url, [
@@ -59,18 +58,18 @@ class SincronizacionController extends Controller
     //$servicio, es el nombre con el que se llenaran los mensajes 
     //$metodo, Es el nombre del metodo del servico web al que se accedera
     //$cli es la bandera para saber si es por consola o por sistema web
-    public function ServicioWeb($servicio, $metodo, $cli = false) 
+    public function ServicioWeb($servicio, $metodo, $cli = false, $returnvalor = false) 
     {
         $conexion = $this->ConexionWBS();
 
         if (!$conexion['success']) {
             Log::channel('sync')->error("Fallo de conexión con el servicio web: {$conexion['error']}"); //Guarda el mensaje de error en los logs
-            if ($cli) {
-                echo $conexion['message'] . "\n";
-                return;
-            }
+            
+            if ($cli) { echo $conexion['message'] . "\n"; return; }
+            if ($returnvalor) { return ['tipo' => $conexion['type'], 'msg' => $conexion['message']]; }
             return redirect()->back()->with($conexion['type'], $conexion['message']); //Regresa a la pantalla la alerta del error
         }
+
         $client = $conexion['client'];
 
         try {
@@ -87,13 +86,19 @@ class SincronizacionController extends Controller
                 case 'Direcciones': $valor = $this->Direcciones($xmlResponse); break;
                 case 'Grupo_Descuentos': $valor = $this->Grupo_Descuentos($xmlResponse); break;
                 case 'Descuentos_Detalle': $valor = $this->DescuentosDetalle($xmlResponse); break;
+                case 'Cambios_Monedas': $valor = $this->CambiosMoneda($xmlResponse); break;
+               // case 'Vendedores': $valor = $this->Vendedores($xmlResponse); break;
+
+                default:
+                    $valor = ['tipo' => 'warning', 'msg' => "Servicio no reconocido: {$servicio}"];
             }
 
-            if ($cli) {
-                echo $valor['msg'] . "\n";
-            } else {
-                return redirect()->back()->with($valor['tipo'], $valor['msg']);
-            }
+            if ($returnvalor) { return $valor; } // Devuelve array en lugar de redirect
+            
+
+            if ($cli) { echo $valor['msg'] . "\n"; } 
+            else if ($returnvalor) { return ['tipo' => $conexion['type'], 'msg' => $conexion['message']]; }
+            else { return redirect()->back()->with($valor['tipo'], $valor['msg']); }
 
         } catch (\Throwable $e) {//Marca errores que esten por mala recepcion de datos
             $msg = "Error al sincronizar ".$servicio ;//. $e->getMessage();
@@ -105,10 +110,52 @@ class SincronizacionController extends Controller
                 'error' => $e->getMessage()
             ]);
 
+            if ($returnvalor) { return ['tipo' => 'error', 'msg' => $msg . ': ' . $e->getMessage()]; }
+
+            if ($cli) { echo $msg . "\n"; }
+            else { return redirect()->back()->with('error', $msg); }
+        }
+    }
+
+    public function ServicioWebAux($servicio, $metodo, $cli = false)
+    {
+        try {
+            // Ejecuta los dos métodos SOAP
+           Log::channel('sync')->notice("Inicio del servicio 1"); $valor1 =  $this->ServicioWeb($servicio, $metodo.'_1', $cli, true);
+           Log::channel('sync')->notice("Inicio del servicio 2"); $valor2 = $this->ServicioWeb($servicio, $metodo.'_2', $cli, true);
+           Log::channel('sync')->notice("Inicio del servicio 3"); $valor3 = $this->ServicioWeb($servicio, $metodo.'_3', $cli, true);
+           Log::channel('sync')->notice("Inicio del servicio 4"); $valor4 = $this->ServicioWeb($servicio, $metodo.'_4', $cli, true);
+
+           $tipos = [$valor1['tipo'], $valor2['tipo'], $valor3['tipo'], $valor4['tipo']];
+
+           if ($cli) {
+                // Para CLI solo mostramos en consola
+                if ( count(array_unique( $tipos)) === 1 ) { echo "{$valor1['msg']}\n"; }
+                else { echo "1.- {$valor1['msg']}\n2.- {$valor2['msg']}\n3.- {$valor3['msg']}\n4.- {$valor4['msg']}\n"; }
+                return;
+            } else { // Para web
+                if( count(array_unique( $tipos)) === 1 ){$tipo = $valor1['tipo']; $mensaje = $valor1['msg']; }
+                else{
+                    $tipo = 'warning';
+                    $msgs = [
+                        "Sub WS 1.- {$valor1['msg']}",
+                        "Sub WS 2.- {$valor2['msg']}",
+                        "Sub WS 3.- {$valor3['msg']}",
+                        "Sub WS 4.- {$valor4['msg']}"
+                    ];
+                    $unicos = array_unique($msgs);
+                    $mensaje = implode('<br>', $unicos);
+                }
+                return redirect()->back()->with($tipo, $mensaje);
+            }
+
+        } catch (\Throwable $e) {
+            Log::channel('sync')->error("Error al sincronizar EDG1: " . $e->getMessage());
             if ($cli) {
-                echo $msg . "\n";
+                echo "Error al ejecutar la sincronización de {$metodo}\n";
+                return;
             } else {
-                return redirect()->back()->with('error', $msg);
+                return redirect()->back()->with('Error', "Error al ejecutar la sincronización de {$metodo}");
             }
         }
     }
@@ -178,7 +225,7 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OPLN_Articulos: " . "Error con el la categoria de lista de precio: " . (string)$lista->ListName . "=> " . $e->getMessage());
             }    
         }
-        return $this->aux('Categoria_Lista_Precios', $total, $insertados, $errores );
+        return $this->aux('Categorias de Listas de Precios', $total, $insertados, $errores );
     }
 
     private function Marcas($xmlResponse) //OITB
@@ -241,7 +288,7 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("ITM1_ListaPrecio: " . "Error con el precio del articulo: " . (string)$precio->ItemCode . "=> " . $e->getMessage());
             }
         }
-        return $this->aux('Lista_Precio', $total, $insertados, $errores, $warnings );
+        return $this->aux('Lista de Precio', $total, $insertados, $errores, $warnings );
     }
 
     private function Clientes($xmlResponse)//OCRD
@@ -356,10 +403,10 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OEDG_GruposDescuento: " . "Error con el grupo de descuento de: ".$GPO_Descuento->AbsEntry." Del cliente " . (string)$GPO_Descuento->ObjCode . "=> " . $e->getMessage());
             }           
         }
-         return $this->aux('GruposDescuento', $total, $insertados, $errores, $warnings, $excluidos );
+         return $this->aux('Grupos de Descuentos', $total, $insertados, $errores, $warnings, $excluidos );
     }
 
-    private function DescuentosDetalle($xmlResponse) //EDG1 PENDIENTE **************************************
+    private function DescuentosDetalle($xmlResponse) //EDG1
     {
         $total = count($xmlResponse->GPO_DescuentosEDG1); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
@@ -401,8 +448,79 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("EDG1_DescuentosDetalle: Error con registro AbsEntry '{$absEntry}' ObjKey '{$objKey}' => ".$e->getMessage());
             }
         }
+        return $this->aux('Descuentos Detalle', $total, $insertados, $errores, $warnings);
+    }
 
-        return $this->aux('Descuentos_Detalle', $total, $insertados, $errores, $warnings);
+    /*private function Vendedores($xmlResponse) //OSLP
+    {
+        $total = count($xmlResponse->); // Total elementos del XML
+        $insertados = 0; // Contador de inserciones/actualizaciones exitosas
+        $errores = 0;   // Contador de errores
+        $warnings = 0;
+        $excluidos = 0;
+
+        foreach ($xmlResponse-> as $vendedor) {
+            try {
+                // Insertar o actualizar registro
+                $registro = Vendedores::updateOrInsert(
+                    [   'SlpCode' => , ],
+                    [
+                        'SlpName' => ,
+                        'Active' => ,
+                    ]
+                );
+                if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
+            } catch (\Throwable $e) {
+                $errores++; Log::channel('sync')->error("OSLP_Vendedor: " . "Error con el vendedor: ".. "=> " . $e->getMessage());
+            }           
+        }
+         return $this->aux('Vendedores', $total, $insertados, $errores, $warnings, $excluidos );
+    }*/
+
+    private function CambiosMoneda($xmlResponse)//ORTT 
+    {
+        $total = count($xmlResponse->TipoCambioORTT); // Total elementos del XML
+        $insertados = 0; // Contador de inserciones/actualizaciones exitosas
+        $errores = 0;   // Contador de errores
+        $warnings = 0;
+
+        foreach ($xmlResponse->TipoCambioORTT as $moneda) {
+            try {
+                // Obtener Currency_ID desde OCRN
+                $currency = Moneda::where('Currency', (string)$moneda->Currency)->first();
+                if (!$currency) {
+                    $warnings++; 
+                    Log::channel('sync')->warning("ORTT_CambiosMonedas: Warning: Faltan la monedas ".$moneda->Currency." Por ingresar en el sistema");
+                    // Si no existe la moneda, puedes saltarla o manejar el error
+                    continue;
+                }
+
+                // ✅ Convertir la fecha del XML a formato MySQL
+                $fecha = null;
+                try {
+                    $fecha = Carbon::createFromFormat('d/m/Y h:i:s a', (string)$moneda->RateDate)->format('Y-m-d H:i:s');
+                } catch (\Exception $e) {
+                    Log::channel('sync')->warning("ORTT_CambiosMonedas: Formato de fecha inválido ({$moneda->RateDate})");
+                    $warnings++;
+                    continue; // salta este registro si la fecha es inválida
+                }
+
+                // Insertar o actualizar precio
+                 $registro = MonedaCambio::updateOrInsert(
+                    [
+                        'Currency_ID' => $currency->Currency_ID ,
+                        'RateDate' => $fecha,
+                    ],
+                    [
+                        'Rate' => $moneda->Rate,
+                    ]
+                );
+                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
+            } catch (\Throwable $e) {
+                $errores++; Log::channel('sync')->error("ORTT_CambiosMonedas: " . "Error con la moneda: " . $currency->CurrName . "=> " . $e->getMessage());
+            }
+        }
+        return $this->aux('Cambios de Monedas', $total, $insertados, $errores, $warnings );
     }
 
     //esta funcion se encarga de retornar los mensajes 
@@ -413,11 +531,13 @@ class SincronizacionController extends Controller
     //$excluidos = esta variable es para los registros que usan clientes y entre sus datos traen datos de provedores esos son excluidos
     private function aux($servicio, $total, $insertados, $errores, $warnings=0, $excluidos=0)
     {
+        Log::channel('sync')->notice("Informacion de {$servicio}; Insertados={$insertados}; total={$total}; errores={$errores}");
+        
         // Caso 1: todo fue exitoso
         if ($total === $insertados && $errores === 0 && $warnings === 0) {
             return [
                 'tipo' => 'success',
-                'msg'  => "Sincronización de {$servicio} completada correctamente. Total: {$total} elementos."
+                'msg'  => "Sincronización de {$servicio} completada correctamente."
             ];
         }
 
@@ -425,7 +545,7 @@ class SincronizacionController extends Controller
         if($excluidos > 0 && ($excluidos + $insertados === $total)) {
             return [
                 'tipo' => 'success',
-                'msg'  => "Sincronización de {$servicio} completada correctamente. Total: {$insertados} elementos. Excluidos: {$excluidos} elementos."
+                'msg'  => "Sincronización de {$servicio} completada correctamente."
             ];
         }
 

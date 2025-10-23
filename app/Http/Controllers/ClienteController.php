@@ -40,13 +40,4 @@ class ClienteController extends Controller
 
         return view('admin.clientesCatalogo', compact('clientes'));
     }
-
-    public function activo_inactivo(Request $request)
-    {
-        $cliente = Clientes::findOrFail($request->id);
-        $cliente->{$request->field} = $request->value; //{$request->field es el nombre del campo a acualizar que se guarda como data en el html
-        $cliente->save();
-
-        return response()->json(['success' => true]);
-    }
 }
