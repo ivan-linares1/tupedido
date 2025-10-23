@@ -147,20 +147,36 @@
             </form>
         </div>
 
+        <!-- Cambios en las monedas ORTT-->
+        <div class="col-md-3 col-sm-6">
+            <form action="{{ route('Sincronizar', ['servicio'=>'Cambios_Monedas', 'metodo'=>'SBO_Tipo_Cambio_ORTT']) }}" method="POST">
+                @csrf
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi-currency-exchange icon-currency"></i>
+                        <h5 class="card-title">Divisas del Dia</h5>
+                        <p class="card-text">Sincroniza las divisas del dia.</p>
+                        <button type="submit" class="btn btn-success w-100">Ejecutar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Vendedores OSLP-->
+        <div class="col-md-3 col-sm-6">
+            <form action="{{ route('Sincronizar', ['servicio'=>'Vendedores', 'metodo'=>'#']) }}" method="POST">
+                @csrf
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-person-lines-fill icon-vendedor"></i>
+                        <h5 class="card-title">Vendedores</h5>
+                        <p class="card-text">Sincroniza los vendedores.</p>
+                        <button type="submit" class="btn btn-success w-100">Ejecutar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('.sincronizadores-panel form');
-    const loading = document.getElementById('loading');
-
-    forms.forEach(form => {
-        form.addEventListener('submit', function() {
-            loading.style.display = 'grid'; // mostrar el loading
-        });
-    });
-});
-</script>
-
 @endsection

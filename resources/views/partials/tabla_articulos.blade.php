@@ -28,11 +28,16 @@
                     <span style="color:red; font-weight:bold;">SIN PRECIO</span>
                 @endif
             </td>
-            <td class="col-active" style="width: 80px !important">
-                <label class="switch">
-                    <input type="checkbox" class="toggle-estado" data-id="{{ $articulo->ItemCode }}" data-field="Active" data-url="{{ route('estado.Articulo') }}" {{ $articulo->Active == 'Y' ? 'checked' : '' }}>
-                    <span class="slider round"></span>
-                </label>
+             <td class="text-center">
+                @if ($articulo->Active === 'Y')
+                    <span class="badge bg-success rounded-pill px-3 py-2">
+                        <i class="bi bi-check-circle me-1"></i> Activo
+                    </span>
+                @else
+                    <span class="badge bg-danger rounded-pill px-3 py-2">
+                        <i class="bi bi-x-circle me-1"></i> Inactivo
+                    </span>
+                @endif
             </td>
             @endif
         </tr>

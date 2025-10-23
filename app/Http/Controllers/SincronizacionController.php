@@ -10,7 +10,10 @@ use App\Models\DireccionesClientes;
 use App\Models\ListaPrecio;
 use App\Models\Marcas;
 use App\Models\Moneda;
+use App\Models\MonedaCambio;
 use App\Models\Precios;
+use App\Models\Vendedores;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class SincronizacionController extends Controller
@@ -83,6 +86,9 @@ class SincronizacionController extends Controller
                 case 'Direcciones': $valor = $this->Direcciones($xmlResponse); break;
                 case 'Grupo_Descuentos': $valor = $this->Grupo_Descuentos($xmlResponse); break;
                 case 'Descuentos_Detalle': $valor = $this->DescuentosDetalle($xmlResponse); break;
+                case 'Cambios_Monedas': $valor = $this->CambiosMoneda($xmlResponse); break;
+               // case 'Vendedores': $valor = $this->Vendedores($xmlResponse); break;
+
                 default:
                     $valor = ['tipo' => 'warning', 'msg' => "Servicio no reconocido: {$servicio}"];
             }
@@ -219,7 +225,7 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OPLN_Articulos: " . "Error con el la categoria de lista de precio: " . (string)$lista->ListName . "=> " . $e->getMessage());
             }    
         }
-        return $this->aux('Categoria_Lista_Precios', $total, $insertados, $errores );
+        return $this->aux('Categorias de Listas de Precios', $total, $insertados, $errores );
     }
 
     private function Marcas($xmlResponse) //OITB
@@ -282,7 +288,7 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("ITM1_ListaPrecio: " . "Error con el precio del articulo: " . (string)$precio->ItemCode . "=> " . $e->getMessage());
             }
         }
-        return $this->aux('Lista_Precio', $total, $insertados, $errores, $warnings );
+        return $this->aux('Lista de Precio', $total, $insertados, $errores, $warnings );
     }
 
     private function Clientes($xmlResponse)//OCRD
@@ -397,7 +403,7 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OEDG_GruposDescuento: " . "Error con el grupo de descuento de: ".$GPO_Descuento->AbsEntry." Del cliente " . (string)$GPO_Descuento->ObjCode . "=> " . $e->getMessage());
             }           
         }
-         return $this->aux('GruposDescuento', $total, $insertados, $errores, $warnings, $excluidos );
+         return $this->aux('Grupos de Descuentos', $total, $insertados, $errores, $warnings, $excluidos );
     }
 
     private function DescuentosDetalle($xmlResponse) //EDG1
@@ -442,7 +448,79 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("EDG1_DescuentosDetalle: Error con registro AbsEntry '{$absEntry}' ObjKey '{$objKey}' => ".$e->getMessage());
             }
         }
-        return $this->aux('Descuentos_Detalle', $total, $insertados, $errores, $warnings);
+        return $this->aux('Descuentos Detalle', $total, $insertados, $errores, $warnings);
+    }
+
+    /*private function Vendedores($xmlResponse) //OSLP
+    {
+        $total = count($xmlResponse->); // Total elementos del XML
+        $insertados = 0; // Contador de inserciones/actualizaciones exitosas
+        $errores = 0;   // Contador de errores
+        $warnings = 0;
+        $excluidos = 0;
+
+        foreach ($xmlResponse-> as $vendedor) {
+            try {
+                // Insertar o actualizar registro
+                $registro = Vendedores::updateOrInsert(
+                    [   'SlpCode' => , ],
+                    [
+                        'SlpName' => ,
+                        'Active' => ,
+                    ]
+                );
+                if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
+            } catch (\Throwable $e) {
+                $errores++; Log::channel('sync')->error("OSLP_Vendedor: " . "Error con el vendedor: ".. "=> " . $e->getMessage());
+            }           
+        }
+         return $this->aux('Vendedores', $total, $insertados, $errores, $warnings, $excluidos );
+    }*/
+
+    private function CambiosMoneda($xmlResponse)//ORTT 
+    {
+        $total = count($xmlResponse->TipoCambioORTT); // Total elementos del XML
+        $insertados = 0; // Contador de inserciones/actualizaciones exitosas
+        $errores = 0;   // Contador de errores
+        $warnings = 0;
+
+        foreach ($xmlResponse->TipoCambioORTT as $moneda) {
+            try {
+                // Obtener Currency_ID desde OCRN
+                $currency = Moneda::where('Currency', (string)$moneda->Currency)->first();
+                if (!$currency) {
+                    $warnings++; 
+                    Log::channel('sync')->warning("ORTT_CambiosMonedas: Warning: Faltan la monedas ".$moneda->Currency." Por ingresar en el sistema");
+                    // Si no existe la moneda, puedes saltarla o manejar el error
+                    continue;
+                }
+
+                // ✅ Convertir la fecha del XML a formato MySQL
+                $fecha = null;
+                try {
+                    $fecha = Carbon::createFromFormat('d/m/Y h:i:s a', (string)$moneda->RateDate)->format('Y-m-d H:i:s');
+                } catch (\Exception $e) {
+                    Log::channel('sync')->warning("ORTT_CambiosMonedas: Formato de fecha inválido ({$moneda->RateDate})");
+                    $warnings++;
+                    continue; // salta este registro si la fecha es inválida
+                }
+
+                // Insertar o actualizar precio
+                 $registro = MonedaCambio::updateOrInsert(
+                    [
+                        'Currency_ID' => $currency->Currency_ID ,
+                        'RateDate' => $fecha,
+                    ],
+                    [
+                        'Rate' => $moneda->Rate,
+                    ]
+                );
+                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
+            } catch (\Throwable $e) {
+                $errores++; Log::channel('sync')->error("ORTT_CambiosMonedas: " . "Error con la moneda: " . $currency->CurrName . "=> " . $e->getMessage());
+            }
+        }
+        return $this->aux('Cambios de Monedas', $total, $insertados, $errores, $warnings );
     }
 
     //esta funcion se encarga de retornar los mensajes 

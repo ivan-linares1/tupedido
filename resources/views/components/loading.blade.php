@@ -72,3 +72,16 @@
     to { transform: translateY(-60px) scaleX(1); }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('.sincronizadores-panel form');
+    const loading = document.getElementById('loading');
+
+    forms.forEach(form => {
+        form.addEventListener('submit', function() {
+            loading.style.display = 'grid'; // mostrar el loading
+        });
+    });
+});
+</script>

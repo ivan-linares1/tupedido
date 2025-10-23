@@ -52,13 +52,4 @@ class ArticuloController extends Controller
 
         return view('users.catalogo_productos', compact('articulos', 'marcas'));
     }
-
-    public function activo_inactivo(Request $request)
-    {
-        $articulo = Articulo::findOrFail($request->id);
-        $articulo->{$request->field} = $request->value; //{$request->field es el nombre del campo a acualizar que se guarda como data en el html
-        $articulo->save();
-
-        return response()->json(['success' => true]);
-    }
 }

@@ -5,7 +5,7 @@
             <th>Nombre</th>
             <th>Telefono</th>
             <th>E-mail</th>
-            <th>Activo</th>
+            <th>Estado</th>
         </tr>
     </thead>
     <tbody>
@@ -16,16 +16,15 @@
             <td>{{ $cliente->phone1}}</td>
             <td>{{ $cliente->{'e-mail'} }}</td>
             <td class="text-center">
-                <label class="switch">
-                    <input 
-                        type="checkbox" 
-                        class="toggle-estado" 
-                        data-id="{{ $cliente->CardCode }}"
-                        data-field="Active"
-                        data-url="{{ route('estado.Cliente') }}"
-                        {{ $cliente->Active == 'Y' ? 'checked' : '' }}>
-                    <span class="slider round"></span>
-                </label>
+                @if ($cliente->Active === 'Y')
+                    <span class="badge bg-success rounded-pill px-3 py-2">
+                        <i class="bi bi-check-circle me-1"></i> Activo
+                    </span>
+                @else
+                    <span class="badge bg-danger rounded-pill px-3 py-2">
+                        <i class="bi bi-x-circle me-1"></i> Inactivo
+                    </span>
+                @endif
             </td>
         </tr>
         @empty

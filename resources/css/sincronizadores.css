@@ -53,15 +53,18 @@
 }
 
 /* Diferentes iconos y colores por tipo */
-.icon-monedas { background: #0d6efd; }       /* Azul */
-.icon-marcas { background: #6f42c1; }        /* Morado */
-.icon-categorias { background: #198754; }    /* Verde */
-.icon-articulos { background: #fd7e14; }     /* Naranja */
-.icon-precios { background: #dc3545; }       /* Rojo */
-.icon-clientes { background: #0dcaf0; }   /* Celeste / Turquesa */
-.icon-direcciones { background: #203fc9; }  /* azulado  */
-.icon-descuentos {background: #ffc107; }/* Amarillo dorado */
-.icon-descuento {background: #28a745; }/* verde claro*/
+.icon-monedas { background: #0d6efd; }       
+.icon-marcas { background: #6f42c1; }        
+.icon-categorias { background: #198754; }    
+.icon-articulos { background: #fd7e14; }     
+.icon-precios { background: #dc3545; }       
+.icon-clientes { background: #0dcaf0; }   
+.icon-direcciones { background: #203fc9; }  
+.icon-descuentos {background: #ffc107; }
+.icon-descuento {background: #28a745; }
+.icon-currency {background: #D4AF37; }
+.icon-vendedor {background: #0d6dfda9; }
+
 
 
 .sincronizadores-panel .card:hover i {
