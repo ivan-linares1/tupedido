@@ -10,7 +10,7 @@ $(document).on('keydown', '.cantidad, #telefono', function(e) {
     }
 });
 
-//acciones de las alerts
+//acciones de las alerts 
 document.addEventListener('DOMContentLoaded', function() {
     // Cerrar manualmente
     document.querySelectorAll('.panel-alert .close-btn').forEach(function(btn){
@@ -43,7 +43,8 @@ $(document).ready(function() {
     }
 
     // Toggle estado con confirmación SweetAlert2
-    $('.toggle-estado').on('change', function () {
+    $(document).on('change', '.toggle-estado', function (e) {
+        e.preventDefault();
         const $this = $(this);
         const id = $this.data('id');
         const url = $this.data('url');
