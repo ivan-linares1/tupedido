@@ -43,7 +43,8 @@ $(document).ready(function() {
     }
 
     // Toggle estado con confirmación SweetAlert2
-    $('.toggle-estado').on('change', function () {
+    $(document).on('change', '.toggle-estado', function (e) {
+        e.preventDefault();
         const $this = $(this);
         const id = $this.data('id');
         const url = $this.data('url');

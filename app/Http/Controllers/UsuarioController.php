@@ -9,28 +9,45 @@ use Illuminate\Support\Facades\Hash;
 
 class UsuarioController extends Controller
 {
-    // Muestra la lista de usuarios
-    public function index()
+    // Muestra la lista de usuarios con búsqueda, filtros y paginación
+    public function index(Request $request)
     {
-        $usuarios = User::all();
+        $query = User::with('rol')->orderBy('id', 'desc');
 
-        // Clientes que ya tienen usuario
-        $clientesConUsuario = User::whereNotNull('codigo_cliente')
-                                  ->pluck('codigo_cliente')
-                                  ->toArray();
+        // Filtro por búsqueda
+        if ($request->filled('buscar')) {
+            $buscar = $request->buscar;
+            $query->where(function ($q) use ($buscar) {
+                $q->where('email', 'like', "%{$buscar}%")
+                  ->orWhere('nombre', 'like', "%{$buscar}%");
+            });
+        }
 
-        // Vendedores que ya tienen usuario
-        $vendedoresConUsuario = User::whereNotNull('codigo_vendedor')
-                                    ->pluck('codigo_vendedor')
-                                    ->toArray();
+        // Filtro por estatus
+        if ($request->estatus === 'Activo') {
+            $query->where('activo', 1);
+        } elseif ($request->estatus === 'Inactivo') {
+            $query->where('activo', 0);
+        }
 
-        // Traemos los clientes de OCRD que aún no tienen usuario
+        // Cantidad de registros por página
+        $mostrar = $request->mostrar ?? 25;
+        $usuarios = $query->paginate($mostrar);
+
+        // Si es AJAX, renderizamos solo la tabla
+        if ($request->ajax()) {
+            return view('partials.tabla_usuario', compact('usuarios'))->render();
+        }
+
+        // Vista completa: también necesitamos clientes y vendedores para los modales
+        $clientesConUsuario = User::whereNotNull('codigo_cliente')->pluck('codigo_cliente')->toArray();
+        $vendedoresConUsuario = User::whereNotNull('codigo_vendedor')->pluck('codigo_vendedor')->toArray();
+
         $clientes = DB::table('ocrd')
             ->select('CardCode','CardName')
             ->whereNotIn('CardCode', $clientesConUsuario)
             ->get();
 
-        // Traemos los vendedores activos de OSLP que aún no tienen usuario
         $vendedores = DB::table('oslp')
             ->select('SlpCode','SlpName','Active')
             ->where('Active','Y')
@@ -51,7 +68,6 @@ class UsuarioController extends Controller
                 'password'  => 'required|confirmed|min:6',
             ]);
 
-            // Validar que el cliente no tenga ya usuario
             if (User::where('codigo_cliente', $request->cliente)->exists()) {
                 return redirect()->back()->with('error', 'El cliente ya tiene un usuario creado.');
             }
@@ -64,12 +80,11 @@ class UsuarioController extends Controller
             $user->rol_id         = 3; // Rol cliente
             $user->activo         = 1;
             $user->nombre         = $cliente->CardName ?? 'Cliente';
-            $user->codigo_cliente = $cliente->CardCode; // Guardamos el código de cliente
+            $user->codigo_cliente = $cliente->CardCode;
 
             $user->save();
 
-            return redirect()->route('admin.usuarios.index')
-                ->with('success', 'Usuario cliente creado correctamente');
+            return redirect()->route('admin.usuarios.index')->with('success', 'Usuario cliente creado correctamente');
         }
 
         // Si viene slpcode, es usuario vendedor
@@ -80,7 +95,6 @@ class UsuarioController extends Controller
                 'password' => 'required|confirmed|min:6',
             ]);
 
-            // Validar que el vendedor no tenga ya usuario
             if (User::where('codigo_vendedor', $request->slpcode)->exists()) {
                 return redirect()->back()->with('error', 'El vendedor ya tiene un usuario creado.');
             }
@@ -93,18 +107,27 @@ class UsuarioController extends Controller
             $user->rol_id          = 4; // Rol vendedor
             $user->activo          = 1;
             $user->nombre          = $vendedor->SlpName ?? 'Vendedor';
-            $user->codigo_vendedor = $vendedor->SlpCode; // Guardamos el código de vendedor
+            $user->codigo_vendedor = $vendedor->SlpCode;
 
             $user->save();
 
-            return redirect()->route('admin.usuarios.index')
-                ->with('success', 'Usuario vendedor creado correctamente');
+            return redirect()->route('admin.usuarios.index')->with('success', 'Usuario vendedor creado correctamente');
         }
 
         return redirect()->back()->with('error', 'No se pudo determinar el tipo de usuario a crear.');
     }
 
-    // Devuelve info del cliente (AJAX)
+    // Toggle activo/inactivo
+    public function activo_inactivo(Request $request)
+    {
+        $usuario = User::findOrFail($request->id);
+        $usuario->{$request->field} = $request->value; 
+        $usuario->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    // Info de cliente (AJAX)
     public function getCliente(Request $request)
     {
         $cardCode = $request->cardCode;
@@ -150,7 +173,7 @@ class UsuarioController extends Controller
         return response()->json($data);
     }
 
-    // Devuelve info del vendedor (AJAX)
+    // Info de vendedor (AJAX)
     public function show($slpCode)
     {
         $vendedor = DB::table('oslp')
@@ -164,14 +187,5 @@ class UsuarioController extends Controller
         }
 
         return response()->json($vendedor);
-    }
-    
-    public function activo_inactivo(Request $request)
-    {
-        $usuario = User::findOrFail($request->id);
-        $usuario->{$request->field} = $request->value; 
-        $usuario->save();
-
-        return response()->json(['success' => true]);
     }
 }
