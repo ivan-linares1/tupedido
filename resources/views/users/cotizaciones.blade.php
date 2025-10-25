@@ -9,23 +9,24 @@
 <div class="table-responsive mt-4">
     <h3 class="mb-3 fw-bold">COTIZACIONES</h3>
 
+    {{-- Contenedor de filtros y botón --}}
     <div class="mb-3 d-flex justify-content-between align-items-center">
-        
-        @if($configuracionVacia == true && (Auth::user()->rol_id == 3 || Auth::user()->rol_id == 4))
-        <div class="d-inline-block position-relative">
-            <button class="btn btn-primary" disabled>Nueva Cotización</button>
-            <small class="mensaje-cambio text-danger">⚠️ {!! 'Contacte a soporte: <br> Problema de configuracion.' !!}</small>
-        </div>
-        @elseif($configuracionVacia == true && (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2))
+        {{-- Botón Nueva Cotización --}}
+        @if($configuracionVacia && in_array(Auth::user()->rol_id, [3,4]))
+            <div class="d-inline-block position-relative">
+                <button class="btn btn-primary" disabled>Nueva Cotización</button>
+                <small class="mensaje-cambio text-danger">⚠️ {!! 'Contacte a soporte: <br> Problema de configuración.' !!}</small>
+            </div>
+        @elseif($configuracionVacia && in_array(Auth::user()->rol_id, [1,2]))
             <div class="d-inline-block position-relative">
                 <button class="btn btn-primary" onclick="alertConfig()">Nueva Cotización</button>
             </div>
-
             <script>
+                // Alerta para usuarios administradores si la configuración está vacía
                 function alertConfig() {
                     Swal.fire({
                         title: '⚠️ Configuración incompleta',
-                        html: `Debes terminar de configurar el sistema.`,
+                        html: 'Debes terminar de configurar el sistema.',
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Ir a Configuración',
@@ -43,86 +44,71 @@
             <a href="{{ route('NuevaCotizacion') }}" class="btn btn-primary">Nueva Cotización</a>
         @endif
 
+        {{-- Select mostrar --}}
+        <div class="d-flex gap-2">
+            <label for="mostrar" class="form-label fw-semibold">Mostrar</label>
+            <select id="mostrar" class="form-select form-select-sm rounded-3">
+                <option value="10" {{ request('mostrar') == 10 ? 'selected' : '' }}>10</option>
+                <option value="25" {{ request('mostrar') == 25 ? 'selected' : '' }}>25</option>
+                <option value="50" {{ request('mostrar') == 50 ? 'selected' : '' }}>50</option>
+                <option value="100" {{ request('mostrar') == 100 ? 'selected' : '' }}>100</option>
+            </select>
+        </div>
+
+        {{-- Filtros de búsqueda y paginación --}}
         <div class="d-flex gap-2">
             <input type="text" id="buscarCotizacion" class="form-control" placeholder="Buscar...">
             <input type="date" id="fechaCotizacion" class="form-control" max="{{ date('Y-m-d') }}">
         </div>
     </div>
 
-    <table class="table table-bordered table-striped m-8">
-        <thead class="text-center">
-            <tr>
-                <th>Folio</th>
-                <th>Fecha</th>
-                <th>Cliente</th>
-                <th>Vendedor</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody id="tablaCotizaciones">
-            @forelse($cotizaciones as $cotizacion)
-                <tr>
-                    <td>
-                        <a href="{{ route('detalles', $cotizacion->DocEntry) }}" 
-                        style="cursor: pointer; color: blue; text-decoration: underline;">
-                        CO - {{ $cotizacion->DocEntry }}
-                        </a>
-                    </td>
-                    <td>{{ \Carbon\Carbon::parse($cotizacion->DocDate)->format('d-m-Y') }}</td>
-                    <td>{{ $cotizacion->CardName }}</td>
-                    <td>{{ $cotizacion->vendedor_nombre }}</td>
-                    <td>${{ number_format($cotizacion->Total, 2) }} {{ $cotizacion->moneda_nombre }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="5" class="text-center">Sin cotizaciones disponibles</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+    {{-- Contenedor de tabla --}}
+    <div id="tablaCotizacionesContainer">
+        @include('partials.tabla_cotizacion')
+    </div>
 </div>
 
 <script>
-    $(document).ready(function() {
-        function filtrarCotizaciones() {
-            let texto = $('#buscarCotizacion').val().toLowerCase();
-            let fecha = $('#fechaCotizacion').val(); // YYYY-MM-DD
+$(document).ready(function() {
 
-            let coincidencias = 0;
+    function fetchCotizaciones(url) {
+        if(!url) url = "{{ route('cotizaciones') }}";
 
-            $('#tablaCotizaciones tr').each(function() {
-                let filaTexto = $(this).text().toLowerCase();
-                let filaFecha = $(this).find('td:nth-child(2)').text(); // columna fecha en formato d-m-Y
+        const buscar = $('#buscarCotizacion').val();
+        const fecha = $('#fechaCotizacion').val();
+        const mostrar = $('#mostrar').val();
 
-                // Convertimos filaFecha a formato YYYY-MM-DD
-                let partes = filaFecha.split('-'); // ['dd','mm','yyyy']
-                let filaFechaISO = partes[2] + '-' + partes[1] + '-' + partes[0];
-
-                let textoCoincide = filaTexto.indexOf(texto) > -1;
-                let fechaCoincide = !fecha || filaFechaISO === fecha;
-
-                let mostrar = textoCoincide && fechaCoincide;
-                $(this).toggle(mostrar);
-
-                if (mostrar) coincidencias++;
-            });
-
-            // Si no hay coincidencias, mostramos una fila de mensaje
-            $('#sinResultados').remove(); // eliminar mensaje previo si existe
-            if (coincidencias === 0) {
-                $('#tablaCotizaciones').append(`
-                    <tr id="sinResultados">
-                        <td colspan="5" class="text-center text-muted">
-                            No se encontraron resultados
-                        </td>
-                    </tr>
-                `);
+        $.ajax({
+            url: url,
+            method: 'GET',
+            data: { buscar, fecha, mostrar },
+            success: function(data) {
+                $('#tablaCotizacionesContainer').html(data);
+            },
+            error: function(xhr) {
+                console.error(xhr);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudieron cargar las cotizaciones.'
+                });
             }
-        }
+        });
+    }
 
-        // Eventos
-        $('#buscarCotizacion').on('keyup', filtrarCotizaciones);
-        $('#fechaCotizacion').on('change', filtrarCotizaciones);
+    // Búsqueda y filtros
+    $('#buscarCotizacion').on('keyup', function() { fetchCotizaciones(); });
+    $('#fechaCotizacion, #mostrar').on('change', function() { fetchCotizaciones(); });
+
+    // Paginación AJAX
+    $(document).on('click', '#tablaCotizacionesContainer .pagination a', function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        if(url) fetchCotizaciones(url);
     });
+
+});
+
 </script>
+
 @endsection

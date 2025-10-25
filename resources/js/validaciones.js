@@ -30,63 +30,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 //acciones de los cambios de estado de los catalogos de clientes y productos
 $(document).ready(function() {
-
-    function showFlash(message, type = "success") {
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: type,
-            title: message,
-            showConfirmButton: false,
-            timer: 2000
-        });
-    }
-
-    // Toggle estado con confirmación SweetAlert2
-    $(document).on('change', '.toggle-estado', function (e) {
-        e.preventDefault();
-        const $this = $(this);
-        const id = $this.data('id');
-        const url = $this.data('url');
-        const field = $this.data('field');
-        const newValue = $this.is(':checked') ? 'Y' : 'N';
-        const prevState = !$this.is(':checked');
-
-        // Detener el toggle hasta confirmar
-        $this.prop('checked', prevState);
-
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: `Vas a cambiar el estado a ${newValue === 'Y' ? 'Activo' : 'Inactivo'}`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#05564f',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, cambiar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $this.prop('disabled', true);
-                $.post(url, {_token: document.querySelector('meta[name="csrf-token"]').content, id: id, field: field, value: newValue})
-                .done(function(response){
-                    if(response.success){
-                        $this.prop('checked', newValue === 'Y');
-                        $this.closest('tr').attr('data-status', newValue);
-                        showFlash("Estado actualizado correctamente", "success");
-                    } else {
-                        showFlash("Error al actualizar", "error");
-                    }
-                })
-                .fail(function(){
-                    showFlash("Error de conexión", "error");
-                })
-                .always(function(){
-                    $this.prop('disabled', false);
-                });
-            }
-        });
-    });
-
     // Búsqueda dinámica
     $('#buscarCliente').on('keyup', function() {
         const valor = $(this).val().toLowerCase();

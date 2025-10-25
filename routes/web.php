@@ -96,9 +96,9 @@ Route::middleware('auth')->group(function () {
 
         /*---------------------- SERVICIOS WEB ----------------------*/ 
         //Llama a la funcion de servicios web geeneral
-        Route::post('ServiciosWEB/{servicio}/{metodo}', [ SincronizacionController::class, 'ServicioWeb'])->name('Sincronizar');
+        Route::post('ServiciosWEB/{servicio}/{metodo}/{modo}', [ SincronizacionController::class, 'ServicioWeb'])->name('Sincronizar');
         //ruta intermedia para el servicio de edg1 ya que esta en subservicios 
-        Route::post('ServiciosWEB_Aux/{servicio}/{metodo}', [ SincronizacionController::class, 'ServicioWebAux'])->name('SincronizarAux');
+        Route::post('ServiciosWEB_Aux/{servicio}/{metodo}/{modo}', [ SincronizacionController::class, 'ServicioWebAux'])->name('SincronizarAux');
     });
 
     // USUARIOS NORMALES Y VENDEDORES (Roles 3 y 4)

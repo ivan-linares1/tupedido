@@ -58,12 +58,13 @@ class SincronizacionController extends Controller
     //$servicio, es el nombre con el que se llenaran los mensajes 
     //$metodo, Es el nombre del metodo del servico web al que se accedera
     //$cli es la bandera para saber si es por consola o por sistema web
-    public function ServicioWeb($servicio, $metodo, $cli = false, $returnvalor = false) 
+    //$returnvalor es solo para regresar valores en EDG1 porque tiene varios metodos 
+    public function ServicioWeb($servicio, $metodo, $modo, $cli = false, $returnvalor = false) 
     {
         $conexion = $this->ConexionWBS();
 
         if (!$conexion['success']) {
-            Log::channel('sync')->error("Fallo de conexión con el servicio web: {$conexion['error']}"); //Guarda el mensaje de error en los logs
+            Log::channel('sync')->error("Fallo de conexión con el servicio web: {$conexion['error']} en modo: {$modo}"); //Guarda el mensaje de error en los logs
             
             if ($cli) { echo $conexion['message'] . "\n"; return; }
             if ($returnvalor) { return ['tipo' => $conexion['type'], 'msg' => $conexion['message']]; }
@@ -77,16 +78,16 @@ class SincronizacionController extends Controller
             $xmlResponse = $response->{$metodo.'Result'};
 
             switch($servicio){
-                case 'Monedas': $valor = $this->Monedas($xmlResponse); break;
-                case 'Articulos': $valor = $this->Articulos($xmlResponse); break;
-                case 'Categoria_Lista_Precios': $valor = $this->Categoria_Lista_Precios($xmlResponse); break;
-                case 'Marcas': $valor = $this->Marcas($xmlResponse); break;
-                case 'Lista_Precios': $valor = $this->ListaPrecio($xmlResponse); break;
-                case 'Clientes': $valor = $this->Clientes($xmlResponse); break;
-                case 'Direcciones': $valor = $this->Direcciones($xmlResponse); break;
-                case 'Grupo_Descuentos': $valor = $this->Grupo_Descuentos($xmlResponse); break;
-                case 'Descuentos_Detalle': $valor = $this->DescuentosDetalle($xmlResponse); break;
-                case 'Cambios_Monedas': $valor = $this->CambiosMoneda($xmlResponse); break;
+                case 'Monedas': $valor = $this->Monedas($xmlResponse, $modo); break;
+                case 'Articulos': $valor = $this->Articulos($xmlResponse, $modo); break;
+                case 'Categoria_Lista_Precios': $valor = $this->Categoria_Lista_Precios($xmlResponse, $modo); break;
+                case 'Marcas': $valor = $this->Marcas($xmlResponse, $modo); break;
+                case 'Lista_Precios': $valor = $this->ListaPrecio($xmlResponse, $modo); break;
+                case 'Clientes': $valor = $this->Clientes($xmlResponse, $modo); break;
+                case 'Direcciones': $valor = $this->Direcciones($xmlResponse, $modo); break;
+                case 'Grupo_Descuentos': $valor = $this->Grupo_Descuentos($xmlResponse, $modo); break;
+                case 'Descuentos_Detalle': $valor = $this->DescuentosDetalle($xmlResponse, $modo); break;
+                case 'Cambios_Monedas': $valor = $this->CambiosMoneda($xmlResponse, $modo); break;
                // case 'Vendedores': $valor = $this->Vendedores($xmlResponse); break;
 
                 default:
@@ -117,14 +118,14 @@ class SincronizacionController extends Controller
         }
     }
 
-    public function ServicioWebAux($servicio, $metodo, $cli = false)
+    public function ServicioWebAux($servicio, $metodo, $modo, $cli = false)
     {
         try {
             // Ejecuta los dos métodos SOAP
-           Log::channel('sync')->notice("Inicio del servicio 1"); $valor1 =  $this->ServicioWeb($servicio, $metodo.'_1', $cli, true);
-           Log::channel('sync')->notice("Inicio del servicio 2"); $valor2 = $this->ServicioWeb($servicio, $metodo.'_2', $cli, true);
-           Log::channel('sync')->notice("Inicio del servicio 3"); $valor3 = $this->ServicioWeb($servicio, $metodo.'_3', $cli, true);
-           Log::channel('sync')->notice("Inicio del servicio 4"); $valor4 = $this->ServicioWeb($servicio, $metodo.'_4', $cli, true);
+           Log::channel('sync')->notice("Inicio del servicio 1"); $valor1 =  $this->ServicioWeb($servicio, $metodo.'_1', $modo, $cli, true);
+           Log::channel('sync')->notice("Inicio del servicio 2"); $valor2 = $this->ServicioWeb($servicio, $metodo.'_2', $modo, $cli, true);
+           Log::channel('sync')->notice("Inicio del servicio 3"); $valor3 = $this->ServicioWeb($servicio, $metodo.'_3', $modo, $cli, true);
+           Log::channel('sync')->notice("Inicio del servicio 4"); $valor4 = $this->ServicioWeb($servicio, $metodo.'_4', $modo, $cli, true);
 
            $tipos = [$valor1['tipo'], $valor2['tipo'], $valor3['tipo'], $valor4['tipo']];
 
@@ -161,8 +162,11 @@ class SincronizacionController extends Controller
     }
 
     //funciones privadas que se encargan de hacer las inserciones o actualizacions de cada servicio web individualmente 
-    private function Monedas($xmlResponse) //OCRN
+    private function Monedas($xmlResponse, $modo) //OCRN
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->Moneda instanceof \stdClass) { $xmlResponse->Moneda = [$xmlResponse->Moneda]; }
+
         $total = count($xmlResponse->Moneda); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
@@ -178,15 +182,18 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OCRN_Monedas: " . "Error con la moneda: " . (string)$moneda->CurrCode . "=> " . $e->getMessage());
             }
         }
-         return $this->aux('Monedas', $total, $insertados, $errores );
+         return $this->aux('Monedas', $total, $insertados, $errores, 0, $modo );
     }
     
-    private function Articulos($xmlResponse) //OITM
+    private function Articulos($xmlResponse, $modo) //OITM
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->Articulo instanceof \stdClass) { $xmlResponse->Articulo = [$xmlResponse->Articulo]; } 
+
         $total = count($xmlResponse->Articulo); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
          $errores = 0;   // Contador de errores
-
+        
         foreach ($xmlResponse->Articulo as $art) {
             try {
                 $registro = Articulo::updateOrCreate( 
@@ -196,7 +203,7 @@ class SincronizacionController extends Controller
                         'FrgnName'   => (string) $art->FrgnName,
                         'SalUnitMsr' => (string) $art->SalUnitMsr,
                         'Active'     => (string) ($art->validFor),
-                        'ItmsGrpCod' => (int) $art->ItmsGrpCod,
+                        'ItmsGrpCod' => (string) $art->ItmsGrpCod,
                         'Id_imagen'  => 1,
                     ],
                 );
@@ -205,11 +212,14 @@ class SincronizacionController extends Controller
                  $errores++; Log::channel('sync')->error("OITM_Articulos: " . "Error con el articulo: " . (string)$art->ItemName . "=> " . $e->getMessage());
             }
         }
-         return $this->aux('Articulos', $total, $insertados, $errores );
+         return $this->aux('Articulos', $total, $insertados,  $errores, 0, $modo );
     }
 
-    private function Categoria_Lista_Precios($xmlResponse) //OPLN
+    private function Categoria_Lista_Precios($xmlResponse, $modo) //OPLN
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->CAT_LP instanceof \stdClass) { $xmlResponse->CAT_LP = [$xmlResponse->CAT_LP]; }
+
         $total = count($xmlResponse->CAT_LP); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
@@ -225,11 +235,14 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OPLN_Articulos: " . "Error con el la categoria de lista de precio: " . (string)$lista->ListName . "=> " . $e->getMessage());
             }    
         }
-        return $this->aux('Categorias de Listas de Precios', $total, $insertados, $errores );
+        return $this->aux('Categorias de Listas de Precios', $total, $insertados, $errores, 0, $modo );
     }
 
-    private function Marcas($xmlResponse) //OITB
+    private function Marcas($xmlResponse, $modo) //OITB
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->Articulo instanceof \stdClass) { $xmlResponse->Articulo = [$xmlResponse->Articulo]; }
+
         $total = count($xmlResponse->Marcas); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
@@ -237,7 +250,7 @@ class SincronizacionController extends Controller
 
         foreach ($xmlResponse->Marcas as $marca) {
             try {
-                $registro = Marcas::updateOrCreate(
+                $registro = Marcas::updateOrCreate(    
                     ['ItmsGrpCod' => (string) $marca->ItmsGrpCod],
                     [
                         'ItmsGrpNam' => (string) $marca->ItmsGrpNam,
@@ -251,11 +264,14 @@ class SincronizacionController extends Controller
                  $errores++; Log::channel('sync')->error("OITB_Marcas: " . "Error con el la marca: " . (string)$marca->ItmsGrpNam . "=> " . $e->getMessage());
             }
         }
-        return $this->aux('Marcas', $total, $insertados, $errores );
+        return $this->aux('Marcas', $total, $insertados, $errores, 0, $modo );
     }
 
-    private function ListaPrecio($xmlResponse)//ITM1
+    private function ListaPrecio($xmlResponse, $modo)//ITM1
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->ListaP instanceof \stdClass) { $xmlResponse->ListaP = [$xmlResponse->ListaP]; }
+
         $total = count($xmlResponse->ListaP); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
@@ -288,11 +304,14 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("ITM1_ListaPrecio: " . "Error con el precio del articulo: " . (string)$precio->ItemCode . "=> " . $e->getMessage());
             }
         }
-        return $this->aux('Lista de Precio', $total, $insertados, $errores, $warnings );
+        return $this->aux('Lista de Precio', $total, $insertados, $errores, $warnings, $modo );
     }
 
-    private function Clientes($xmlResponse)//OCRD
+    private function Clientes($xmlResponse, $modo)//OCRD
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->Clientes instanceof \stdClass) { $xmlResponse->Clientes = [$xmlResponse->Clientes]; }
+
         $total = count($xmlResponse->Clientes); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
@@ -314,11 +333,14 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OCRD_Clientes: " . "Error con el la marca: " . (string)$cliente->CardName . "=> " . $e->getMessage());
             }
         }
-        return $this->aux('Clientes', $total, $insertados, $errores );
+        return $this->aux('Clientes', $total, $insertados, $errores, 0, $modo );
     }
 
-    private function Direcciones($xmlResponse) // CRD1
+    private function Direcciones($xmlResponse, $modo) // CRD1
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->Direcciones instanceof \stdClass) { $xmlResponse->Direcciones = [$xmlResponse->Direcciones]; }
+
         $total = count($xmlResponse->Direcciones); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
@@ -363,11 +385,14 @@ class SincronizacionController extends Controller
                  $errores++; Log::channel('sync')->error("CRD1_Direcciones: " . "Error con direcion de: ".$direccion->Address." Del cliente " . (string)$direccion->CardCode . "=> " . $e->getMessage());
             }
         } 
-        return $this->aux('Direcciones', $total, $insertados, $errores, $warnings, $excluidos );
+        return $this->aux('Direcciones', $total, $insertados, $errores, $warnings, $modo, $excluidos );
     }
 
-    private function Grupo_Descuentos($xmlResponse) //OEDG
+    private function Grupo_Descuentos($xmlResponse, $modo) //OEDG
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->GPO_Descuentos instanceof \stdClass) { $xmlResponse->GPO_Descuentos = [$xmlResponse->GPO_Descuentos]; }
+
         $total = count($xmlResponse->GPO_Descuentos); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
@@ -403,11 +428,14 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OEDG_GruposDescuento: " . "Error con el grupo de descuento de: ".$GPO_Descuento->AbsEntry." Del cliente " . (string)$GPO_Descuento->ObjCode . "=> " . $e->getMessage());
             }           
         }
-         return $this->aux('Grupos de Descuentos', $total, $insertados, $errores, $warnings, $excluidos );
+         return $this->aux('Grupos de Descuentos', $total, $insertados, $errores, $warnings, $modo, $excluidos );
     }
 
-    private function DescuentosDetalle($xmlResponse) //EDG1
+    private function DescuentosDetalle($xmlResponse, $modo) //EDG1
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->GPO_DescuentosEDG1 instanceof \stdClass) { $xmlResponse->GPO_DescuentosEDG1 = [$xmlResponse->GPO_DescuentosEDG1]; }
+
         $total = count($xmlResponse->GPO_DescuentosEDG1); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
@@ -448,11 +476,14 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("EDG1_DescuentosDetalle: Error con registro AbsEntry '{$absEntry}' ObjKey '{$objKey}' => ".$e->getMessage());
             }
         }
-        return $this->aux('Descuentos Detalle', $total, $insertados, $errores, $warnings);
+        return $this->aux('Descuentos Detalle', $total, $insertados, $errores, $warnings, $modo);
     }
 
-    /*private function Vendedores($xmlResponse) //OSLP
+    /*private function Vendedores($xmlResponse, $modo) //OSLP
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse-> instanceof \stdClass) { $xmlResponse-> = [$xmlResponse->]; }
+
         $total = count($xmlResponse->); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
@@ -474,11 +505,14 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OSLP_Vendedor: " . "Error con el vendedor: ".. "=> " . $e->getMessage());
             }           
         }
-         return $this->aux('Vendedores', $total, $insertados, $errores, $warnings, $excluidos );
+         return $this->aux('Vendedores', $total, $insertados, $errores, $warnings, $modo, $excluidos );
     }*/
 
-    private function CambiosMoneda($xmlResponse)//ORTT 
+    private function CambiosMoneda($xmlResponse, $modo)//ORTT 
     {
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->TipoCambioORTT instanceof \stdClass) { $xmlResponse->TipoCambioORTT = [$xmlResponse->TipoCambioORTT]; }
+
         $total = count($xmlResponse->TipoCambioORTT); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
@@ -495,15 +529,10 @@ class SincronizacionController extends Controller
                     continue;
                 }
 
-                // ✅ Convertir la fecha del XML a formato MySQL
-                $fecha = null;
-                try {
-                    $fecha = Carbon::createFromFormat('d/m/Y h:i:s a', (string)$moneda->RateDate)->format('Y-m-d H:i:s');
-                } catch (\Exception $e) {
-                    Log::channel('sync')->warning("ORTT_CambiosMonedas: Formato de fecha inválido ({$moneda->RateDate})");
-                    $warnings++;
-                    continue; // salta este registro si la fecha es inválida
-                }
+                 
+                $fechaStr = str_replace(['a. m.', 'p. m.', 'a.m.', 'p.m.', 'A. M.', 'P. M.'], ['am', 'pm', 'am', 'pm', 'am', 'pm'], (string)$moneda->RateDate);
+
+                $fecha = Carbon::createFromFormat('d/m/Y h:i:s a', $fechaStr)->format('Y-m-d');
 
                 // Insertar o actualizar precio
                  $registro = MonedaCambio::updateOrInsert(
@@ -520,7 +549,18 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("ORTT_CambiosMonedas: " . "Error con la moneda: " . $currency->CurrName . "=> " . $e->getMessage());
             }
         }
-        return $this->aux('Cambios de Monedas', $total, $insertados, $errores, $warnings );
+        $monedaMXP = Moneda::where('Currency', 'MXP')->first();
+        MonedaCambio::updateOrInsert(
+            [
+                'Currency_ID' =>  $monedaMXP->Currency_ID ,
+                'RateDate' => $fecha,
+            ],
+            [
+                'Rate' => 1,
+            ]
+        );
+
+        return $this->aux('Cambios de Monedas', $total, $insertados, $errores, $warnings, $modo);
     }
 
     //esta funcion se encarga de retornar los mensajes 
@@ -529,7 +569,7 @@ class SincronizacionController extends Controller
     //$insertados = Contador de inserciones/actualizaciones exitosas
     //$errores = Contador de errores
     //$excluidos = esta variable es para los registros que usan clientes y entre sus datos traen datos de provedores esos son excluidos
-    private function aux($servicio, $total, $insertados, $errores, $warnings=0, $excluidos=0)
+    private function aux($servicio, $total, $insertados, $errores, $warnings=0, $modo, $excluidos=0)
     {
         Log::channel('sync')->notice("Informacion de {$servicio}; Insertados={$insertados}; total={$total}; errores={$errores}");
         
@@ -537,7 +577,7 @@ class SincronizacionController extends Controller
         if ($total === $insertados && $errores === 0 && $warnings === 0) {
             return [
                 'tipo' => 'success',
-                'msg'  => "Sincronización de {$servicio} completada correctamente."
+                'msg'  => "Sincronización de {$servicio} completada correctamente. En modo {$modo}."
             ];
         }
 
@@ -545,7 +585,7 @@ class SincronizacionController extends Controller
         if($excluidos > 0 && ($excluidos + $insertados === $total)) {
             return [
                 'tipo' => 'success',
-                'msg'  => "Sincronización de {$servicio} completada correctamente."
+                'msg'  => "Sincronización de {$servicio} completada correctamente. En modo {$modo}."
             ];
         }
 
@@ -553,14 +593,14 @@ class SincronizacionController extends Controller
         if ($warnings > 0 && $errores === 0) {
             return [
                 'tipo' => 'warning',
-                'msg'  => "Faltan ".$warnings." datos base para continuar con la operacion"
+                'msg'  => "Faltan ".$warnings." datos base para continuar con la operacion. En modo {$modo}."
             ];
         }
 
         // Caso 3: hubo errores
         return [
             'tipo' => 'error',
-            'msg'  => "Total de {$servicio} = $total, Insertados/Actualizados = $insertados."
+            'msg'  => "Total de {$servicio} = $total, Insertados/Actualizados = $insertados. En modo {$modo}."
         ];
     }
 }

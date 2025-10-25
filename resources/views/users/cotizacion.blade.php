@@ -220,12 +220,12 @@
 
 <div class="container my-4 d-flex justify-content-start gap-2">
 
-    @if($modo == 0)
+    @if($modo == 0) {{--Estos son los botones que aparecen cuando una cotizacion es nueva--}}
         <!-- Botón Cancelar -->
         <button type="button" class="btn btn-danger" onclick="window.location='{{ url('/') }}'">
             <i class="bi bi-x-circle"></i> Cancelar
         </button>
-        @if($moneda->cambios->isEmpty())
+        @if($moneda->cambios->isEmpty()) {{--Cuando no hay cambios de monedas estos botones se muestran deshabilitados y muestran un mensaje--}}
             <div class="d-inline-block position-relative">
                 <button class="btn btn-primary" disabled><i class="bi bi-save"></i> Guardar</button>
                 <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>
@@ -242,13 +242,13 @@
                 <i class="bi bi-bag"></i> Pedido
             </button>
         @endif
-    @else
+    @else{{--Estos son los botones que aparecen cuando una cotizacion existe y se abrio para ver los detalles de la misma--}}
         <!-- Botón PDF -->
         <button type="button" class="btn btn-danger" onclick="window.open('{{ route('cotizacion.pdf', $cotizacion->DocEntry) }}', '_blank')">
             <i class="bi bi-filetype-pdf"></i> PDF
         </button>
 
-        @if($moneda->cambios->isEmpty() || $pedido)
+        @if($moneda->cambios->isEmpty() || $pedido){{--Cuando no hay cambios de monedas estos botones se muestran deshabilitados y muestran un mensaje--}}
          <div class="d-inline-block position-relative">
             <button class="btn btn-secondary" disabled><i class="bi bi-pencil-square"></i> Editar</button>
             <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>
