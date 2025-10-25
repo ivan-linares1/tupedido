@@ -7,6 +7,7 @@
 
 <div class="table-responsive mt-4">
     <h3 class="mb-3 fw-bold">PEDIDOS</h3>
+    <x-loading />
 
     <div class="mb-3 d-flex justify-content-between align-items-center">
         {{-- Botón Nuevo Pedido --}}
@@ -38,7 +39,7 @@
                 }
             </script>
         @else
-            <a href="{{ route('NuevaPedido') }}" class="btn btn-primary">Nuevo Pedido</a>
+            <a href="{{ route('NuevaPedido') }}" class="btn btn-primary" data-loading="true">Nuevo Pedido</a>
         @endif
         
         

@@ -27,36 +27,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 6000);
 });
 
+//valida las animaciones de cargando...
+document.addEventListener('DOMContentLoaded', function() {
+    const loading = document.getElementById('loading');
 
-//acciones de los cambios de estado de los catalogos de clientes y productos
-$(document).ready(function() {
-    // Búsqueda dinámica
-    $('#buscarCliente').on('keyup', function() {
-        const valor = $(this).val().toLowerCase();
-        $('#tablaClientes tbody tr').filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(valor) > -1);
+    // Mostrar loader al enviar formularios dentro de sincronizadores-panel
+    document.querySelectorAll('.sincronizadores-panel form').forEach(form => {
+        form.addEventListener('submit', function() {
+            loading.style.display = 'grid';
         });
     });
 
-    // Filtro Mostrar y Estatus
-    $('#mostrar').on('change', function(){
-        let val = $(this).val();
-        $('#tablaClientes tbody tr').slice(val).hide();
-        $('#tablaClientes tbody tr').slice(0, val).show();
-    });
-
-    $('#estatus').on('change', function(){
-        let val = $(this).val();
-        $('#tablaClientes tbody tr').each(function(){
-            let status = $(this).attr('data-status');
-            if(val === "" || status === val){
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
+    // Mostrar loader al hacer clic en enlaces con data-loading="true"
+    document.querySelectorAll('a[data-loading="true"]').forEach(link => {
+        link.addEventListener('click', function() {
+            loading.style.display = 'grid';
+            // no evitamos la redirección — solo mostramos el loader
         });
     });
-
-    // Inicial: aplicar filtro mostrar
-    $('#mostrar').trigger('change');
 });

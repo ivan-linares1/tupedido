@@ -21,54 +21,53 @@ class CotizacionesController extends Controller
 {
 
     public function index(Request $request)
-{
-    $user = Auth::user();
-    $configuracionVacia = configuracion::count() === 0;
+    {
+        $user = Auth::user();
+        $configuracionVacia = configuracion::count() === 0;
 
-    $buscar = $request->input('buscar');
-    $fecha = $request->input('fecha');
-    $mostrar = $request->input('mostrar', 10);
+        $buscar = $request->input('buscar');
+        $fecha = $request->input('fecha');
+        $mostrar = $request->input('mostrar', 10);
 
-    $query = Cotizacion::with(['vendedor', 'moneda'])
-                ->orderBy('DocEntry', 'desc');
+        $query = Cotizacion::with(['vendedor', 'moneda'])
+                    ->orderBy('DocEntry', 'desc');
 
-    // Filtrado por rol
-    if ($user->rol_id == 3) { // Cliente
-        $query->where('CardCode', $user->codigo_cliente);
-    } elseif ($user->rol_id == 4) { // Vendedor
-        $query->where('SlpCode', $user->codigo_vendedor);
-    } elseif (!in_array($user->rol_id, [1,2])) {
-        abort(403, 'Rol no permitido');
+        // Filtrado por rol
+        if ($user->rol_id == 3) { // Cliente
+            $query->where('CardCode', $user->codigo_cliente);
+        } elseif ($user->rol_id == 4) { // Vendedor
+            $query->where('SlpCode', $user->codigo_vendedor);
+        } elseif (!in_array($user->rol_id, [1,2])) {
+            abort(403, 'Rol no permitido');
+        }
+
+        // Filtro búsqueda por Folio, Cliente y Vendedor
+        if ($buscar) {
+            $query->where(function($q) use ($buscar) {
+                $q->where('DocEntry', 'like', "%$buscar%")
+                ->orWhere('CardName', 'like', "%$buscar%")
+                ->orWhereHas('vendedor', function($v) use ($buscar) {
+                    $v->where('SlpName', 'like', "%$buscar%");
+                });
+            });
+        }
+
+        // Filtro por fecha
+        if ($fecha) {
+            $query->whereDate('DocDate', $fecha);
+        }
+
+        $cotizaciones = $query->paginate($mostrar)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('partials.tabla_cotizacion', [
+                'cotizaciones' => $cotizaciones,
+                'configuracionVacia' => $configuracionVacia
+            ])->render();
+        }
+
+        return view('users.cotizaciones', compact('cotizaciones', 'configuracionVacia'));
     }
-
-    // Filtro búsqueda por Folio, Cliente y Vendedor
-    if ($buscar) {
-        $query->where(function($q) use ($buscar) {
-            $q->where('DocEntry', 'like', "%$buscar%")
-              ->orWhere('CardName', 'like', "%$buscar%")
-              ->orWhereHas('vendedor', function($v) use ($buscar) {
-                  $v->where('SlpName', 'like', "%$buscar%");
-              });
-        });
-    }
-
-    // Filtro por fecha
-    if ($fecha) {
-        $query->whereDate('DocDate', $fecha);
-    }
-
-    $cotizaciones = $query->paginate($mostrar)->withQueryString();
-
-    if ($request->ajax()) {
-        return view('partials.tabla_cotizacion', [
-            'cotizaciones' => $cotizaciones,
-            'configuracionVacia' => $configuracionVacia
-        ])->render();
-    }
-
-    return view('users.cotizaciones', compact('cotizaciones', 'configuracionVacia'));
-}
-
 
 
 

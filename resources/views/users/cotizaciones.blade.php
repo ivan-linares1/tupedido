@@ -8,6 +8,7 @@
 
 <div class="table-responsive mt-4">
     <h3 class="mb-3 fw-bold">COTIZACIONES</h3>
+    <x-loading />
 
     {{-- Contenedor de filtros y botón --}}
     <div class="mb-3 d-flex justify-content-between align-items-center">
@@ -41,7 +42,7 @@
                 }
             </script>
         @else
-            <a href="{{ route('NuevaCotizacion') }}" class="btn btn-primary">Nueva Cotización</a>
+            <a href="{{ route('NuevaCotizacion') }}" class="btn btn-primary" data-loading="true">Nueva Cotización</a>
         @endif
 
         {{-- Select mostrar --}}

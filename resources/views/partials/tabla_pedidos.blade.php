@@ -12,8 +12,7 @@
         @forelse($pedidos as $pedido)
             <tr>
                 <td>
-                    <a href="{{ route('detallesP', $pedido->CotizacionDocEntry) }}" 
-                        style="cursor: pointer; color: blue; text-decoration: underline;">
+                    <a href="{{ route('detallesP', $pedido->CotizacionDocEntry) }}" style="cursor: pointer; color: blue; text-decoration: underline;" data-loading="true">
                         PE - {{ $pedido->DocEntry }}
                     </a>
                 </td>

@@ -12,7 +12,7 @@
         @forelse($cotizaciones as $cotizacion)
             <tr>
                 <td>
-                    <a href="{{ route('detalles', $cotizacion->DocEntry) }}" style="cursor:pointer;color:blue;text-decoration:underline;">
+                    <a href="{{ route('detalles', $cotizacion->DocEntry) }}" style="cursor:pointer;color:blue;text-decoration:underline;" data-loading="true">
                         CO - {{ $cotizacion->DocEntry }}
                     </a>
                 </td>
