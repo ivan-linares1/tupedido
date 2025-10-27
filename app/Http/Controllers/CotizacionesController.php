@@ -15,6 +15,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+
 
 
 class CotizacionesController extends Controller
@@ -404,7 +408,7 @@ class CotizacionesController extends Controller
         return $pdf->stream("Cotizacion-{$cotizacion->DocEntry}.pdf");
     }
 
-    /*private function enviarCotizacionASMX($cotizacion, $articulos)
+    private function enviarCotizacionASMX($cotizacion, $articulos)
     {
         $xml = new \SimpleXMLElement('<Cotizacion/>');
         $encabezado = $xml->addChild('Encabezado');
@@ -433,8 +437,72 @@ class CotizacionesController extends Controller
         ])->withBody($xmlString, 'text/xml')
         ->post($url);
 
+        Log::channel('sync')->info('XML enviado: ' . $xmlString);
+
         if (!$response->successful()) {
             Log::channel('sync')->error('Error al enviar cotización: '.$response->status().' '.$response->body());
         }
-    }*/
+    }
+
+
+    public function enviarTodasLasCotizaciones()
+{
+    try {
+        // Obtener todas las cotizaciones
+        $cotizaciones = DB::table('oqut')->get();
+
+        $enviadas = 0;
+        $errores = [];
+
+        foreach ($cotizaciones as $cotizacion) {
+            // Obtener líneas asociadas a la cotización actual
+            $articulos = DB::table('qut1')
+                ->where('DocEntry', $cotizacion->DocEntry)
+                ->select(
+                    'ItemCode',
+                    'U_Dscr as descripcion',
+                    'Quantity as cantidad',
+                    'Price as precio'
+                )
+                ->get()
+                ->map(function ($art) {
+                    return [
+                        'itemCode' => $art->ItemCode, // ✅ corregido: respeta mayúscula real
+                        'descripcion' => $art->descripcion,
+                        'cantidad' => $art->cantidad,
+                        'precio' => $art->precio,
+                    ];
+                })
+                ->toArray();
+
+            try {
+                // Llamar a tu función que arma y envía el XML
+                $this->enviarCotizacionASMX($cotizacion, $articulos);
+                $enviadas++;
+            } catch (\Exception $e) {
+                // Registrar el error individual
+                $errores[] = [
+                    'DocEntry' => $cotizacion->DocEntry,
+                    'mensaje' => $e->getMessage(),
+                ];
+                Log::error("Error al enviar cotización {$cotizacion->DocEntry}: " . $e->getMessage());
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Se enviaron {$enviadas} cotizaciones correctamente.",
+            'errores' => $errores,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+        ]);
+    }
+}
+
+
+
+
 }

@@ -1,27 +1,24 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Usuarios')
 
 @section('contenido')
 
- {{-- Contenedor para mensajes flash dinámicos --}}
-    <div id="flash-messages" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-        {{-- Aquí se insertarán los alerts --}}
-    </div>
+{{-- Contenedor para mensajes flash dinámicos --}}
+<div id="flash-messages" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
 
 <div class="card shadow-sm border-0 rounded-3">
     <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white rounded-top">
         <h5 class="mb-0">Usuarios</h5>
-        <!-- Botón abre modal -->
-        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">
-            Nuevo Cliente
-        </button>
-        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoVendedor">
-            Nuevo Vendedor
-        </button>
+        <div>
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoUsuario">Nuevo Cliente</button>
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoVendedor">Nuevo Vendedor</button>
+        </div>
     </div>
 
     <div class="card-body">
+
+        <!-- FILTROS -->
         <div class="row mb-4 g-3">
             <div class="col-md-2">
                 <label for="mostrar" class="form-label fw-semibold">Mostrar</label>
@@ -43,56 +40,19 @@
                 <label for="buscar" class="form-label fw-semibold">Buscar</label>
                 <div class="input-group input-group-sm">
                     <input type="text" id="buscar" class="form-control" placeholder="Buscar...">
-                    <button class="btn btn-outline-primary">
-                        <i class="bi bi-search"></i>
-                    </button>
+                    <button class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
                 </div>
             </div>
         </div>
 
-        <div class="table-responsive">
-            <!-- Agregué solo id="tablaUsuarios" para que los scripts funcionen -->
-            <table id="tablaUsuarios" class="table table-hover table-striped align-middle">
-                <thead class="table-dark">
-                    <tr>
-                        <th scope="col">Usuario</th>
-                        <th scope="col">Nombre</th>
-                        <th scope="col">Rol</th>
-                        <th scope="col">Status</th>
-                        <th scope="col" class="text-center">Acción</th> <!-- <-- nueva columna -->
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach ($usuarios as $usuario)
-                        <tr>
-                            <td>{{ $usuario->email }}</td>
-                            <td>{{ $usuario->nombre }}</td>
-                            <td>{{ $usuario->rol?->nombre }}</td>
-                            <td>{{ $usuario->activo ? 'activo' : 'inactivo' }}</td>
-                            <td class="text-center">
-                                @if ($usuario->rol_id != 1)
-                                    <label class="switch">
-                                        <input 
-                                            type="checkbox" 
-                                            class="toggle-estado-usuarios"
-                                            data-id="{{ $usuario->id }}"
-                                            data-field="activo"
-                                            data-url="{{ route('estado.Usuario') }}"
-                                            {{ $usuario->activo == 1 ? 'checked' : '' }}>
-                                        <span class="slider round"></span>
-                                    </label>
-                                @endif
-                            </td>                            
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+        <!-- TABLA DINÁMICA -->
+        <div id="tablaUsuariosContainer">
+            @include('partials.tabla_usuario', ['usuarios' => $usuarios])
         </div>
     </div>
 </div>
 
-<!-- Modal Nuevo Usuario (CLIENTE) -->
+<!-- MODAL NUEVO CLIENTE -->
 <div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-labelledby="modalNuevoUsuarioLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-3 shadow">
@@ -103,16 +63,13 @@
             <form id="formNuevoUsuario" method="POST" action="{{ route('admin.usuarios.store') }}">
                 @csrf
                 <div class="modal-body">
-                    
                     <!-- Selección Cliente -->
                     <div class="mb-3">
                         <label for="cliente_usuario" class="form-label fw-semibold">Cliente</label>
                         <select id="cliente_usuario" name="cliente" class="form-select" style="width:100%">
                             <option value="">Seleccione un cliente...</option>
                             @foreach($clientes as $cliente)
-                                <option value="{{ $cliente->CardCode }}">
-                                    {{ $cliente->CardCode }} - {{ $cliente->CardName }}
-                                </option>
+                                <option value="{{ $cliente->CardCode }}">{{ $cliente->CardCode }} - {{ $cliente->CardName }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -161,8 +118,6 @@
                             <label class="form-label fw-semibold">Email de contacto</label>
                             <textarea id="email_contacto" name="email_contacto" class="form-control" rows="3" readonly></textarea>
                         </div>
-
-
                     </div>
 
                     <hr>
@@ -177,7 +132,6 @@
                         <label class="form-label fw-semibold">Dirección de Envío</label>
                         <input type="text" id="direccion_envio" name="direccion_envio" class="form-control" readonly>
                     </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Guardar</button>
@@ -188,7 +142,7 @@
     </div>
 </div>
 
-<!-- Modal Nuevo Vendedor -->
+<!-- MODAL NUEVO VENDEDOR -->
 <div class="modal fade" id="modalNuevoVendedor" tabindex="-1" aria-labelledby="modalNuevoVendedorLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-3 shadow">
@@ -198,9 +152,7 @@
             </div>
             <form id="formNuevoVendedor" method="POST" action="{{ route('admin.usuarios.store') }}">
                 @csrf
-                <input type="hidden" name="rol" value="Vendedor">
                 <div class="modal-body">
-                    
                     <!-- Selección Vendedor -->
                     <div class="mb-3">
                         <label for="slpcode" class="form-label fw-semibold">Seleccionar Vendedor</label>
@@ -208,9 +160,7 @@
                             <option value="">Seleccione un vendedor...</option>
                             @foreach($vendedores as $vendedor)
                                 @if($vendedor->Active == 'Y')
-                                    <option value="{{ $vendedor->SlpCode }}">
-                                        {{ $vendedor->SlpCode }} - {{ $vendedor->SlpName }}
-                                    </option>
+                                    <option value="{{ $vendedor->SlpCode }}">{{ $vendedor->SlpCode }} - {{ $vendedor->SlpName }}</option>
                                 @endif
                             @endforeach
                         </select>
@@ -245,7 +195,6 @@
                             <input type="password" name="password_confirmation" id="password_confirmation_vendedor" class="form-control" required>
                         </div>
                     </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Guardar</button>
@@ -257,130 +206,104 @@
 </div>
 
 @endsection
+
 @push('scripts')
 <!-- DataTables -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-    // fallback global por si el data-url no está disponible en el DOM re-renderizado
-    window.usuariosEstadoUrl = "{{ route('estado.Usuario') }}";
-</script>
-
-
-
-<!-- Select2 y lógica de filtros -->
-<script>
-
-
-
 $(document).ready(function() {
 
-    // Inicializamos DataTable y guardamos la instancia en "table"
-    var table = null;
-    if ($('#tablaUsuarios').length) {
-        table = $('#tablaUsuarios').DataTable({
-            pageLength: 25,
-            lengthChange: false,
-            dom: 'rtip',
-            language: {
-    url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
-}
+    window.usuariosEstadoUrl = "{{ route('estado.Usuario') }}";
 
-        });
+    // Inicializar Select2
+    $('#cliente_usuario, #slpcode').select2({ dropdownParent: $('#modalNuevoUsuario, #modalNuevoVendedor'), placeholder: "Seleccione", allowClear: true });
 
-        // Mostrar N registros
-        $('#mostrar').on('change', function() {
-            const val = parseInt($(this).val()) || 25;
-            table.page.len(val).draw();
-        });
-
-        // Filtro estatus (case-insensitive)
-       $('#estatus').on('change', function() {
-            const raw = $(this).val();
-            let filtro = '';
-
-            if (!raw || raw.toLowerCase() === 'todos') {
-                filtro = '';
-            } else if (raw.toLowerCase() === 'activo') {
-                filtro = '^activo$'; // regex exacto
-            } else if (raw.toLowerCase() === 'inactivo') {
-                filtro = '^inactivo$'; // regex exacto
-            }
-
-            table.column(3).search(filtro, true, false, true).draw();
-        });
-
-
-        // Buscar dinámico
-        $('#buscar').on('keyup', function() {
-            table.search(this.value).draw();
-        });
-    }
-
-    // ============================
-    // Select2 y AJAX para modales (sin cambios)
-    // ============================
-    $('#cliente_usuario').select2({
-        dropdownParent: $('#modalNuevoUsuario'),
-        placeholder: "Seleccione un cliente",
-        allowClear: true
-    });
-
-    $('#cliente_usuario').on('change', function(){
+    // AJAX para cargar datos de cliente
+    $('#cliente_usuario').on('change', function() {
         let cardCode = $(this).val();
         if(cardCode){
-            $.ajax({
-                url: "/admin/ocrd/" + cardCode,
-                type: "GET",
-                success: function(data){
-                    $('#codigo_cliente').val(data.CardCode);
-                    $('#nombres').val(data.Nombres);
-                    $('#apellido_paterno').val(data.ApellidoPaterno);
-                    $('#apellido_materno').val(data.ApellidoMaterno);
-                    $('#telefono').val(data.Telefono);
-
-                    if (Array.isArray(data.EmailContacto)) {
-                        $('#email_contacto').val(data.EmailContacto.join("\n"));
-                    } else {
-                        $('#email_contacto').val(data.EmailContacto);
-                    }
-                    $('#direccion_fiscal').val(data.DireccionFiscal);
-                    $('#direccion_envio').val(data.DireccionEnvio);
-                }
+            $.getJSON("/admin/ocrd/" + cardCode, function(data){
+                $('#codigo_cliente').val(data.CardCode);
+                $('#nombres').val(data.Nombres);
+                $('#apellido_paterno').val(data.ApellidoPaterno);
+                $('#apellido_materno').val(data.ApellidoMaterno);
+                $('#telefono').val(data.Telefono);
+                $('#email_contacto').val(Array.isArray(data.EmailContacto) ? data.EmailContacto.join("\n") : data.EmailContacto);
+                $('#direccion_fiscal').val(data.DireccionFiscal);
+                $('#direccion_envio').val(data.DireccionEnvio);
             });
         } else {
             $('#codigo_cliente, #nombres, #apellido_paterno, #apellido_materno, #telefono, #email_contacto, #direccion_fiscal, #direccion_envio').val('');
         }
     });
 
-    $('#slpcode').select2({
-        dropdownParent: $('#modalNuevoVendedor'),
-        placeholder: "Seleccione un vendedor",
-        allowClear: true
-    });
-
-    $('#slpcode').on('change', function(){
+    // AJAX para cargar datos de vendedor
+    $('#slpcode').on('change', function() {
         let slpCode = $(this).val();
         if(slpCode){
-            $.ajax({
-                url: "/admin/oslp/" + slpCode,
-                type: "GET",
-                success: function(data){
-                    $('#codigo_vendedor').val(data.SlpCode);
-                    $('#nombre_vendedor').val(data.SlpName);
-                }
+            $.getJSON("/admin/oslp/" + slpCode, function(data){
+                $('#codigo_vendedor').val(data.SlpCode);
+                $('#nombre_vendedor').val(data.SlpName);
             });
         } else {
             $('#codigo_vendedor, #nombre_vendedor').val('');
         }
     });
 
+    var table = null;
 
-    $.ajaxSetup({
+if ($('#tablaUsuarios').length) {
+
+    // Si ya existe DataTable, lo destruimos para evitar "Cannot reinitialise"
+    if ($.fn.DataTable.isDataTable('#tablaUsuarios')) {
+        $('#tablaUsuarios').DataTable().destroy();
+    }
+
+    // Inicializamos DataTable
+    table = $('#tablaUsuarios').DataTable({
+        pageLength: 25,
+        lengthChange: false,
+        dom: 'rtip',
+        language: {
+            url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+        }
+    });
+
+    // Mostrar N registros
+    $('#mostrar').on('change', function() {
+        const val = parseInt($(this).val()) || 25;
+        table.page.len(val).draw();
+    });
+
+    // Filtro estatus (case-insensitive)
+    $('#estatus').on('change', function() {
+        const raw = $(this).val();
+        let filtro = '';
+
+        if (!raw || raw.toLowerCase() === 'todos') {
+            filtro = '';
+        } else if (raw.toLowerCase() === 'activo') {
+            filtro = '^activo$';
+        } else if (raw.toLowerCase() === 'inactivo') {
+            filtro = '^inactivo$';
+        }
+
+        table.column(3).search(filtro, true, false, true).draw();
+    });
+
+    // Buscar dinámico
+    $('#buscar').on('keyup', function() {
+        table.search(this.value).draw();
+    });
+}
+
+// Toggle estado con confirmación
+$.ajaxSetup({
     headers: {
         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
         'X-Requested-With': 'XMLHttpRequest',
@@ -388,143 +311,63 @@ $(document).ready(function() {
     }
 });
 
+$(document).on('change', '.toggle-estado-usuarios', function() {
+    var $checkbox = $(this);
+    var id = $checkbox.data('id');
+    var newState = $checkbox.is(':checked') ? 1 : 0;
+    var prevState = $checkbox.prop('checked') ? 0 : 1; // Invertimos temporalmente para visual
+    var $row = $checkbox.closest('tr');
+    var $statusCell = $row.find('td').eq(3);
 
-     // Evento para toggle con confirmación y notificación
-    $(document).on('change', '.toggle-estado-usuarios', function () {
-        var $checkbox = $(this);
-        var id = $checkbox.data('id');
-        var url = $checkbox.data('url') || window.usuariosEstadoUrl;
-        var newState = $checkbox.is(':checked') ? 1 : 0;
-        var prevState = newState ? 0 : 1;
-        var $row = $checkbox.closest('tr');
-        var $statusCell = $row.find('td').eq(3);
+    // Bloqueamos el checkbox mientras confirma
+    $checkbox.prop('checked', prevState === 1);
 
-        // Detenemos el cambio hasta confirmar
-        $checkbox.prop('checked', prevState === 1);
-
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: "Vas a cambiar el estado del usuario a " + (newState ? "Activo" : "Inactivo"),
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#05564f',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, cambiar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $checkbox.prop('disabled', true);
-
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {
-                        id: id,
-                        field: 'activo',
-                        value: newState
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            $checkbox.prop('checked', newState === 1);
-                            $statusCell.text(newState ? 'activo' : 'inactivo');
-
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'success',
-                                title: 'Estado actualizado correctamente',
-                                showConfirmButton: false,
-                                timer: 2000
-                            });
-                        } else {
-                            Swal.fire('Error', 'No se pudo actualizar el estado en el servidor.', 'error');
-                            $checkbox.prop('checked', prevState === 1);
-                            $statusCell.text(prevState === 1 ? 'activo' : 'inactivo');
-                        }
-                    },
-                    error: function() {
-                        Swal.fire('Error', 'Ocurrió un error de conexión.', 'error');
-                        $checkbox.prop('checked', prevState === 1);
-                        $statusCell.text(prevState === 1 ? 'activo' : 'inactivo');
-                    },
-                    complete: function() {
-                        $checkbox.prop('disabled', false);
-                    }
-                });
-            } else {
-                // Si cancela, dejamos el estado anterior
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Vas a cambiar el estado del usuario a " + (newState ? "Activo" : "Inactivo"),
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#05564f',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, cambiar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if(result.isConfirmed){
+            $checkbox.prop('disabled', true);
+            $.post("{{ route('estado.Usuario') }}", {id: id, field: 'activo', value: newState}, function(response){
+                if(response.success){
+                    $checkbox.prop('checked', newState === 1);
+                    $statusCell.text(newState ? 'activo' : 'inactivo');
+                    Swal.fire({toast:true, position:'top-end', icon:'success', title:'Estado actualizado correctamente', showConfirmButton:false, timer:2000});
+                } else {
+                    Swal.fire('Error', 'No se pudo actualizar el estado en el servidor.', 'error');
+                    $checkbox.prop('checked', prevState === 1);
+                    $statusCell.text(prevState === 1 ? 'activo' : 'inactivo');
+                }
+            }).fail(function(){
+                Swal.fire('Error', 'Ocurrió un error de conexión.', 'error');
                 $checkbox.prop('checked', prevState === 1);
-            }
-        });
+                $statusCell.text(prevState === 1 ? 'activo' : 'inactivo');
+            }).always(function(){ $checkbox.prop('disabled', false); });
+        } else {
+            $checkbox.prop('checked', prevState === 1);
+        }
     });
-
-
-
-
-
 });
 
 
+});
 </script>
-
-
-
 
 <style>
 /* Toggle switch estilo iOS */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 26px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 26px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #28a745; /* verde éxito */
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #28a745;
-}
-
-input:checked + .slider:before {
-  transform: translateX(24px);
-}
-
-/* redondeado */
-.slider.round {
-  border-radius: 26px;
-}
+.switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:26px; }
+.slider:before { position:absolute; content:""; height:20px; width:20px; left:3px; bottom:3px; background-color:white; transition:.4s; border-radius:50%; }
+input:checked + .slider { background-color:#28a745; }
+input:focus + .slider { box-shadow:0 0 1px #28a745; }
+input:checked + .slider:before { transform:translateX(24px); }
+.slider.round { border-radius:26px; }
 </style>
 @endpush
-

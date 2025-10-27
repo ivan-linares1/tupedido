@@ -18,6 +18,14 @@ Route::post('/enviar-monedas', [App\Http\Controllers\EnvioDatosController::class
 
 // Receptor de prueba
 Route::post('/receptor', [App\Http\Controllers\EnvioDatosController::class, 'receptor'])->withoutMiddleware('web');
+
+
+ Route::get('/Cotizaciones/EnviarTodas', [CotizacionesController::class, 'enviarTodas'])
+    ->name('cotizaciones.enviarTodas');
+
+
+
+Route::get('/enviar-cotizaciones', [CotizacionesController::class, 'enviarTodasLasCotizaciones']);
 //****************************************************************************************************************************************** */
 Route::get('/', fn() => redirect()->route('dashboard'));
 
