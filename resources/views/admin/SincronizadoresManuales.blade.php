@@ -24,7 +24,7 @@
                 /*OEDG*/   ['icon' => 'bi-tags-fill icon-descuentos',       'titulo' => 'Grupos de Descuentos',    'texto' => 'Sincroniza grupos de descuentos.',                   'servicio' => 'Grupo_Descuentos',        'metodo1' => 'SBO_Grupos_Descuentos_OEDG',         'metodo2' => '#'],
                 /*EDG1*/   ['icon' => 'bi-percent icon-descuento',          'titulo' => 'Descuentos',              'texto' => 'Sincroniza los descuentos.',                         'servicio' => 'Descuentos_Detalle',      'metodo1' => 'SBO_Grupos_Descuentos_EDG1',         'metodo2' => '#'],
                 /*ORTT*/   ['icon' => 'bi-currency-exchange icon-currency', 'titulo' => 'Divisas del Día',         'texto' => 'Sincroniza las divisas del día.',                    'servicio' => 'Cambios_Monedas',         'metodo1' => 'SBO_Tipo_Cambio_ORTT',               'metodo2' => '#'],
-                /*-OSLP-*/ ['icon' => 'bi-person-lines-fill icon-vendedor', 'titulo' => 'Vendedores',              'texto' => 'Sincroniza los vendedores.',                         'servicio' => 'Vendedores',              'metodo1' => 'SBO_Vendedores_OSLP',                'metodo2' => '#'],
+                /*-OSLP-*/ ['icon' => 'bi-person-lines-fill icon-vendedor', 'titulo' => 'Vendedores',              'texto' => 'Sincroniza los vendedores.',                         'servicio' => 'Vendedores',              'metodo1' => '#',                                  'metodo2' => '#'],
             ];
         @endphp
 

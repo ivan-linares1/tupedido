@@ -159,6 +159,7 @@ CREATE TABLE QUT1(
   FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
 );
 
+/*Pedidos*/
 CREATE TABLE RDR1 (
   DocEntry INT AUTO_INCREMENT PRIMARY KEY,
   fecha DATE NOT NULL,
