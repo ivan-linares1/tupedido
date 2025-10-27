@@ -11,6 +11,7 @@ use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\SincronizacionController;
 use App\Models\configuracion;
+    
 
 //****************************************************************************************************************************************** */
 // Enviar monedas
@@ -99,9 +100,23 @@ Route::middleware('auth')->group(function () {
         Route::post('ServiciosWEB/{servicio}/{metodo}', [ SincronizacionController::class, 'ServicioWeb'])->name('Sincronizar');
         //ruta intermedia para el servicio de edg1 ya que esta en subservicios 
         Route::post('ServiciosWEB_Aux/{servicio}/{metodo}', [ SincronizacionController::class, 'ServicioWebAux'])->name('SincronizarAux');
+        
+        
     });
 
     // USUARIOS NORMALES Y VENDEDORES (Roles 3 y 4)
     Route::middleware(['role:3,4'])->group(function () { });
+
 });
+
+
+        Route::get('/Cotizaciones/EnviarTodas', [CotizacionesController::class, 'enviarTodas'])
+    ->name('cotizaciones.enviarTodas');
+
+
+
+Route::get('/enviar-cotizaciones', [CotizacionesController::class, 'enviarTodasLasCotizaciones']);
+
+
+
 require __DIR__ . '/auth.php';
