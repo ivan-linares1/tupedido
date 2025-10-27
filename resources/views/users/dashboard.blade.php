@@ -10,6 +10,8 @@
     <p>Bienvenido  <b> {{Auth::user()->nombre }} </b> a Tu Pedido.</p>
 @endif
 
+<x-loading />
+
 @if($configuracionVacia == true && (Auth::user()->rol_id == 3 || Auth::user()->rol_id == 4))
     <div class="d-inline-block position-relative">
         <button class="btn btn-primary" disabled>Nueva Cotización</button>
@@ -41,8 +43,8 @@
         }
     </script>
 @else
-    <a href="{{ route('NuevaCotizacion') }}" class="btn btn-primary">Nueva Cotización</a>
-    <a href="{{ route('NuevaPedido') }}" class="btn btn-primary">Nuevo Pedido</a>
+    <a href="{{ route('NuevaCotizacion') }}" class="btn btn-primary" data-loading="true">Nueva Cotización</a>
+    <a href="{{ route('NuevaPedido') }}" class="btn btn-primary" data-loading="true">Nuevo Pedido</a>
 @endif
 
 @endsection

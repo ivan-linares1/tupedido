@@ -19,50 +19,77 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class PedidosController extends Controller
 {
     
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $configuracionVacia = configuracion::count() === 0;//Variable booleana si es true significa que no tenemos configuracion y si es false si exite la configuracion
+        $configuracionVacia = configuracion::count() === 0;
 
-        // Obtener todos los pedidos con su cotización asociada
+        $buscar = $request->input('buscar');
+        $fecha = $request->input('fecha');
+        $mostrar = $request->input('mostrar', 10);
+
         $query = pedidos::with(['cotizacionBase.vendedor', 'cotizacionBase.moneda'])
             ->orderBy('DocEntry', 'desc');
 
-        // Si el usuario es superAdministrador o Administrador
-        if ($user->rol_id == 1 || $user->rol_id == 2) { /* No filtramos, ven todo */ }
-        // Si el usuario es cliente, filtrar por su código de cliente
-        else if ($user->rol_id == 3) {
-            $query->whereHas('cotizacionBase', function($q) use ($user) {
-                $q->where('CardCode', $user->codigo_cliente);
+        // Filtrado por rol
+        if (in_array($user->rol_id, [1, 2])) {
+            // admin/superadmin no filtran
+        } elseif ($user->rol_id == 3) {
+            $query->whereHas('cotizacionBase', fn($q) => $q->where('CardCode', $user->codigo_cliente));
+        } elseif ($user->rol_id == 4) {
+            $query->whereHas('cotizacionBase', fn($q) => $q->where('SlpCode', $user->codigo_vendedor));
+        } else {
+            abort(403, 'Rol no permitido');
+        }
+
+        // Filtro de búsqueda
+        if ($buscar) {
+            $query->where(function($q) use ($buscar) {
+                // Folio
+                $q->where('DocEntry', 'like', "%$buscar%")
+                // Cliente
+                ->orWhereHas('cotizacionBase', function($q2) use ($buscar) {
+                    $q2->where('CardName', 'like', "%$buscar%");
+                })
+                // Vendedor
+                ->orWhereHas('cotizacionBase.vendedor', function($q3) use ($buscar) {
+                    $q3->where('SlpName', 'like', "%$buscar%");
+                });
             });
         }
-        // Si el usuario es vendedor, filtrar por su código de cliente
-        else if ($user->rol_id == 4) {
-            $query->whereHas('cotizacionBase', function($q) use ($user) {
-                $q->where('SlpCode', $user->codigo_vendedor);
-            });
+
+        // Filtro por fecha
+        if ($fecha) {
+            $query->whereHas('cotizacionBase', fn($q) =>
+                $q->whereDate('DocDate', $fecha)
+            );
         }
-         else { abort(403, 'Rol no permitido'); }
 
-        $pedidos = $query->get();
+        // Paginación
+        $pedidos = $query->paginate($mostrar)->withQueryString();
 
-        // Transformar para la vista
-        $pedidosList = $pedidos->map(function($pedido) {
-            $cotizacion = $pedido->cotizacionBase;
-
+        // Transformación sin romper el paginador
+        $pedidos->getCollection()->transform(function($pedido) {
+            $cot = $pedido->cotizacionBase;
             return (object)[
                 'DocEntry' => $pedido->DocEntry,
-                'CotizacionDocEntry' => $cotizacion->DocEntry ?? null,
-                'CotizacionFecha' => $cotizacion->DocDate ?? null,
-                'Cliente' => $cotizacion->CardName ?? null,
-                'Vendedor' => $cotizacion->vendedor->SlpName ?? null,
-                'Total' => $cotizacion->Total ?? 0,
-                'Moneda' => $cotizacion->moneda->Currency ?? 'MXN',
+                'CotizacionDocEntry' => $cot->DocEntry ?? null,
+                'CotizacionFecha' => $cot->DocDate ?? null,
+                'Cliente' => $cot->CardName ?? null,
+                'Vendedor' => $cot->vendedor->SlpName ?? null,
+                'Total' => $cot->Total ?? 0,
+                'Moneda' => $cot->moneda->Currency ?? 'MXN',
             ];
         });
 
-        return view('users.pedidos', ['pedidos' => $pedidosList, 'configuracionVacia' => $configuracionVacia]);
-    }   
+        // Solo tabla si es AJAX
+        if ($request->ajax()) {
+            return view('partials.tabla_pedidos', compact('pedidos'))->render();
+        }
+
+        return view('users.pedidos', compact('pedidos', 'configuracionVacia'));
+    }
+
 
     public function NuevoPedido ($DocEntry = null)
     {

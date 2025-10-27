@@ -24,37 +24,55 @@ use Illuminate\Support\Facades\DB;
 class CotizacionesController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $configuracionVacia = configuracion::count() === 0;//Variable booleana si es true significa que no tenemos configuracion y si es false si exite la configuracion
+        $configuracionVacia = configuracion::count() === 0;
 
-        // Base de la consulta: cotizaciones con sus relaciones
-        $query = Cotizacion::select(
-                'OQUT.*',
-                'OSLP.SlpName as vendedor_nombre',
-                'OCRN.Currency as moneda_nombre'
-            )
-            ->leftJoin('OSLP', 'OQUT.SlpCode', '=', 'OSLP.SlpCode')
-            ->leftJoin('OCRN', 'OQUT.DocCur', '=', 'OCRN.Currency_ID')
-            ->orderBy('OQUT.DocEntry', 'desc');
-        
-        // Si el usuario es superAdministrador o Administrador
-        if ($user->rol_id == 1 || $user->rol_id == 2) { /* No filtramos, ven todo */ }
-        // Si el usuario es cliente, filtramos por su código
-        else if ($user->rol_id == 3) {
-            $query->where('OQUT.CardCode', $user->codigo_cliente);
+        $buscar = $request->input('buscar');
+        $fecha = $request->input('fecha');
+        $mostrar = $request->input('mostrar', 10);
+
+        $query = Cotizacion::with(['vendedor', 'moneda'])
+                    ->orderBy('DocEntry', 'desc');
+
+        // Filtrado por rol
+        if ($user->rol_id == 3) { // Cliente
+            $query->where('CardCode', $user->codigo_cliente);
+        } elseif ($user->rol_id == 4) { // Vendedor
+            $query->where('SlpCode', $user->codigo_vendedor);
+        } elseif (!in_array($user->rol_id, [1,2])) {
+            abort(403, 'Rol no permitido');
         }
-        // Si el usuario es vendedor, filtramos por su código
-        else if ($user->rol_id == 4) {
-            $query->where('OQUT.SlpCode', $user->codigo_vendedor);
+
+        // Filtro búsqueda por Folio, Cliente y Vendedor
+        if ($buscar) {
+            $query->where(function($q) use ($buscar) {
+                $q->where('DocEntry', 'like', "%$buscar%")
+                ->orWhere('CardName', 'like', "%$buscar%")
+                ->orWhereHas('vendedor', function($v) use ($buscar) {
+                    $v->where('SlpName', 'like', "%$buscar%");
+                });
+            });
         }
-        else { abort(403, 'Rol no permitido'); }
 
-        $cotizaciones = $query->get();
+        // Filtro por fecha
+        if ($fecha) {
+            $query->whereDate('DocDate', $fecha);
+        }
 
-        return view('users.cotizaciones', compact('cotizaciones','configuracionVacia'));
+        $cotizaciones = $query->paginate($mostrar)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('partials.tabla_cotizacion', [
+                'cotizaciones' => $cotizaciones,
+                'configuracionVacia' => $configuracionVacia
+            ])->render();
+        }
+
+        return view('users.cotizaciones', compact('cotizaciones', 'configuracionVacia'));
     }
+
 
 
     public function NuevaCotizacion ($DocEntry = null)
@@ -173,8 +191,6 @@ class CotizacionesController extends Controller
                 'fechaCreacion'    => 'required',
                 'fechaEntrega'     => 'required',
                 'CardName'         => 'required',
-                'phone1'           => 'required',
-                'email'            => 'required',
                 'DocCur'           => 'required',
                 //'ShipToCode'       => 'required',
                 //'PayToCode'        => 'required',
@@ -221,8 +237,8 @@ class CotizacionesController extends Controller
                 'DocDueDate'    => $request->fechaEntrega,
                 'CardName'      => $request->CardName,
                 'SlpCode'       => $request->SlpCode,
-                'Phone1'        => $request->phone1,
-                'E_Mail'        => $request->email,
+                'Phone1'        => $request->phone1 ?? '',
+                'E_Mail'        => $request->email ?? '',
                 'DocCur'        => $request->DocCur,
                 'ShipToCode'    => $request->ShipToCode ?? '',
                 'PayToCode'     => $request->PayToCode ?? '',

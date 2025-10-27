@@ -161,7 +161,7 @@ window.agregarArticulo = function(art) {
         <td class="itemcode">${art.ItemCode}</td>
         <td class="frgnName">${art.FrgnName}</td>
         <td class="imagen" data-imagen="${art.Id_imagen}"><img src="${art.imagen?.Ruta_imagen}" alt="Imagen" style="width: 50px; height: auto;"></td>
-        <td class="medida">Unidad de medida</td>
+        <td class="medida">${art.SalUnitMsr}</td>
         <td class="precio">${Number(precio || 0).toFixed(2)}</td>
         <td class="moneda">${monedaCambio ? monedaCambio.Currency : art.precio.moneda.Currency}</td>
         <td class="iva">IVA ${IVA}%</td>
