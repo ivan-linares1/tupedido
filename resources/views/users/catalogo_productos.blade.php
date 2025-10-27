@@ -4,8 +4,6 @@
 
 @section('contenido')
 
-<div id="flash-messages" class="alert-top-end"></div>
-
 <div class="card shadow-sm border-0 rounded-3 mt-4">
     <div class="card-header d-flex justify-content-between align-items-center bg-success text-white rounded-top">
         <h5 class="mb-0">

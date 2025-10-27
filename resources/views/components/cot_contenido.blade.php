@@ -26,7 +26,7 @@
         </thead>
 
         <tbody>
-            @if(isset($cotizacion) && $cotizacion->lineas)
+            @if(isset($modo) && $modo == 1 && isset($cotizacion) && $cotizacion->lineas)
                 @foreach($cotizacion->lineas as $linea)
                         <tr >
                             <td class="itemcode">{{ $linea->ItemCode }}</td>
@@ -34,7 +34,7 @@
                             <td class="imagen">
                                 <img src="{{ $linea->imagen?->Ruta_imagen }}" alt="Imagen" style="width: 50px; height: auto;">
                             </td>
-                            <td class="medida">Unidad de medida</td>
+                            <td class="medida">{{ $linea->unitMsr2}}</td>
                             <td class="precio">{{ number_format($linea->Price, 2) }}</td>
                             <td class="moneda">  {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}</td>
                             <td class="iva">IVA {{ $IVA }}%</td>

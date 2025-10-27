@@ -123,7 +123,7 @@ CREATE TABLE OQUT(
     DocDate DATE,
     DocDueDate DATE,
     CardName VARCHAR(100),
-    SlpCode INT NOT NULL,
+    SlpCode INT,
     Phone1 VARCHAR(20),
     E_Mail VARCHAR(100),
     DocCur VARCHAR(3),

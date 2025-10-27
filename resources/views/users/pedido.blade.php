@@ -6,7 +6,6 @@
 
  <!-- Importación de JS -->
 @vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
-
 <div class="container my-4">
     <h3 class="mb-3 fw-bold">
         @if($modo == 0)
