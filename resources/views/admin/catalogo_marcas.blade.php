@@ -69,9 +69,6 @@
     </div>
 </div>
 
-@endsection
-
-@push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 
 <style>
@@ -89,7 +86,7 @@
 </style>
 
 
-@push('scripts')
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
@@ -129,5 +126,4 @@ $(document).ready(function() {
 </script>
 
 
-
-@endpush
+@endsection

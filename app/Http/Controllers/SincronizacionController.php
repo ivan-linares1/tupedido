@@ -21,7 +21,7 @@ class SincronizacionController extends Controller
     // Conexión al Web Service con manejo de errores
     private function ConexionWBS()
     {
-        $url = "http://10.10.1.13:8083/KombiService.asmx?wsdl";
+        $url = "http://10.10.1.14:8083/KombiService.asmx?wsdl";
 
         try {
             $client = new \SoapClient($url, [
@@ -164,6 +164,8 @@ class SincronizacionController extends Controller
     //funciones privadas que se encargan de hacer las inserciones o actualizacions de cada servicio web individualmente 
     private function Monedas($xmlResponse, $modo) //OCRN
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->Moneda)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse->Moneda instanceof \stdClass) { $xmlResponse->Moneda = [$xmlResponse->Moneda]; }
 
@@ -187,8 +189,11 @@ class SincronizacionController extends Controller
     
     private function Articulos($xmlResponse, $modo) //OITM
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->Articulo)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse->Articulo instanceof \stdClass) { $xmlResponse->Articulo = [$xmlResponse->Articulo]; } 
+        
 
         $total = count($xmlResponse->Articulo); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
@@ -217,6 +222,8 @@ class SincronizacionController extends Controller
 
     private function Categoria_Lista_Precios($xmlResponse, $modo) //OPLN
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->CAT_LP)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse->CAT_LP instanceof \stdClass) { $xmlResponse->CAT_LP = [$xmlResponse->CAT_LP]; }
 
@@ -240,8 +247,10 @@ class SincronizacionController extends Controller
 
     private function Marcas($xmlResponse, $modo) //OITB
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->Marcas)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
-        if ($xmlResponse->Articulo instanceof \stdClass) { $xmlResponse->Articulo = [$xmlResponse->Articulo]; }
+        if ($xmlResponse->Marcas instanceof \stdClass) { $xmlResponse->Marcas = [$xmlResponse->Marcas]; }
 
         $total = count($xmlResponse->Marcas); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
@@ -269,6 +278,8 @@ class SincronizacionController extends Controller
 
     private function ListaPrecio($xmlResponse, $modo)//ITM1
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->ListaP)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse->ListaP instanceof \stdClass) { $xmlResponse->ListaP = [$xmlResponse->ListaP]; }
 
@@ -309,6 +320,8 @@ class SincronizacionController extends Controller
 
     private function Clientes($xmlResponse, $modo)//OCRD
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->Clientes)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse->Clientes instanceof \stdClass) { $xmlResponse->Clientes = [$xmlResponse->Clientes]; }
 
@@ -338,6 +351,8 @@ class SincronizacionController extends Controller
 
     private function Direcciones($xmlResponse, $modo) // CRD1
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->Direcciones)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse->Direcciones instanceof \stdClass) { $xmlResponse->Direcciones = [$xmlResponse->Direcciones]; }
 
@@ -390,6 +405,8 @@ class SincronizacionController extends Controller
 
     private function Grupo_Descuentos($xmlResponse, $modo) //OEDG
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->Grupo_Descuentos)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse->GPO_Descuentos instanceof \stdClass) { $xmlResponse->GPO_Descuentos = [$xmlResponse->GPO_Descuentos]; }
 
@@ -433,6 +450,8 @@ class SincronizacionController extends Controller
 
     private function DescuentosDetalle($xmlResponse, $modo) //EDG1
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->GPO_DescuentosEDG1)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse->GPO_DescuentosEDG1 instanceof \stdClass) { $xmlResponse->GPO_DescuentosEDG1 = [$xmlResponse->GPO_DescuentosEDG1]; }
 
@@ -481,6 +500,8 @@ class SincronizacionController extends Controller
 
     /*private function Vendedores($xmlResponse, $modo) //OSLP
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse-> instanceof \stdClass) { $xmlResponse-> = [$xmlResponse->]; }
 
@@ -510,6 +531,8 @@ class SincronizacionController extends Controller
 
     private function CambiosMoneda($xmlResponse, $modo)//ORTT 
     {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->TipoCambioORTT)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse->TipoCambioORTT instanceof \stdClass) { $xmlResponse->TipoCambioORTT = [$xmlResponse->TipoCambioORTT]; }
 
