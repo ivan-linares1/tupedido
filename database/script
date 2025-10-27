@@ -145,7 +145,7 @@ CREATE TABLE OQUT(
 CREATE TABLE QUT1(
   DocEntry INT NOT NULL,
   LineNum INT NOT NULL,
-  ObjType VARCHAR(20),
+  ObjType VARCHAR(20) default 23,
   ItemCode VARCHAR(50) NOT NULL,
   U_Dscr VARCHAR(250),
   unitMsr2 VARCHAR(100),
@@ -160,15 +160,51 @@ CREATE TABLE QUT1(
 );
 
 /*Pedidos*/
+CREATE TABLE ORDR(
+    DocEntry INT AUTO_INCREMENT PRIMARY KEY,
+    CardCode VARCHAR(15) NOT NULL,
+    DocDate DATE,
+    DocDueDate DATE,
+    CardName VARCHAR(100),
+    SlpCode INT,
+    Phone1 VARCHAR(20),
+    E_Mail VARCHAR(100),
+    DocCur VARCHAR(3),
+    ShipToCode VARCHAR(50),
+    PayToCode VARCHAR(50),
+    Address VARCHAR(254),
+    Address2 VARCHAR(254),
+    TotalSinPromo DECIMAL(19,6),
+    Descuento DECIMAL(19,6),
+    Subtotal DECIMAL(19,6),
+    IVA DECIMAL(19,6),
+    Total DECIMAL(19,6),
+    comment VARCHAR(254),
+    FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
+    FOREIGN KEY (SlpCode) REFERENCES OSLP(SlpCode)
+);
+
+/*Líneas de pedidos*/
 CREATE TABLE RDR1 (
-  DocEntry INT AUTO_INCREMENT PRIMARY KEY,
-  fecha DATE NOT NULL,
-  LineNum INT,
+  DocEntry INT NOT NULL,
+  LineNum INT NOT NULL,
+  ObjType VARCHAR(20) default 23,
+  ItemCode VARCHAR(50) NOT NULL,
+  U_Dscr VARCHAR(250),
+  unitMsr2 VARCHAR(100),
+  Price DECIMAL(19,6),
+  DiscPrcnt DECIMAL(19,6),
+  Quantity DECIMAL(19,6),
+  Id_imagen BIGINT,
   TargetType INT,
   TrgetEntry INT,
   BaseRef VARCHAR(16),
-  BaseType INT,
+  BaseType INT default 23,
   BaseEntry INT,
+  PRIMARY KEY (DocEntry, LineNum),
+  FOREIGN KEY (DocEntry) REFERENCES ORDR(DocEntry),
+  FOREIGN KEY (ItemCode) REFERENCES OITM(ItemCode),
+  FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen),
   FOREIGN KEY (BaseEntry) REFERENCES OQUT(DocEntry)
 );
 

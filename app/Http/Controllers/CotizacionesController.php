@@ -8,8 +8,8 @@ use App\Models\Cotizacion;
 use App\Models\configuracion;
 use App\Models\DireccionesClientes;
 use App\Models\LineasCotizacion;
+use App\Models\LineasPedidos;
 use App\Models\Moneda;
-use App\Models\pedidos;
 use App\Models\Vendedores; 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -73,15 +73,13 @@ class CotizacionesController extends Controller
         return view('users.cotizaciones', compact('cotizaciones', 'configuracionVacia'));
     }
 
-
-
     public function NuevaCotizacion ($DocEntry = null)
     {
-
         $IVA = configuracion::firstOrFail()->iva;
         $hoy = Carbon::today()->format('Y-m-d');
         $mañana = Carbon::tomorrow()->format('Y-m-d');
         $pedido = null;
+        $cotizacion = null;
 
         // Fechas por defecto (HOY para nueva cotización)
         $fechaCreacion = $hoy;
@@ -142,7 +140,7 @@ class CotizacionesController extends Controller
             }
         }
 
-        return view('users.cotizacion', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos', 'pedido'));
+        return view('users.cotizacion', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos', 'pedido', 'cotizacion'));
     }
 
     public function ObtenerDirecciones($CardCode){
@@ -301,7 +299,8 @@ class CotizacionesController extends Controller
             abort(403, 'Rol no permitido.');
         }
 
-        $pedido = pedidos::where('BaseEntry', $cotizacion->DocEntry)->first();
+        //verifica si existe algun pedido relacionado
+        $pedido = LineasPedidos::where('BaseEntry', $cotizacion->DocEntry)->first();
 
         // Datos adicionales para la vista
         $IVA = configuracion::firstOrFail()->iva;
@@ -309,7 +308,6 @@ class CotizacionesController extends Controller
 
         // Clientes y vendedores
         $clientes = Clientes::with('descuentos.detalles.marca')->get();
-        $user = Auth::user();
         $vendedores = Vendedores::where('Active', 'Y')->get();
 
         // Monedas
@@ -345,7 +343,7 @@ class CotizacionesController extends Controller
         $cotizacion = Cotizacion::with('lineas')->findOrFail($id);
 
         $data = [
-            'logo'    => public_path('storage/' . configuracion::firstOrFail()->ruta_logo,),
+            'logo' => resource_path('views/pdf/logo.png'),
             'titulo'  => 'COTIZACIÓN',
             'subtitulo'  => 'Cotización',
             'numero'  =>  $cotizacion->DocEntry,
