@@ -1,3 +1,6 @@
+/*Estos estilos se aplican en las tablas donde se listan todos las cotizaciones
+y todos los pedido unicamente en esas 2 vistas*/
+
 /* ======== TÍTULOS ======== */
 h3 {
     font-family: var(--fuente-principal);

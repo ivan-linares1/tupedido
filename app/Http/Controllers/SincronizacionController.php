@@ -406,7 +406,7 @@ class SincronizacionController extends Controller
     private function Grupo_Descuentos($xmlResponse, $modo) //OEDG
     {
         //Aqui valido si existen datos en el xml antes de procesarlo
-        if (!isset($xmlResponse->Grupo_Descuentos)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
+        if (!isset($xmlResponse->GPO_Descuentos)) {return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ];}
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
         if ($xmlResponse->GPO_Descuentos instanceof \stdClass) { $xmlResponse->GPO_Descuentos = [$xmlResponse->GPO_Descuentos]; }
 
