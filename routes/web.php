@@ -23,9 +23,48 @@ Route::post('/receptor', [App\Http\Controllers\EnvioDatosController::class, 'rec
  Route::get('/Cotizaciones/EnviarTodas', [CotizacionesController::class, 'enviarTodas'])
     ->name('cotizaciones.enviarTodas');
 
+Route::get('/probar-xml', function () {
+    $cotizacion = (object)[
+        'CardCode' => 'C0001',
+        'CardName' => 'Cliente Demo',
+        'DocDate' => '2025-10-27',
+        'DocDueDate' => '2025-11-05',
+        'Total' => '12500.50'
+    ];
+
+    $articulos = [
+        [
+            'itemCode' => 'A100',
+            'descripcion' => 'Producto A',
+            'cantidad' => 2,
+            'precio' => '5000'
+        ],
+        [
+            'itemCode' => 'B200',
+            'descripcion' => 'Producto B',
+            'cantidad' => 1,
+            'precio' => '2500.50'
+        ]
+    ];
+
+    $controller = new App\Http\Controllers\CotizacionesController();
+    $resultado = $controller->enviarCotizacionASMX($cotizacion, $articulos);
+
+    return "<pre>$resultado</pre>";
+});
 
 
-Route::get('/enviar-cotizaciones', [CotizacionesController::class, 'enviarTodasLasCotizaciones']);
+//Route::get('/enviar-cotizaciones', [App\Http\Controllers\CotizacionesController::class, 'enviarCotizacionesReales']);
+
+
+
+Route::get('/enviar-cotizaciones', [CotizacionesController::class, 'enviarCotizacionesReales']);
+
+
+
+
+
+//Route::get('/enviar-cotizaciones', [CotizacionesController::class, 'enviarTodasLasCotizaciones']);
 //****************************************************************************************************************************************** */
 Route::get('/', fn() => redirect()->route('dashboard'));
 
