@@ -12,14 +12,14 @@
         @forelse($pedidos as $pedido)
             <tr>
                 <td>
-                    <a href="{{ route('detallesP', $pedido->CotizacionDocEntry) }}" style="cursor: pointer; color: blue; text-decoration: underline;" data-loading="true">
+                    <a href="{{ route('detallesP', $pedido->DocEntry) }}" style="cursor: pointer; color: blue; text-decoration: underline;" data-loading="true">
                         PE - {{ $pedido->DocEntry }}
                     </a>
                 </td>
-                <td>{{ \Carbon\Carbon::parse($pedido->CotizacionFecha)->format('d-m-Y') }}</td>
-                <td>{{ $pedido->Cliente }}</td>
-                <td>{{ $pedido->Vendedor }}</td>
-                <td>${{ number_format($pedido->Total, 2) }} {{ $pedido->Moneda }}</td>
+                <td>{{ \Carbon\Carbon::parse($pedido->DocDate)->format('d-m-Y') }}</td>
+                <td>{{ $pedido->CardName }}</td>
+                <td>{{ $pedido->Vendedor->SlpName ?? '' }}</td>
+                <td>{{ number_format($pedido->Total,2) }} {{ $pedido->moneda->Currency ?? '' }}</td>
             </tr>
         @empty
             <tr>

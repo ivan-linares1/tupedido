@@ -355,6 +355,7 @@ $("#guardarCotizacion").on("click", function() {
     $("#totalH").val($("#total").text().replace('$',''));
     $("#comentariosH").val($('#comentarios').val());
 
+
     // Recopilar artículos
     let articulos = [];
     $("#tablaArticulos tbody tr:not(:last)").each(function() {
@@ -406,7 +407,8 @@ $("#btnPedido").on("click", function() {
             imagen: $(this).find(".imagen").data("imagen")
         });
     });
-
+    
     $("#articulosP").val(JSON.stringify(articulos));
+    $("#BaseEntry").val("{{ $cotizacion->DocEntry ?? '' }}");
     $("#formCotizacionPedido").submit();
 });
