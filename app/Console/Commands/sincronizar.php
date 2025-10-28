@@ -49,7 +49,6 @@ class Sincronizar extends Command
         else if($tipo2 === 'update')
         {
             $metodo = [
-                'Monedas' => '',
                 'Articulos' => 'SBOArticulos_Actualiza_OITM',
                 'Marcas' => '',
                 'Categoria_Lista_Precios' => '',
