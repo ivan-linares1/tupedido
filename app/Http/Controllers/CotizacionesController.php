@@ -20,6 +20,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
 
+use App\Models\CotizacionLinea;
+
+
 
 class CotizacionesController extends Controller
 {
@@ -406,43 +409,61 @@ class CotizacionesController extends Controller
         return $pdf->stream("Cotizacion-{$cotizacion->DocEntry}.pdf");
     }
 
-    private function enviarCotizacionASMX($cotizacion, $articulos)
-    {
-        $xml = new \SimpleXMLElement('<Cotizacion/>');
-        $encabezado = $xml->addChild('Encabezado');
-        $encabezado->addChild('CardCode', $cotizacion->CardCode);
-        $encabezado->addChild('CardName', $cotizacion->CardName);
-        $encabezado->addChild('DocDate', $cotizacion->DocDate);
-        $encabezado->addChild('DocDueDate', $cotizacion->DocDueDate);
-        $encabezado->addChild('Total', $cotizacion->Total);
 
-        $lineas = $xml->addChild('Lineas');
-        foreach ($articulos as $index => $art) {
-            $linea = $lineas->addChild('Linea');
-            $linea->addChild('LineNum', $index + 1);
-            $linea->addChild('ItemCode', $art['itemCode']);
-            $linea->addChild('Descripcion', htmlspecialchars($art['descripcion']));
-            $linea->addChild('Cantidad', $art['cantidad']);
-            $linea->addChild('Precio', floatval(str_replace(',', '', $art['precio'])));
-        }
 
-        $xmlString = $xml->asXML();
-        
-        $url = 'http://10.10.1.12:8092//ServicioWeb.asmx/RecibirCotizacion';
 
-        $response = Http::withHeaders([
-            'Content-Type' => 'text/xml; charset=utf-8',
-        ])->withBody($xmlString, 'text/xml')
-        ->post($url);
+//----------------------------------------- FUNCIONES SERVICIO ------------------------------------------------------------------
 
-        Log::channel('sync')->info('XML enviado: ' . $xmlString);
+    /*
+    public function enviarCotizacionASMX($cotizacion, $articulos)
+{
+    $xml = new \SimpleXMLElement('<Cotizacion/>');
 
-        if (!$response->successful()) {
-            Log::channel('sync')->error('Error al enviar cotización: '.$response->status().' '.$response->body());
-        }
+    $encabezado = $xml->addChild('Encabezado');
+    $encabezado->addChild('CardCode', $cotizacion->CardCode);
+    $encabezado->addChild('CardName', $cotizacion->CardName);
+    $encabezado->addChild('DocDate', $cotizacion->DocDate);
+    $encabezado->addChild('DocDueDate', $cotizacion->DocDueDate);
+    $encabezado->addChild('Total', $cotizacion->Total);
+
+    $lineas = $xml->addChild('Lineas');
+    foreach ($articulos as $index => $art) {
+        $linea = $lineas->addChild('Linea');
+        $linea->addChild('LineNum', $index + 1);
+        $linea->addChild('ItemCode', $art['itemCode']);
+        $linea->addChild('Descripcion', htmlspecialchars($art['descripcion']));
+        $linea->addChild('Cantidad', $art['cantidad']);
+        $linea->addChild('Precio', floatval(str_replace(',', '', $art['precio'])));
     }
 
+    $xmlString = $xml->asXML();
 
+    // URL del ASMX que funciona en navegador
+    $url = 'https://localhost:44321/ServicioWeb.asmx/RecibirCotizacion';
+
+    // Enviar XML, ignorando certificado SSL auto-firmado
+    $response = Http::withHeaders([
+        'Content-Type' => 'text/xml; charset=utf-8',
+    ])
+    ->withBody($xmlString, 'text/xml')
+    ->withoutVerifying() // <- muy importante para pruebas
+    ->post($url);
+
+    // Mostrar logs
+    Log::info('XML enviado: '.$xmlString);
+    Log::info('Respuesta ASMX: '.$response->body());
+
+    // Retornar respuesta para verla en pantalla
+    return $response->body();
+}
+*/
+
+
+
+
+
+//----------- Version Prueba OG Bidireccional ---------
+/*
     public function enviarTodasLasCotizaciones()
 {
     try {
@@ -499,6 +520,112 @@ class CotizacionesController extends Controller
         ]);
     }
 }
+*/
+
+
+// ----------------------------FUNCIONES SERVICIO BIDIRECCIONAL------------------------------------------
+
+/*
+public function enviarCotizacionASMX($cotizacion, $articulos)
+{
+    $xml = new \SimpleXMLElement('<Cotizacion/>');
+
+    $encabezado = $xml->addChild('Encabezado');
+    $encabezado->addChild('DocEntry', $cotizacion->DocEntry);
+    $encabezado->addChild('CardCode', $cotizacion->CardCode);
+    $encabezado->addChild('CardName', $cotizacion->CardName);
+    $encabezado->addChild('DocDate', $cotizacion->DocDate);
+    $encabezado->addChild('DocDueDate', $cotizacion->DocDueDate);
+    $encabezado->addChild('Total', $cotizacion->Total);
+    $encabezado->addChild('Phone', $cotizacion->Phone1);
+    $encabezado->addChild('Email', $cotizacion->E_Mail);
+    $encabezado->addChild('Comentario', htmlspecialchars($cotizacion->comment));
+
+    $lineasXml = $xml->addChild('Lineas');
+    foreach ($articulos as $index => $art) {
+        $linea = $lineasXml->addChild('Linea');
+        $linea->addChild('LineNum', $index + 1);
+        $linea->addChild('ItemCode', $art['itemCode']);
+        $linea->addChild('Descripcion', htmlspecialchars($art['descripcion']));
+        $linea->addChild('Cantidad', $art['cantidad']);
+        $linea->addChild('Precio', floatval($art['precio']));
+    }
+
+    $xmlString = $xml->asXML();
+
+    $url = 'https://localhost:44321/ServicioWeb.asmx/RecibirCotizacion';
+
+    try {
+        $response = Http::withHeaders([
+            'Content-Type' => 'text/xml; charset=utf-8',
+        ])
+        ->withBody($xmlString, 'text/xml')
+        ->withoutVerifying()
+        ->post($url);
+
+        $respuesta = $response->body();
+    } catch (\Exception $e) {
+        $respuesta = 'Error al enviar: ' . $e->getMessage();
+    }
+
+    Log::info('XML enviado: ' . $xmlString);
+    Log::info('Respuesta ASMX: ' . $respuesta);
+
+    return [
+        'xml_enviado' => $xmlString,
+        'respuesta_asmx' => $respuesta
+    ];
+}
+*/
+
+/*
+public function enviarCotizacionesReales()
+{
+    // Tomamos todas las cotizaciones de prueba (o filtra según tu criterio)
+    $cotizaciones = DB::table('oqut')->get();
+
+    $enviadas = [];
+    $errores = [];
+
+    foreach ($cotizaciones as $cot) {
+        $lineas = DB::table('qut1')->where('DocEntry', $cot->DocEntry)->get()->map(function($item){
+            return [
+                'itemCode' => $item->ItemCode,
+                'descripcion' => $item->U_Dscr,
+                'cantidad' => $item->Quantity,
+                'precio' => $item->Price,
+            ];
+        })->toArray();
+
+        try {
+            $resultado = $this->enviarCotizacionASMX($cot, $lineas);
+
+            $enviadas[] = [
+                'cotizacion_id' => $cot->DocEntry,
+                'xml_enviado' => $resultado['xml_enviado'],
+                'respuesta_asmx' => $resultado['respuesta_asmx']
+            ];
+        } catch (\Exception $e) {
+            $errores[] = [
+                'cotizacion_id' => $cot->DocEntry,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    // Devolver todo como JSON
+    return response()->json([
+        'success' => true,
+        'message' => 'Se enviaron '.count($enviadas).' cotizaciones.',
+        'enviadas' => $enviadas,
+        'errores' => $errores
+    ], 200, [], JSON_PRETTY_PRINT);
+}
+
+*/
+
+
+
 
 
 
