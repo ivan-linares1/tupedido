@@ -91,9 +91,9 @@ Route::middleware('auth')->group(function () {
     Route::prefix('Pedidos')->group(function () {
         Route::get('/', [PedidosController::class, 'index'])->name('Pedidos');
         Route::get('/NuevoPedido/{DocEntry?}', [PedidosController::class, 'NuevoPedido'])->name('NuevaPedido');
-        Route::post('/GuardarPedido', [PedidosController::class, 'GuardarCotizacion'])->name('cotizacionSavePedido');
+        Route::post('/GuardarPedido', [PedidosController::class, 'guardarPedido'])->name('PedidoSave');
         Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
-        Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfCotizacion'])->name('pedido.pdf');
+        Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfPedido'])->name('pedido.pdf');
     });
 
 
