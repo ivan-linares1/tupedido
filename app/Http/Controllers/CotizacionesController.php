@@ -15,14 +15,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
-
-
-use App\Models\CotizacionLinea;
-
-
 
 class CotizacionesController extends Controller
 {
@@ -88,7 +80,8 @@ class CotizacionesController extends Controller
         $fechaCreacion = $hoy;
         $fechaEntrega  = $mañana;
 
-        $clientes = Clientes::with('descuentos.detalles.marca')->where('Active', 'Y')->get();
+        //$clientes = Clientes::with('descuentos.detalles.marca')->where('Active', 'Y')->get();
+        $clientes = [];
 
         $user = Auth::user();
         $vendedores = Vendedores::where('Active', 'Y')->get();
@@ -310,7 +303,8 @@ class CotizacionesController extends Controller
         $hoy = Carbon::today()->format('Y-m-d');
 
         // Clientes y vendedores
-        $clientes = Clientes::with('descuentos.detalles.marca')->get();
+        #$clientes = Clientes::with('descuentos.detalles.marca')->get();
+        $clientes = [];
         $vendedores = Vendedores::where('Active', 'Y')->get();
 
         // Monedas

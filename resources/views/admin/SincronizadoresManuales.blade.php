@@ -14,7 +14,7 @@
         <!-- templated para general las cards -->
         @php
             $cards = [
-                /*OCRN 1*/ ['icon' => 'bi-currency-dollar icon-monedas',    'titulo' => 'Monedas',                 'texto' => 'Sincroniza todas las monedas existentes.',           'servicio' => 'Monedas',                 'metodo1' => 'SBOMonedas_OCRN',                                  ],
+                /*OCRN 1*/ ['icon' => 'bi-currency-dollar icon-monedas',    'titulo' => 'Monedas',                 'texto' => 'Sincroniza todas las monedas existentes.',           'servicio' => 'Monedas',                 'metodo1' => 'SBO_Monedas_OCRN',                                  ],
                 /*OITB 2*/ ['icon' => 'bi-grid-1x2-fill icon-marcas',       'titulo' => 'Grupos de Artículos',     'texto' => 'Sincroniza los grupos de artículos o marcas.',       'servicio' => 'Marcas',                  'metodo1' => 'SBO_GPO_AgregaTodo_Marca_OITB',                   'metodo2' => 'SBO_GPO_Actualiza_Marca_OITB'],
                 /*OPLN 2*/ ['icon' => 'bi-list-check icon-categorias',      'titulo' => 'Cat. Listas Precios',     'texto' => 'Sincroniza las categorías de listas de precios.',    'servicio' => 'Categoria_Lista_Precios', 'metodo1' => 'SBO_CAT_LP_Agrega_Todo_OPLN',                     'metodo2' => 'SBO_CAT_LP_Actualiza_OPLN'],
                 /*OITM 2*/ ['icon' => 'bi-box-seam icon-articulos',         'titulo' => 'Artículos',               'texto' => 'Sincroniza todos los artículos disponibles.',        'servicio' => 'Articulos',               'metodo1' => 'SBOArticulos_AgregaTodo_OITM',                    'metodo2' => 'SBOArticulos_Actualiza_OITM'],

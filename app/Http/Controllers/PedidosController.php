@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Articulo;
-use App\Models\Clientes;
 use App\Models\Cotizacion;
 use App\Models\configuracion;
 use App\Models\DireccionesClientes;
@@ -44,7 +43,7 @@ class PedidosController extends Controller
             abort(403, 'Rol no permitido');
         }
 
-        // 🔎 Filtro de búsqueda
+        // Filtro de búsqueda
         if ($buscar) {
             $query->where(function ($q) use ($buscar) {
                 $q->where('DocEntry', 'like', "%$buscar%")
@@ -83,7 +82,8 @@ class PedidosController extends Controller
         $fechaCreacion = $hoy;
         $fechaEntrega  = $mañana;
 
-        $clientes = Clientes::with('descuentos.detalles.marca')->where('Active', 'Y')->get();
+        #$clientes = Clientes::with('descuentos.detalles.marca')->where('Active', 'Y')->get();
+        $clientes = [];
 
         $user = Auth::user();
         $vendedores = Vendedores::where('Active', 'Y')->get();
@@ -214,7 +214,8 @@ class PedidosController extends Controller
         $hoy = Carbon::today()->format('Y-m-d');
 
         // Clientes y vendedores
-        $clientes = Clientes::with('descuentos.detalles.marca')->get();
+        //$clientes = Clientes::with('descuentos.detalles.marca')->get();
+        $clientes = [];
         $vendedores = Vendedores::where('Active', 'Y')->get();
 
         // Monedas

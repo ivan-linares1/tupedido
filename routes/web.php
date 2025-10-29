@@ -13,6 +13,7 @@ use App\Http\Controllers\SincronizacionController;
 use App\Models\configuracion;
 
 //****************************************************************************************************************************************** */
+/*
 // Enviar monedas
 Route::post('/enviar-monedas', [App\Http\Controllers\EnvioDatosController::class, 'enviarMonedasExternas'])->withoutMiddleware('web');
 
@@ -61,8 +62,7 @@ Route::get('/probar-xml', function () {
 Route::get('/enviar-cotizaciones', [CotizacionesController::class, 'enviarCotizacionesReales']);
 
 
-
-
+*/
 
 //Route::get('/enviar-cotizaciones', [CotizacionesController::class, 'enviarTodasLasCotizaciones']);
 //****************************************************************************************************************************************** */
@@ -95,6 +95,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
         Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfPedido'])->name('pedido.pdf');
     });
+
+    Route::get('/clientes/buscar', [ClienteController::class, 'buscar'])->name('clientes.buscar');  
 
 
     //CATÁLOGOS (Artículos, Clientes)
