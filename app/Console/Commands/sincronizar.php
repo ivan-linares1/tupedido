@@ -30,15 +30,17 @@ class Sincronizar extends Command
         if($tipo2 === 'todo')
         {
             $metodo = [
-                'Monedas' => 'SBOMonedas_OCRN',
-                'Articulos' => 'SBOArticulos_AgregaTodo_OITM',
-                'Marcas' => 'SBO_GPO_Articulo_OITB',
-                'Categoria_Lista_Precios' => 'SBO_CAT_LP_OPLN',
-                'Lista_Precios' => 'SBOListaPrecios_ITM1',
-                'Clientes' =>'SBO_Clientes_OCRD',
-                'Direcciones' => 'SBO_Clientes_Direcciones_CRD1',
-                'Grupo_Descuentos' => 'SBO_Grupos_Descuentos_OEDG',
+                'Monedas' => 'SBO_Monedas_OCRN',
+                'Marcas' => 'SBO_GPO_AgregaTodo_Marca_OITB',
+                'Categoria_Lista_Precios' => 'SBO_CAT_LP_Agrega_Todo_OPLN',
+                'Articulos' => 'SBO_Articulos_AgregaTodo_OITM',
+                'Lista_Precios' => 'SBO_ListaPrecios_AgregaTodo_ITM1',
+                'Clientes' =>'SBO_Clientes_Agrega_Todo_OCRD',
+                'Direcciones' => 'SBO_Clientes_Agrega_Todo_Direcciones_CRD1',
+                'Grupo_Descuentos' => 'SBO_Grupos_Agrgega_Todo_Descuentos_OEDG',
                 'Descuentos_Detalle' => 'SBO_Grupos_Descuentos_EDG1',
+                'Cambios_Monedas' => 'SBO_Tipo_Cambio_ORTT',
+                'Vendedores' => 'SBO_Agrega_Todo_Vendedores_OSLP',
             ];
 
             if (!isset($metodo[$tipo])) {
@@ -49,14 +51,15 @@ class Sincronizar extends Command
         else if($tipo2 === 'update')
         {
             $metodo = [
-                'Articulos' => 'SBOArticulos_Actualiza_OITM',
                 'Marcas' => 'SBO_GPO_Actualiza_Marca_OITB',
                 'Categoria_Lista_Precios' => 'SBO_CAT_LP_Actualiza_OPLN',
-                'Lista_Precios' => 'SBOListaPrecios_Actualiza_ITM1',
+                'Articulos' => 'SBO_Articulos_Actualiza_OITM',
+                'Lista_Precios' => 'SBO_ListaPrecios_Actualiza_ITM1',
                 'Clientes' =>'SBO_Clientes_Actualiza_OCRD',
                 'Direcciones' => 'SBO_Clientes_Actualiza_Direcciones_CRD1',
                 'Grupo_Descuentos' => 'SBO_Grupos_Actualiza_Descuentos_OEDG',
                 'Descuentos_Detalle' => 'SBO_Grupos_Actualiza_Descuentos_EDG1',
+                'Cambios_Monedas' => 'SBO_Actualiza_Tipo_Cambio_ORTT',
             ];
         }
         else
@@ -75,9 +78,9 @@ class Sincronizar extends Command
 
         try {
             if( $servicio === 'Descuentos_Detalle' && $tipo2 === 'todo'){
-                $controller->ServicioWebAux($servicio, $metodo, true); // true = CLI
+                $controller->ServicioWebAux($servicio, $metodo, $tipo2, true); // true = CLI
             }
-            else{ $controller->ServicioWeb($servicio, $metodo, true);} // true = CLI
+            else{ $controller->ServicioWeb($servicio, $metodo, $tipo2,true);} // true = CLI
             
             $this->info("✅ Finalizacion de la sincronización de: $tipo en el Modo de carga: $tipo2");
         } catch (\Throwable $e) {
