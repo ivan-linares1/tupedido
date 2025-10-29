@@ -216,6 +216,7 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
+    /*
 $(document).ready(function() {
 
     window.usuariosEstadoUrl = "{{ route('estado.Usuario') }}";
@@ -356,7 +357,164 @@ $(document).on('change', '.toggle-estado-usuarios', function() {
 });
 
 
+});*/
+$(document).ready(function() {
+
+    window.usuariosEstadoUrl = "{{ route('estado.Usuario') }}";
+
+    // ---------- Inicializar Select2 dinámicamente ----------
+    function initSelect2() {
+        // Cliente
+        $('#cliente_usuario').select2({
+            dropdownParent: $('#modalNuevoUsuario'),
+            placeholder: "Seleccione",
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Vendedor
+        $('#slpcode').select2({
+            dropdownParent: $('#modalNuevoVendedor'),
+            placeholder: "Seleccione",
+            allowClear: true,
+            width: '100%'
+        });
+    }
+
+    initSelect2(); // Inicializamos al cargar la página
+
+    // Re-inicializar cuando se abre modal (por si se generan dinámicamente)
+    $('#modalNuevoUsuario, #modalNuevoVendedor').on('shown.bs.modal', function() {
+        initSelect2();
+    });
+
+    // ---------- AJAX para cargar datos de cliente ----------
+    $('#cliente_usuario').on('change', function() {
+        let cardCode = $(this).val();
+        if(cardCode){
+            $.getJSON("/admin/ocrd/" + cardCode, function(data){
+                $('#codigo_cliente').val(data.CardCode);
+                $('#nombres').val(data.Nombres);
+                $('#apellido_paterno').val(data.ApellidoPaterno);
+                $('#apellido_materno').val(data.ApellidoMaterno);
+                $('#telefono').val(data.Telefono);
+                $('#email_contacto').val(Array.isArray(data.EmailContacto) ? data.EmailContacto.join("\n") : data.EmailContacto);
+                $('#direccion_fiscal').val(data.DireccionFiscal);
+                $('#direccion_envio').val(data.DireccionEnvio);
+            });
+        } else {
+            $('#codigo_cliente, #nombres, #apellido_paterno, #apellido_materno, #telefono, #email_contacto, #direccion_fiscal, #direccion_envio').val('');
+        }
+    });
+
+    // ---------- AJAX para cargar datos de vendedor ----------
+    $('#slpcode').on('change', function() {
+        let slpCode = $(this).val();
+        if(slpCode){
+            $.getJSON("/admin/oslp/" + slpCode, function(data){
+                $('#codigo_vendedor').val(data.SlpCode);
+                $('#nombre_vendedor').val(data.SlpName);
+            });
+        } else {
+            $('#codigo_vendedor, #nombre_vendedor').val('');
+        }
+    });
+
+    // ---------- Inicializar DataTable ----------
+    var table = null;
+    if ($('#tablaUsuarios').length) {
+        if ($.fn.DataTable.isDataTable('#tablaUsuarios')) {
+            $('#tablaUsuarios').DataTable().destroy();
+        }
+
+        table = $('#tablaUsuarios').DataTable({
+            pageLength: 25,
+            lengthChange: false,
+            dom: 'rtip',
+            language: {
+                url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
+            }
+        });
+
+        // Mostrar N registros
+        $('#mostrar').on('change', function() {
+            const val = parseInt($(this).val()) || 25;
+            table.page.len(val).draw();
+        });
+
+        // Filtrar por estatus
+        $('#estatus').on('change', function() {
+            const raw = $(this).val();
+            let filtro = '';
+            if (!raw || raw.toLowerCase() === 'todos') filtro = '';
+            else if (raw.toLowerCase() === 'activo') filtro = '^activo$';
+            else if (raw.toLowerCase() === 'inactivo') filtro = '^inactivo$';
+            table.column(3).search(filtro, true, false, true).draw();
+        });
+
+        // Búsqueda global
+        $('#buscar').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+    }
+
+    // ---------- Toggle estado con confirmación ----------
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    });
+
+    $(document).on('change', '.toggle-estado-usuarios', function() {
+        var $checkbox = $(this);
+        var id = $checkbox.data('id');
+        var newState = $checkbox.is(':checked') ? 1 : 0;
+        var prevState = $checkbox.prop('checked') ? 0 : 1;
+        var $row = $checkbox.closest('tr');
+        var $statusCell = $row.find('td').eq(3);
+
+        $checkbox.prop('checked', prevState === 1);
+
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Vas a cambiar el estado del usuario a " + (newState ? "Activo" : "Inactivo"),
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#05564f',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, cambiar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if(result.isConfirmed){
+                $checkbox.prop('disabled', true);
+                $.post(window.usuariosEstadoUrl, {id: id, field: 'activo', value: newState}, function(response){
+                    if(response.success){
+                        $checkbox.prop('checked', newState === 1);
+                        $statusCell.text(newState ? 'activo' : 'inactivo');
+                        Swal.fire({toast:true, position:'top-end', icon:'success', title:'Estado actualizado correctamente', showConfirmButton:false, timer:2000});
+                    } else {
+                        Swal.fire('Error', 'No se pudo actualizar el estado en el servidor.', 'error');
+                        $checkbox.prop('checked', prevState === 1);
+                        $statusCell.text(prevState === 1 ? 'activo' : 'inactivo');
+                    }
+                }).fail(function(){
+                    Swal.fire('Error', 'Ocurrió un error de conexión.', 'error');
+                    $checkbox.prop('checked', prevState === 1);
+                    $statusCell.text(prevState === 1 ? 'activo' : 'inactivo');
+                }).always(function(){ $checkbox.prop('disabled', false); });
+            } else {
+                $checkbox.prop('checked', prevState === 1);
+            }
+        });
+    });
+
 });
+
+
+
+
 </script>
 
 <style>
