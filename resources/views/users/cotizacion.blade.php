@@ -4,6 +4,18 @@
 
 @section('contenido')
 
+<script>
+window.preseleccionadoCliente = @json($preseleccionados['cliente'] ?? null);
+window.preseleccionadoClienteText = @json($preseleccionados['cliente'] && $cotizacion
+    ? $preseleccionados['cliente'].' - '.$cotizacion->CardName
+    : null);
+window.preseleccionadoClientePhone = @json($cotizacion->Phone1 ?? '');
+window.preseleccionadoClienteEmail = @json($cotizacion->E_Mail ?? '');
+window.preseleccionadoClienteCardName = @json($cotizacion->CardName ?? '');
+window.preseleccionadoClienteDescuentos = @json($cotizacion->descuentos ?? []);
+window.preseleccionadoClienteDireccionFiscal = @json($cotizacion->Address ?? '');
+window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '');
+</script>
 <!-- Importación de JS y CSS -->
 @vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
 
@@ -29,20 +41,8 @@
             <h4>CLIENTES</h4>
             <div class="mb-3">
                 <label>Cliente</label>
-                <select class="form-select" name="cliente" id="selectCliente" @if($modo == 1 || in_array(Auth::user()->rol_id, [3])) disabled @endif>
+                <select class="form-select" name="cliente" id="selectCliente" @if($modo == 1 || in_array(Auth::user()->rol_id, [3])) disabled @endif >
                     <option value="" selected disabled>Selecciona un cliente...</option>
-                    @foreach($clientes as $cliente)
-                        <option
-                            value="{{ $cliente->CardCode }}"
-                            data-phone="{{ $cliente->phone1 }}"
-                            data-email="{{ $cliente->{'e-mail'} }}"
-                            data-cardname="{{ $cliente->CardName }}"
-                            data-descuentos='@json($cliente->descuentos->flatMap(fn($d) => $d->detalles->map(fn($dd) => ["ObjKey"=>$dd->ObjKey,"Discount"=>$dd->Discount])))'
-                            @if(($preseleccionados['cliente'] ?? '') == $cliente->CardCode) selected @endif
-                        >
-                            {{ $cliente->CardCode.' - '.$cliente->CardName }}
-                        </option>
-                    @endforeach
                 </select>
             </div>
 

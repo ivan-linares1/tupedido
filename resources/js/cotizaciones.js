@@ -22,6 +22,7 @@ const IVA = JSON.parse(selectMoneda.dataset.iva);
 // SELECT CLIENTE CON BUSQUEDA
 // ================================
 $(document).ready(function() {
+    const $select = $('#selectCliente');
     $('#selectCliente').select2({
         placeholder: "Selecciona un cliente",
         allowClear: true,
@@ -36,8 +37,17 @@ $(document).ready(function() {
                     page: params.page || 1 // número de página
                 };
             },
-            processResults: function(data, params) {
-                params.page = params.page || 1;
+             processResults: function(data, params) {
+            params.page = params.page || 1;
+            // 🔹 Aseguramos que cada cliente tenga todos los campos
+                const items = data.items.map(cli => ({
+                    id: cli.id,
+                    text: cli.text,
+                    cardname: cli.cardName,
+                    phone: cli.phone || 'Sin teléfono',
+                    email: cli.email || 'Sin correo',
+                    active: cli.active
+                }));
                 return {
                     results: data.items,
                     pagination: {
@@ -57,6 +67,32 @@ $(document).ready(function() {
         }
     });
 
+     // 🔹 Preselección correcta con todos los datos
+    if (window.preseleccionadoCliente) {
+        const option = new Option(
+            window.preseleccionadoClienteText,
+            window.preseleccionadoCliente,
+            true,
+            true
+        );
+        $select.append(option).trigger('change');
+
+        // Guardar datos extra en Select2
+        const select2Data = $select.select2('data');
+        if (select2Data.length) {
+            select2Data[0].cardname = window.preseleccionadoClienteCardName;
+            select2Data[0].phone = window.preseleccionadoClientePhone || 'Sin teléfono';
+            select2Data[0].email = window.preseleccionadoClienteEmail || 'Sin correo';
+            select2Data[0].descuentos = window.preseleccionadoClienteDescuentos;
+            select2Data[0].direccionFiscal = window.preseleccionadoClienteDireccionFiscal;
+            select2Data[0].direccionEntrega = window.preseleccionadoClienteDireccionEntrega;
+            $select.select2('data', select2Data);
+        }
+
+        // Llenar teléfono, correo y direcciones
+        actualizarDatosCliente();
+    }
+
     // Esto permite que al abrir el select (sin escribir) cargue la primera página
     $('#selectCliente').on('select2:open', function() {
         if (!$('.select2-results__option').length) {
@@ -74,25 +110,23 @@ $(document).ready(function() {
 // ACTUALIZAR DATOS DEL CLIENTE
 // ================================
 function actualizarDatosCliente() {
-    let selected = $('#selectCliente').find('option:selected');
-    let cardCode = selected.val();
+    const cliente = $('#selectCliente').select2('data')[0]; // obtiene el cliente seleccionado
+    if (!cliente) return;
 
-    if (!cardCode) return; // No hacer nada si no hay cliente seleccionado
+    const phone = cliente.phone || 'Sin teléfono';
+    const email = cliente.email || 'Sin correo';
+    const cardCode = cliente.id;
 
-    // Mostrar teléfono y correo
-    let phone = selected.data('phone') || 'Sin teléfono';
-    let email = selected.data('email') || 'Sin correo';
     let emailFormatted = email.split(',').join('<br>');
-
     if (email !== 'Sin correo') {
         let emails = email.split(',').map(e => `<li>${e.trim()}</li>`).join('');
         emailFormatted = `<ul style="padding-left: 20px; margin: 0;">${emails}</ul>`;
     }
 
-    $('#telefono').text("Telefono: " + phone);
+    $('#telefono').text("Teléfono: " + phone);
     $('#correo').html("Correos:<br>" + emailFormatted);
 
-    // Consultar direcciones del cliente vía AJAX
+    // 🔹 Traer direcciones vía AJAX
     $.ajax({
         url: `/Cotizaciones/cliente/${cardCode}/direcciones`,
         type: 'GET',
@@ -105,6 +139,7 @@ function actualizarDatosCliente() {
         }
     });
 }
+
 
 // Ejecutar cuando cambie el select del cliente
 $('#selectCliente').on('change', actualizarDatosCliente);
@@ -379,13 +414,15 @@ $(document).ready(function() {
 // ================================
 $("#guardarCotizacion").on("click", function() {
     // Llenar inputs ocultos con valores de la página
-    $("#clienteH").val($("#selectCliente").val());
+    const cliente = $('#selectCliente').select2('data')[0] || {};
+     // Llenar inputs ocultos con valores de la página
+    $("#clienteH").val(cliente.id || '');
     $("#fechaCreacionH").val($("#fechaCreacion").val());
     $("#fechaEntregaH").val($("#fechaEntrega").val());
-    $("#CardNameH").val($("#selectCliente option:selected").data("cardname"));
+    $("#CardNameH").val(cliente.cardName || '');
     $("#SlpCodeH").val($("#selectVendedor").val());
-    $("#phone1H").val($("#selectCliente option:selected").data("phone"));
-    $("#emailH").val($("#selectCliente option:selected").data("email"));
+    $("#phone1H").val(cliente.phone || '');
+    $("#emailH").val(cliente.email || '');
     $("#DocCurH").val($("#selectMoneda").val());
     $("#direccionFiscalH").val($("#direccionFiscal").text());
     $("#direccionEntregaH").val($("#direccionEntrega").text());
@@ -419,13 +456,15 @@ $("#guardarCotizacion").on("click", function() {
 // GUARDAR PEDIDO
 // ================================
 $("#btnPedido").on("click", function() {
-    $("#clienteP").val($("#selectCliente").val());
+    const cliente = $('#selectCliente').select2('data')[0] || {};
+
+    $("#clienteP").val(cliente.id || '');
     $("#fechaCreacionP").val($("#fechaCreacion").val());
     $("#fechaEntregaP").val($("#fechaEntrega").val());
-    $("#CardNameP").val($("#selectCliente option:selected").data("cardname"));
+    $("#CardNameP").val(cliente.cardName || '');
     $("#SlpCodeP").val($("#selectVendedor").val());
-    $("#phone1P").val($("#selectCliente option:selected").data("phone"));
-    $("#emailP").val($("#selectCliente option:selected").data("email"));
+    $("#phone1P").val(cliente.phone || '');
+    $("#emailP").val(cliente.email || '');
     $("#DocCurP").val($("#selectMoneda").val());
     $("#direccionFiscalP").val($("#direccionFiscal").text());
     $("#direccionEntregaP").val($("#direccionEntrega").text());
