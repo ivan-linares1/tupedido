@@ -25,9 +25,50 @@ $(document).ready(function() {
     $('#selectCliente').select2({
         placeholder: "Selecciona un cliente",
         allowClear: true,
-        width: '100%'
+        width: '100%',
+        ajax: {
+            url: '/clientes/buscar',
+            dataType: 'json',
+            delay: 250,
+            data: function(params) {
+                return {
+                    q: params.term || '', // texto buscado (vacío = mostrar todos)
+                    page: params.page || 1 // número de página
+                };
+            },
+            processResults: function(data, params) {
+                params.page = params.page || 1;
+                return {
+                    results: data.items,
+                    pagination: {
+                        more: data.more
+                    }
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 0, // permite abrir sin escribir
+        templateResult: function(repo) {
+            if (repo.loading) return "Cargando...";
+            return repo.text;
+        },
+        templateSelection: function(repo) {
+            return repo.text || repo.id;
+        }
+    });
+
+    // Esto permite que al abrir el select (sin escribir) cargue la primera página
+    $('#selectCliente').on('select2:open', function() {
+        if (!$('.select2-results__option').length) {
+            $(this).data('select2').trigger('query', {
+                term: '',
+                page: 1
+            });
+        }
     });
 });
+
+
 
 // ================================
 // ACTUALIZAR DATOS DEL CLIENTE

@@ -22,17 +22,17 @@ class SincronizacionController extends Controller
     private function ConexionWBS()
     {
         $url = "http://10.10.1.14:8083/KombiService.asmx?wsdl";
-        $token = "token";
+        $token = "1234567";
 
         try {
             // Cabecera HTTP personalizada
-            /*$headers = [ 'http' => [ 'header' => "Authorization: Bearer $token\r\n", ]];
-            $context = stream_context_create($headers);*/
+            $headers = [ 'http' => [ 'header' => "Authorization: Bearer $token\r\n", ]];
+            $context = stream_context_create($headers);
 
             $client = new \SoapClient($url, [
                 'trace' => true,
                 'exceptions' => true,
-                //'stream_context' => $context,
+                'stream_context' => $context,
             ]);
 
            return [

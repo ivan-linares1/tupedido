@@ -40,4 +40,42 @@ class ClienteController extends Controller
 
         return view('admin.clientesCatalogo', compact('clientes'));
     }
+
+
+    public function buscar(Request $request)
+{
+    $search = trim($request->get('q', ''));
+    $page = $request->get('page', 1);
+    $perPage = 20;
+
+    $query = Clientes::query();
+
+    // Si hay texto, busca por nombre o código
+    if ($search !== '') {
+        $query->where(function ($q) use ($search) {
+            $q->where('CardName', 'like', "%{$search}%")
+              ->orWhere('CardCode', 'like', "%{$search}%");
+        });
+    }
+
+    $total = $query->count();
+
+    $clientes = $query->skip(($page - 1) * $perPage)
+                      ->take($perPage)
+                      ->get(['CardCode', 'CardName']);
+
+    return response()->json([
+        'items' => $clientes->map(function($c) {
+            return [
+                'id'   => $c->CardCode,
+                'text' => "{$c->CardCode} - {$c->CardName}"
+            ];
+        }),
+        'more' => ($page * $perPage) < $total
+    ]);
+}
+
+
+
+
 }
