@@ -4,7 +4,7 @@
             <th>SlpCode</th>
             <th>Nombre</th>
             <th>Estatus</th>
-            <th class="text-center">Acción</th>
+            <!--th class="text-center">Acción</!--th-->
         </tr>
     </thead>
     <tbody>
@@ -13,7 +13,7 @@
                 <td>{{ $item->SlpCode }}</td>
                 <td>{{ $item->SlpName }}</td>
                 <td class="status-text">{{ $item->Active == 'Y' ? 'Activo' : 'Inactivo' }}</td>
-                <td class="text-center">
+                <!--<td class="text-center">
                     <label class="switch">
                         <input 
                             type="checkbox" 
@@ -24,7 +24,7 @@
                         >
                         <span class="slider round"></span>
                     </label>
-                </td>
+                </td>-->
             </tr>
         @empty
             <tr>
