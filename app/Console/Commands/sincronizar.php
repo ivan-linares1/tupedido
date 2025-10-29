@@ -50,13 +50,13 @@ class Sincronizar extends Command
         {
             $metodo = [
                 'Articulos' => 'SBOArticulos_Actualiza_OITM',
-                'Marcas' => '',
-                'Categoria_Lista_Precios' => '',
-                'Lista_Precios' => '',
-                'Clientes' =>'',
-                'Direcciones' => '',
-                'Grupo_Descuentos' => '',
-                'Descuentos_Detalle' => '',
+                'Marcas' => 'SBO_GPO_Actualiza_Marca_OITB',
+                'Categoria_Lista_Precios' => 'SBO_CAT_LP_Actualiza_OPLN',
+                'Lista_Precios' => 'SBOListaPrecios_Actualiza_ITM1',
+                'Clientes' =>'SBO_Clientes_Actualiza_OCRD',
+                'Direcciones' => 'SBO_Clientes_Actualiza_Direcciones_CRD1',
+                'Grupo_Descuentos' => 'SBO_Grupos_Actualiza_Descuentos_OEDG',
+                'Descuentos_Detalle' => 'SBO_Grupos_Actualiza_Descuentos_EDG1',
             ];
         }
         else
