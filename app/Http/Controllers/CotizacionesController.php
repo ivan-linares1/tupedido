@@ -136,8 +136,12 @@ class CotizacionesController extends Controller
                 }
             }
         }
+        $clienteBase = null;
+        if(!empty($preseleccionados['cliente'])){
+            $clienteBase = Clientes::where('CardCode', $preseleccionados['cliente'])->first();
+        }
 
-        return view('users.cotizacion', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos', 'pedido', 'cotizacion'));
+        return view('users.cotizacion', compact('clienteBase', 'clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos', 'pedido', 'cotizacion'));
     }
 
     public function ObtenerDirecciones($CardCode){
@@ -246,7 +250,6 @@ class CotizacionesController extends Controller
                 'IVA'           => $iva,
                 'Total'         => $total,
                 'comment'       => $request->comentarios,
-                
             ]);
 
 
@@ -265,6 +268,7 @@ class CotizacionesController extends Controller
                     'DiscPrcnt'  => floatval(str_replace(['%', ','], '', $art['descuentoPorcentaje'])),
                     'Quantity'   => floatval($art['cantidad']),
                     'Id_imagen'  => $art['imagen'] ?? null,
+                    'ivaPorcentaje' => $art['ivaPorcentaje'] ?? null,
                 ]);
             }
 
@@ -331,8 +335,13 @@ class CotizacionesController extends Controller
             'comentario' =>$cotizacion->comment,
         ];
 
+        $clienteBase = null;
+        if(!empty($preseleccionados['cliente'])){
+            $clienteBase = Clientes::where('CardCode', $preseleccionados['cliente'])->first();
+        }
+
         // Retornar la vista
-        return view('users.cotizacion', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados', 'pedido' ));
+        return view('users.cotizacion', compact('clienteBase', 'cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados', 'pedido' ));
     }
 
 

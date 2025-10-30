@@ -6,16 +6,15 @@
 
 <script>
 window.preseleccionadoCliente = @json($preseleccionados['cliente'] ?? null);
-window.preseleccionadoClienteText = @json($preseleccionados['cliente'] && $cotizacion
-    ? $preseleccionados['cliente'].' - '.$cotizacion->CardName
-    : null);
+window.preseleccionadoClienteText = @json( $preseleccionados['cliente'] ? ($clienteBase->CardCode.'-'.$clienteBase->CardName) : null );
 window.preseleccionadoClientePhone = @json($cotizacion->Phone1 ?? '');
 window.preseleccionadoClienteEmail = @json($cotizacion->E_Mail ?? '');
-window.preseleccionadoClienteCardName = @json($cotizacion->CardName ?? '');
+window.preseleccionadoClienteCardName = @json($clienteBase->CardName ?? '');
 window.preseleccionadoClienteDescuentos = @json($cotizacion->descuentos ?? []);
 window.preseleccionadoClienteDireccionFiscal = @json($cotizacion->Address ?? '');
 window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '');
 </script>
+
 <!-- Importación de JS y CSS -->
 @vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
 
@@ -110,8 +109,8 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
                 </select>
             </div>
 
-            @if(Auth::user()->rol_id != 3)
-                <div class="mb-3">
+            
+                <div class="mb-3" @if(Auth::user()->rol_id == 3) hidden @endif>
                     <label>Vendedor</label>
                     <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"
                             @if($modo == 1 || Auth::user()->rol_id == 4) disabled @endif>
@@ -124,7 +123,6 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
                         @endforeach
                     </select>
                 </div>
-            @endif
         </div>
     </div>
 </div>

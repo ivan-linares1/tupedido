@@ -29,7 +29,8 @@ class LineasPedidos extends Model
         'TrgetEntry',
         'BaseRef',
         'BaseType',
-        'BaseEntry'
+        'BaseEntry',
+        'ivaPorcentaje'
     ];
 
 

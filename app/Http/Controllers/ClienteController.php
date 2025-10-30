@@ -76,7 +76,7 @@ class ClienteController extends Controller
                 return [
                     'id'       => $c->CardCode,
                     'text'     => "{$c->CardCode} - {$c->CardName}",
-                    'cardName' => $c->CardName,
+                    'cardname' => $c->CardName,
                     'phone'    => $c->phone1,
                     'email' => $c->{'e-mail'},
                     'groupNum' => $c->GroupNum,
@@ -85,8 +85,5 @@ class ClienteController extends Controller
             }),
             'more' => ($page * $perPage) < $total
         ]);
-
     }
-
-
 }

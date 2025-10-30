@@ -240,7 +240,7 @@ window.agregarArticulo = function(art) {
         <td class="medida">${art.SalUnitMsr}</td>
         <td class="precio">${Number(precio || 0).toFixed(2)}</td>
         <td class="moneda">${monedaCambio ? monedaCambio.Currency : art.precio.moneda.Currency}</td>
-        <td class="iva">IVA ${IVA}%</td>
+        <td class="ivaPorcentaje">IVA ${IVA}%</td>
         <td><input type="number" value="${cantidad}" min="1" class="form-control form-control-sm cantidad"></td>
         <td class="promocion">Promociones</td>
         <td class="subtotal"></td>
@@ -419,7 +419,7 @@ $("#guardarCotizacion").on("click", function() {
     $("#clienteH").val(cliente.id || '');
     $("#fechaCreacionH").val($("#fechaCreacion").val());
     $("#fechaEntregaH").val($("#fechaEntrega").val());
-    $("#CardNameH").val(cliente.cardName || '');
+    $("#CardNameH").val(cliente.cardname || '');
     $("#SlpCodeH").val($("#selectVendedor").val());
     $("#phone1H").val(cliente.phone || '');
     $("#emailH").val(cliente.email || '');
@@ -444,7 +444,8 @@ $("#guardarCotizacion").on("click", function() {
             precio: $(this).find(".precio").text(),
             descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
             cantidad: $(this).find(".cantidad").val(),
-            imagen: $(this).find(".imagen").data("imagen")
+            imagen: $(this).find(".imagen").data("imagen"),
+            ivaPorcentaje:$(this).find(".ivaPorcentaje").text()
         });
     });
 
@@ -461,7 +462,7 @@ $("#btnPedido").on("click", function() {
     $("#clienteP").val(cliente.id || '');
     $("#fechaCreacionP").val($("#fechaCreacion").val());
     $("#fechaEntregaP").val($("#fechaEntrega").val());
-    $("#CardNameP").val(cliente.cardName || '');
+    $("#CardNameP").val(cliente.cardname || '');
     $("#SlpCodeP").val($("#selectVendedor").val());
     $("#phone1P").val(cliente.phone || '');
     $("#emailP").val(cliente.email || '');
@@ -484,7 +485,8 @@ $("#btnPedido").on("click", function() {
             precio: $(this).find(".precio").text(),
             descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
             cantidad: $(this).find(".cantidad").val(),
-            imagen: $(this).find(".imagen").data("imagen")
+            imagen: $(this).find(".imagen").data("imagen"),
+            ivaPorcentaje:$(this).find(".ivaPorcentaje").text()
         });
     });
     
