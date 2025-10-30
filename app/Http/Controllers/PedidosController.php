@@ -87,6 +87,7 @@ class PedidosController extends Controller
 
         $user = Auth::user();
         $vendedores = Vendedores::where('Active', 'Y')->get();
+        $vendedorBase = Vendedores::where('SlpCode', -1)->first();
 
         // Monedas con cambios del día
         $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
@@ -108,7 +109,7 @@ class PedidosController extends Controller
         // Valores por defecto
         $preseleccionados = [
            'cliente' => ($user->rol_id == 3) ? $user->codigo_cliente : null,
-            'vendedor' => ($user->rol_id == 4) ? $user->codigo_vendedor : null,
+            'vendedor' => $user->rol_id == 4 ? $user->codigo_vendedor : ($user->rol_id == 3 ? $vendedorBase->SlpCode : null),
             'moneda' => configuracion::firstOrFail()->MonedaPrincipal,
             'comentario' =>null,
         ];
@@ -252,10 +253,13 @@ class PedidosController extends Controller
             //  Validaciones
             $request->validate([
                 'cliente'          => 'required',
-                'fechaCreacion'    => 'required|date',
-                'fechaEntrega'     => 'required|date',
+                'SlpCode'          => 'required',
+                'fechaCreacion'    => 'required',
+                'fechaEntrega'     => 'required',
                 'CardName'         => 'required',
                 'DocCur'           => 'required',
+                //'ShipToCode'       => 'required',
+                //'PayToCode'        => 'required',
                 'direccionFiscal'  => 'required',
                 'direccionEntrega' => 'required',
                 'TotalSinPromo'    => 'required',
@@ -264,6 +268,19 @@ class PedidosController extends Controller
                 'iva'              => 'required',
                 'total'            => 'required',
                 'articulos'        => 'required|json',
+            ], [
+                // Mensajes personalizados
+                'required' => 'El campo :attribute es obligatorio.',
+                'json'     => 'Los artículos deben enviarse en formato JSON válido.',
+            ], [
+                //quivalencias de atributos
+                'CardName'         => 'Nombre del cliente',
+                'SlpCode'          => 'Vendedor',
+                'phone1'           => 'Teléfono',
+                'email'            => 'Correo electrónico',
+                'DocCur'           => 'Moneda',
+                //'ShipToCode'       => 'Dirección de envío',
+                //'PayToCode'        => 'Dirección de pago',
             ]);
 
             //  Parsear artículos

@@ -85,6 +85,7 @@ class CotizacionesController extends Controller
 
         $user = Auth::user();
         $vendedores = Vendedores::where('Active', 'Y')->get();
+        $vendedorBase = Vendedores::where('SlpCode', -1)->first();
 
         // Monedas con cambios del día
         $monedas = Moneda::with(['cambios' => function($query) use ($hoy) {
@@ -106,7 +107,7 @@ class CotizacionesController extends Controller
         // Valores por defecto
         $preseleccionados = [
            'cliente' => ($user->rol_id == 3) ? $user->codigo_cliente : null,
-           'vendedor' => ($user->rol_id == 4) ? $user->codigo_vendedor : null,
+           'vendedor' => $user->rol_id == 4 ? $user->codigo_vendedor : ($user->rol_id == 3 ? $vendedorBase->SlpCode : null),
            'moneda' => configuracion::firstOrFail()->MonedaPrincipal,
         ];
 
@@ -182,6 +183,7 @@ class CotizacionesController extends Controller
             //Validaciones
             $request->validate([
                 'cliente'          => 'required',
+                'SlpCode'          => 'required',
                 'fechaCreacion'    => 'required',
                 'fechaEntrega'     => 'required',
                 'CardName'         => 'required',
