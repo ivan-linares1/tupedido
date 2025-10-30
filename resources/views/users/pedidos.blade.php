@@ -41,6 +41,17 @@
         @else
             <a href="{{ route('NuevaPedido') }}" class="btn btn-primary" data-loading="true">Nuevo Pedido</a>
         @endif
+
+        {{-- Select mostrar --}}
+        <div class="d-flex gap-2">
+            <label for="mostrar" class="form-label fw-semibold">Mostrar</label>
+            <select id="mostrar" class="form-select form-select-sm rounded-3">
+                <option value="10" {{ request('mostrar') == 10 ? 'selected' : '' }}>10</option>
+                <option value="25" {{ request('mostrar') == 25 ? 'selected' : '' }}>25</option>
+                <option value="50" {{ request('mostrar') == 50 ? 'selected' : '' }}>50</option>
+                <option value="100" {{ request('mostrar') == 100 ? 'selected' : '' }}>100</option>
+            </select>
+        </div>
         
         
         

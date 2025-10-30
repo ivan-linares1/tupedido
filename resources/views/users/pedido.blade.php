@@ -6,15 +6,13 @@
 
 <script>
 window.preseleccionadoCliente = @json($preseleccionados['cliente'] ?? null);
-window.preseleccionadoClienteText = @json($preseleccionados['cliente'] && $pedido
-    ? $preseleccionados['cliente'].' - '.$pedido->CardName
-    : null);
-window.preseleccionadoClientePhone = @json($pedido->Phone1 ?? '');
-window.preseleccionadoClienteEmail = @json($pedido->E_Mail ?? '');
-window.preseleccionadoClienteCardName = @json($pedido->CardName ?? '');
-window.preseleccionadoClienteDescuentos = @json($pedido->descuentos ?? []);
-window.preseleccionadoClienteDireccionFiscal = @json($pedido->Address ?? '');
-window.preseleccionadoClienteDireccionEntrega = @json($pedido->Address2 ?? '');
+window.preseleccionadoClienteText = @json( $preseleccionados['cliente'] ? ($clienteBase->CardCode.'-'.$clienteBase->CardName) : null );
+window.preseleccionadoClientePhone = @json($cotizacion->Phone1 ?? $pedido->Phone1 ?? '');
+window.preseleccionadoClienteEmail = @json($cotizacion->E_Mail ?? $pedido->E_Mail ?? '');
+window.preseleccionadoClienteCardName = @json($clienteBase?->CardName ?? '');
+window.preseleccionadoClienteDescuentos = @json($cotizacion->descuentos ?? $pedido->descuentos ?? []);
+window.preseleccionadoClienteDireccionFiscal = @json($cotizacion->Address ?? $pedido->Address ?? '');
+window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $pedido->Address2 ?? '');
 </script>
 
 @vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
@@ -122,8 +120,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($pedido->Address2 ?? '');
                 </select>
             </div>
 
-            @if(Auth::user()->rol_id != 3)
-                <div class="mb-3">
+                <div class="mb-3" @if(Auth::user()->rol_id == 3) hidden @endif>
                     <label>Vendedor</label>
                     <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"
                         @if($modo == 1 || Auth::user()->rol_id == 4) disabled @endif>
@@ -138,7 +135,6 @@ window.preseleccionadoClienteDireccionEntrega = @json($pedido->Address2 ?? '');
                         @endforeach
                     </select>
                 </div>
-            @endif
         </div>
     </div>
 </div>

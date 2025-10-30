@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Articulo;
+use App\Models\Clientes;
 use App\Models\Cotizacion;
 use App\Models\configuracion;
 use App\Models\DireccionesClientes;
@@ -106,7 +107,7 @@ class PedidosController extends Controller
 
         $modo = 0;
 
-        // Valores por defecto
+        // Valores por defecto para cuando no mande un dockentry
         $preseleccionados = [
            'cliente' => ($user->rol_id == 3) ? $user->codigo_cliente : null,
             'vendedor' => $user->rol_id == 4 ? $user->codigo_vendedor : ($user->rol_id == 3 ? $vendedorBase->SlpCode : null),
@@ -139,8 +140,11 @@ class PedidosController extends Controller
                 }
             }
         }
-
-        return view('users.Pedido', compact('clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos', 'cotizacion', 'pedido'));
+        $clienteBase = null;
+        if(!empty($preseleccionados['cliente'])){
+            $clienteBase = Clientes::where('CardCode', $preseleccionados['cliente'])->first();
+        }
+        return view('users.Pedido', compact('clienteBase', 'clientes', 'vendedores', 'monedas', 'articulos', 'IVA', 'preseleccionados', 'modo', 'fechaCreacion', 'fechaEntrega', 'lineasComoArticulos', 'cotizacion', 'pedido'));
     }
 
     public function ObtenerDirecciones($CardCode){
@@ -241,14 +245,17 @@ class PedidosController extends Controller
             'comentario' => $pedido->comment,
         ];
 
+        $clienteBase = null;
+        if(!empty($preseleccionados['cliente'])){
+            $clienteBase = Clientes::where('CardCode', $preseleccionados['cliente'])->first();
+        }
         // Retornar la vista
-        return view('users.Pedido', compact('cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados', 'pedido'));
+        return view('users.Pedido', compact('clienteBase', 'cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados', 'pedido'));
     }
 
 
     public function guardarPedido(Request $request)
     {
-        //dd($request->all());
         try {
             //  Validaciones
             $request->validate([
@@ -341,6 +348,7 @@ class PedidosController extends Controller
                     'TargetType' => $art['TargetType'] ?? null,
                     'TrgetEntry' => $art['TrgetEntry'] ?? null,
                     'BaseRef'    => $art['BaseRef'] ?? null,
+                    'ivaPorcentaje' => $art['ivaPorcentaje'] ?? null,
                 ]);
             }
 
