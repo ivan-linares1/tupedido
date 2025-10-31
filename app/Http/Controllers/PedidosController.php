@@ -73,7 +73,8 @@ class PedidosController extends Controller
 
     public function NuevoPedido ($DocEntry = null)
     {
-        $IVA = configuracion::firstOrFail()->iva;
+        $configuracion = Configuracion::with('impuesto')->firstOrFail();
+        $IVA = $configuracion->impuesto;
         $hoy = Carbon::today()->format('Y-m-d');
         $mañana = Carbon::tomorrow()->format('Y-m-d');
         $cotizacion = null;
@@ -215,7 +216,8 @@ class PedidosController extends Controller
         }
 
         // Datos adicionales para la vista
-        $IVA = configuracion::firstOrFail()->iva;
+        $configuracion = Configuracion::with('impuesto')->firstOrFail();
+        $IVA = $configuracion->impuesto;
         $hoy = Carbon::today()->format('Y-m-d');
 
         // Clientes y vendedores

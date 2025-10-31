@@ -210,6 +210,13 @@ CREATE TABLE RDR1 (
   FOREIGN KEY (BaseEntry) REFERENCES OQUT(DocEntry)
 );
 
+CREATE TABLE OSTC (
+    Code VARCHAR(10)PRIMARY KEY,
+    Name VARCHAR(50) ,
+    Rate DECIMAL(21,4),
+    `Lock` CHAR(1) 
+);
+
 /* =============================
    CONFIGURACION DEL SISTEMA FUERA DE SAP
    ============================= */
@@ -230,7 +237,7 @@ CREATE TABLE users (
 
 CREATE TABLE configuracion(
   id INT AUTO_INCREMENT PRIMARY KEY,
-  iva INT ,
+  iva VARCHAR(10) null,
   ruta_logo VARCHAR(255),
   nombre_empresa VARCHAR(255),
   calle VARCHAR(150),
@@ -240,5 +247,6 @@ CREATE TABLE configuracion(
   telefono VARCHAR(15),
   pais VARCHAR(30),
   MonedaPrincipal INT,
+  FOREIGN KEY(iva) REFERENCES OSTC(Code),
   FOREIGN KEY(MonedaPrincipal) REFERENCES OCRN(Currency_ID)
 );

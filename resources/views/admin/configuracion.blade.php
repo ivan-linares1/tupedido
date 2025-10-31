@@ -94,7 +94,15 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="iva" class="form-label fw-bold"><i class="bi bi-percent me-1"></i> IVA (%)</label>
-                    <input type="number" name="iva" id="iva" class="form-control" value="{{ old('iva', $configuracion->iva) }}">
+                    <select name="iva" id="iva" class="form-select">
+                        <option value="" disabled selected>Selecciona un impuesto</option>
+                        @foreach($impuestos as $iva)
+                            <option value="{{ $iva->Code }}"
+                                @if(old('iva', $configuracion->iva) == $iva->Code) selected @endif>
+                                {{ $iva->Code.' - '.$iva->Name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="col-md-6">
                     <label for="telefono" class="form-label fw-bold"><i class="bi bi-telephone-fill me-1"></i> Teléfono</label>

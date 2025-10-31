@@ -53,7 +53,7 @@
                             {{ $monedas->firstWhere('Currency_ID', $pedido->DocCur)->Currency ?? '' }}
                         @endif
                     </td>
-                    <td class="ivaPorcentaje">{{$linea->ivaPorcentaje}}</td> 
+                    <td class="ivaPorcentaje">IVA {{ number_format($linea->impuesto->Rate, 0) }} %</td> 
                     <td><span>{{ number_format($linea->Quantity ?? 0, 0) }}</span></td>
                     <td class="promocion">Promociones</td>
                     <td class="subtotal">{{ number_format(($linea->Price ?? 0) * ($linea->Quantity ?? 0), 2) }}</td>
@@ -144,7 +144,7 @@
                 </td>
             </tr>
             <tr>
-                <th>Impuesto (IVA {{ $IVA }}%)</th>
+                <th>Impuesto (IVA {{ number_format($IVA->Rate,0) }}%)</th>
                 <td id="iva">
                     @if($modo == 1)
                         {{ number_format($cotizacion->IVA ?? $pedido->IVA ?? 0, 2) }} 

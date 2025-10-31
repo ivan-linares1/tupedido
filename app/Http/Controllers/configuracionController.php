@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\configuracion;
+use App\Models\impuestos;
 use App\Models\Moneda;
 use Illuminate\Http\Request;
 
@@ -13,20 +14,21 @@ class configuracionController extends Controller
         // Traemos la primera fila
         $configuracion = Configuracion::first();
         $monedas = Moneda::all();
+        $impuestos = impuestos::where('Lock', 'N')->get();
         
         //si no existen monedas manda a la vista de los sincronizadores para ejecutarlo manualmente 
-        if($monedas->isEmpty())
+        if($monedas->isEmpty() || $impuestos->isEmpty())
         {
-            return redirect()->route('sincronizadores')->with('error', 'Faltan monedas para iniciar el sistema. Por favor, agregue al menos una moneda antes de continuar.');
+            return redirect()->route('sincronizadores')->with('error', 'Faltan monedas o impuestos para iniciar el sistema. Por favor, agregue datos faltantes antes de continuar.');
         }
 
         // Si no existe, crear un registro por defecto
-        if (!$configuracion) {
+        if (!$configuracion ) {
             // Obtener el primer registro de monedas (o null si no hay ninguno)
             $moneda = Moneda::first();
-          
+            $iva = impuestos::first();
             $configuracion = Configuracion::create([
-                'iva' => 16,
+                'iva' => $iva ? $iva->Code : null,
                 'ruta_logo' => 'logos/logo.png',
                 'nombre_empresa' => 'KOMBITEC, S.A. DE C.V',
                 'calle' => 'AV. DR. SALVADOR NAVA MARTÍNEZ 232',
@@ -39,7 +41,7 @@ class configuracionController extends Controller
             ]);
         }
 
-        return view('admin.configuracion', compact('configuracion', 'monedas'));
+        return view('admin.configuracion', compact('configuracion', 'monedas', 'impuestos'));
     }
 
     public function update(Request $request)
@@ -47,7 +49,7 @@ class configuracionController extends Controller
         $config = configuracion::firstOrFail();
 
         $request->validate([
-            'iva' => 'required|integer|min:0',
+            'iva' => 'required',
             'nombre_empresa' => 'required|string|max:255',
             'calle' => 'nullable|string|max:150',
             'colonia' => 'nullable|string|max:50',
