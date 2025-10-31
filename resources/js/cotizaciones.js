@@ -240,7 +240,7 @@ window.agregarArticulo = function(art) {
         <td class="medida">${art.SalUnitMsr}</td>
         <td class="precio">${Number(precio || 0).toFixed(2)}</td>
         <td class="moneda">${monedaCambio ? monedaCambio.Currency : art.precio.moneda.Currency}</td>
-        <td class="ivaPorcentaje">IVA ${IVA}%</td>
+        <td class="ivaPorcentaje">IVA ${Number(IVA.Rate).toFixed(0)}%</td>
         <td><input type="number" value="${cantidad}" min="1" class="form-control form-control-sm cantidad"></td>
         <td class="promocion">Promociones</td>
         <td class="subtotal"></td>
@@ -358,7 +358,7 @@ function calcularTotales() {
         if (cells.totalFinal) cells.totalFinal.textContent = totalConDescuento.toFixed(2);
     });
 
-    const iva = totalFinalGeneral * (IVA / 100);
+    const iva = totalFinalGeneral * (IVA.Rate / 100);
     const totalConIva = totalFinalGeneral + iva;
 
     const setTotal = (id, value) => {
@@ -445,7 +445,7 @@ $("#guardarCotizacion").on("click", function() {
             descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
             cantidad: $(this).find(".cantidad").val(),
             imagen: $(this).find(".imagen").data("imagen"),
-            ivaPorcentaje:$(this).find(".ivaPorcentaje").text()
+            ivaPorcentaje:IVA.Code
         });
     });
 
@@ -486,7 +486,7 @@ $("#btnPedido").on("click", function() {
             descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
             cantidad: $(this).find(".cantidad").val(),
             imagen: $(this).find(".imagen").data("imagen"),
-            ivaPorcentaje:$(this).find(".ivaPorcentaje").text()
+            ivaPorcentaje:IVA.Code
         });
     });
     

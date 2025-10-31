@@ -26,4 +26,11 @@ class configuracion extends Model
     {
         return $this->belongsTo(Moneda::class, 'MonedaPrincipal', 'Currency_ID');
     }
+
+    // Relación con impuesto
+    public function impuesto()
+    {
+        return $this->belongsTo(impuestos::class, 'iva', 'Code');
+    }
+
 }

@@ -36,4 +36,8 @@ class LineasCotizacion extends Model
     {
         return $this->belongsTo(Imagenes::class, 'Id_imagen', 'Id_imagen');
     }
+
+    public function impuesto() {
+        return$this->belongsTo(impuestos::class, 'ivaPorcentaje', 'Code');
+    }
 }

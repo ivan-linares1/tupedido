@@ -70,7 +70,9 @@ class CotizacionesController extends Controller
 
     public function NuevaCotizacion ($DocEntry = null)
     {
-        $IVA = configuracion::firstOrFail()->iva;
+        $configuracion = Configuracion::with('impuesto')->firstOrFail();
+        $IVA = $configuracion->impuesto;
+
         $hoy = Carbon::today()->format('Y-m-d');
         $mañana = Carbon::tomorrow()->format('Y-m-d');
         $pedido = null;
@@ -305,7 +307,8 @@ class CotizacionesController extends Controller
         $pedido = LineasPedidos::where('BaseEntry', $cotizacion->DocEntry)->first();
 
         // Datos adicionales para la vista
-        $IVA = configuracion::firstOrFail()->iva;
+        $configuracion = Configuracion::with('impuesto')->firstOrFail();
+        $IVA = $configuracion->impuesto;
         $hoy = Carbon::today()->format('Y-m-d');
 
         // Clientes y vendedores
