@@ -53,7 +53,7 @@
                             {{ $monedas->firstWhere('Currency_ID', $pedido->DocCur)->Currency ?? '' }}
                         @endif
                     </td>
-                    <td class="ivaPorcentaje">{{$linea->ivaPorcentaje}}</td>
+                    <td class="ivaPorcentaje">{{$linea->ivaPorcentaje}}</td> 
                     <td><span>{{ number_format($linea->Quantity ?? 0, 0) }}</span></td>
                     <td class="promocion">Promociones</td>
                     <td class="subtotal">{{ number_format(($linea->Price ?? 0) * ($linea->Quantity ?? 0), 2) }}</td>
@@ -103,6 +103,11 @@
                 <td id="totalAntesDescuento">
                     @if($modo == 1)
                         {{ number_format($cotizacion->TotalSinPromo ?? $pedido->TotalSinPromo ?? 0, 2) }} 
+                        @if(isset($cotizacion))
+                            {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
+                        @elseif(isset($pedido))
+                            {{ $monedas->firstWhere('Currency_ID', $pedido->DocCur)->Currency ?? '' }}
+                        @endif
                     @else
                         <span id="totalAntesDescuento">$0.00</span>
                     @endif
@@ -113,6 +118,11 @@
                 <td id="DescuentoD">
                     @if($modo == 1)
                         {{ number_format($cotizacion->Descuento ?? $pedido->Descuento ?? 0, 2) }} 
+                        @if(isset($cotizacion))
+                            {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
+                        @elseif(isset($pedido))
+                            {{ $monedas->firstWhere('Currency_ID', $pedido->DocCur)->Currency ?? '' }}
+                        @endif
                     @else
                         <span id="DescuentoD">$0.00</span>
                     @endif
@@ -123,6 +133,11 @@
                 <td id="totalConDescuento">
                     @if($modo == 1)
                         {{ number_format(($cotizacion->TotalSinPromo ?? $pedido->TotalSinPromo ?? 0) - ($cotizacion->Descuento ?? $pedido->Descuento ?? 0), 2) }} 
+                        @if(isset($cotizacion))
+                            {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
+                        @elseif(isset($pedido))
+                            {{ $monedas->firstWhere('Currency_ID', $pedido->DocCur)->Currency ?? '' }}
+                        @endif
                     @else
                         <span id="totalConDescuento">$0.00</span>
                     @endif
@@ -133,6 +148,11 @@
                 <td id="iva">
                     @if($modo == 1)
                         {{ number_format($cotizacion->IVA ?? $pedido->IVA ?? 0, 2) }} 
+                        @if(isset($cotizacion))
+                            {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
+                        @elseif(isset($pedido))
+                            {{ $monedas->firstWhere('Currency_ID', $pedido->DocCur)->Currency ?? '' }}
+                        @endif
                     @else
                         <span id="iva">$0.00</span>
                     @endif
@@ -143,6 +163,11 @@
                 <td id="total">
                     @if($modo == 1)
                         {{ number_format($cotizacion->Total ?? $pedido->Total ?? 0, 2) }}
+                        @if(isset($cotizacion))
+                            {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
+                        @elseif(isset($pedido))
+                            {{ $monedas->firstWhere('Currency_ID', $pedido->DocCur)->Currency ?? '' }}
+                        @endif
                     @else
                         <span id="total">$0.00</span>
                     @endif
