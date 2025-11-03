@@ -151,6 +151,16 @@ $(document).ready(function () {
     }
 });
 
+// Script basico de inicializacion del select2 para poder buscar un vendedor dentro del select 
+//solo busca con los datos ya cargados no esta paginado ya que son pocos vendedores
+$(document).ready(function() {
+    $('#selectVendedor').select2({
+        placeholder: "Selecciona un vendedor",
+        allowClear: true,
+        width: '100%' 
+    });
+});
+
 // ================================
 // ACTUALIZAR DATOS DE LA MONEDA
 // ================================

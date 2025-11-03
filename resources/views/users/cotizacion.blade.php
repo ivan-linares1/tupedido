@@ -110,19 +110,19 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
             </div>
 
             
-                <div class="mb-3" @if(Auth::user()->rol_id == 3) hidden @endif>
-                    <label>Vendedor</label>
-                    <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"
-                            @if($modo == 1 || Auth::user()->rol_id == 4) disabled @endif>
-                        <option value="" selected disabled>Selecciona un vendedor</option>
-                        @foreach($vendedores as $vendedor)
-                            <option value="{{ $vendedor->SlpCode }}" data-SlpName="{{ $vendedor->SlpName }}"
-                                @if(($preseleccionados['vendedor'] ?? '') == $vendedor->SlpCode) selected @endif>
-                                {{ $vendedor->SlpName }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+            <div class="mb-3" @if(Auth::user()->rol_id == 3) hidden @endif>
+                <label>Vendedor</label>
+                <select class="form-select" name="vendedor_SlpCode" id="selectVendedor"
+                        @if($modo == 1 || Auth::user()->rol_id == 4) disabled @endif>
+                    <option value="" selected disabled>Selecciona un vendedor</option>
+                    @foreach($vendedores as $vendedor)
+                        <option value="{{ $vendedor->SlpCode }}" data-SlpName="{{ $vendedor->SlpName }}"
+                            @if(($preseleccionados['vendedor'] ?? '') == $vendedor->SlpCode) selected @endif>
+                            {{ $vendedor->SlpName }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
         </div>
     </div>
 </div>
