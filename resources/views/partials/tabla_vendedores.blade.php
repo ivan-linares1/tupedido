@@ -4,7 +4,6 @@
             <th>SlpCode</th>
             <th>Nombre</th>
             <th>Estatus</th>
-            <!--th class="text-center">Acción</!--th-->
         </tr>
     </thead>
     <tbody>
@@ -12,19 +11,17 @@
             <tr data-id="{{ $item->SlpCode }}">
                 <td>{{ $item->SlpCode }}</td>
                 <td>{{ $item->SlpName }}</td>
-                <td class="status-text">{{ $item->Active == 'Y' ? 'Activo' : 'Inactivo' }}</td>
-                <!--<td class="text-center">
-                    <label class="switch">
-                        <input 
-                            type="checkbox" 
-                            class="toggle-estado-vendedor"
-                            data-id="{{ $item->SlpCode }}"
-                            data-url="{{ route('admin.vendedores.toggleActivo') }}"
-                            {{ $item->Active == 'Y' ? 'checked' : '' }}
-                        >
-                        <span class="slider round"></span>
-                    </label>
-                </td>-->
+                <td class="status-text">
+                    @if ($item->Active === 'Y')
+                        <span class="badge bg-success rounded-pill px-3 py-2">
+                            <i class="bi bi-check-circle me-1"></i> Activo
+                        </span>
+                    @else
+                        <span class="badge bg-danger rounded-pill px-3 py-2">
+                            <i class="bi bi-x-circle me-1"></i> Inactivo
+                        </span>
+                    @endif
+                </td>
             </tr>
         @empty
             <tr>

@@ -16,7 +16,17 @@
                     <td>{{ $usuario->email }}</td>
                     <td>{{ $usuario->nombre }}</td>
                     <td>{{ $usuario->rol?->nombre }}</td>
-                    <td>{{ $usuario->activo ? 'activo' : 'inactivo' }}</td>
+                    <td>
+                        @if ($usuario->activo === true)
+                            <span class="badge bg-success rounded-pill px-3 py-2">
+                                <i class="bi bi-check-circle me-1"></i> Activo
+                            </span>
+                        @else
+                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                                <i class="bi bi-x-circle me-1"></i> Inactivo
+                            </span>
+                        @endif
+                    </td>
                     <td class="text-center">
                         @if ($usuario->rol_id != 1)
                             <label class="switch">

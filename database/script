@@ -119,6 +119,7 @@ CREATE TABLE ITM1(
 /* Cotizaciones */
 CREATE TABLE OQUT(
     DocEntry INT AUTO_INCREMENT PRIMARY KEY,
+    DocEntry_SAP INT,
     CardCode VARCHAR(15) NOT NULL,
     DocDate DATE,
     DocDueDate DATE,
@@ -163,6 +164,7 @@ CREATE TABLE QUT1(
 /*Pedidos*/
 CREATE TABLE ORDR(
     DocEntry INT AUTO_INCREMENT PRIMARY KEY,
+    DocEntry_SAP INT,
     CardCode VARCHAR(15) NOT NULL,
     DocDate DATE,
     DocDueDate DATE,
