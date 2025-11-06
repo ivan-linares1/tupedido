@@ -15,6 +15,7 @@ class Pedido extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'DocNum',
         'CardCode', 
         'DocDate', 
         'DocDueDate', 

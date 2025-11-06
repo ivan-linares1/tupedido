@@ -6,7 +6,7 @@
 
 <script>
 window.preseleccionadoCliente = @json($preseleccionados['cliente'] ?? null);
-window.preseleccionadoClienteText = @json( $preseleccionados['cliente'] ? ($clienteBase->CardCode.'-'.$clienteBase->CardName) : null );
+window.preseleccionadoClienteText = @json( $preseleccionados['cliente'] ? ($clienteBase->CardCode.' - '.$clienteBase->CardName) : null );
 window.preseleccionadoClientePhone = @json($cotizacion->Phone1 ?? '');
 window.preseleccionadoClienteEmail = @json($cotizacion->E_Mail ?? '');
 window.preseleccionadoClienteCardName = @json($clienteBase->CardName ?? '');
@@ -14,6 +14,7 @@ window.preseleccionadoClienteDescuentos = @json($cotizacion->descuentos ?? []);
 window.preseleccionadoClienteDireccionFiscal = @json($cotizacion->Address ?? '');
 window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '');
 </script>
+
 
 <!-- Importación de JS y CSS -->
 @vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
@@ -26,11 +27,16 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
 @endphp
 
 <div class="container my-4">
-    <h3 class="mb-3 fw-bold">
+    <h3 class="mb-3 fw-bold" data-DocEntryAux='@json($cotizacion->DocEntry ?? "")'>
         @if($modo == 0)
             Nueva Cotización
         @else
             CO - {{ $cotizacion->DocEntry ?? '' }}
+            @if($cotizacion->abierta == 'Y')
+                <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
+            @else
+                <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
+            @endif
         @endif
     </h3>
 
@@ -154,6 +160,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
 <!-- Form para guardar cotización -->
 <form id="formCotizacion" action="{{ route('cotizacionSave') }}" method="POST">
     @csrf
+    <input type="hidden" name="DocEntry_Aux" id="DocEntry_AuxH">
     <input type="hidden" name="cliente" id="clienteH">
     <input type="hidden" name="fechaCreacion" id="fechaCreacionH">
     <input type="hidden" name="fechaEntrega" id="fechaEntregaH">
@@ -196,12 +203,12 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
         <button type="button" class="btn btn-danger" onclick="window.open('{{ route('cotizacion.pdf', $cotizacion->DocEntry ?? 0) }}','_blank')">
             <i class="bi bi-filetype-pdf"></i> PDF
         </button>
-        @if($moneda->cambios->isEmpty() || $pedido)
+        @if($moneda->cambios->isEmpty() || $pedido || $cotizacion->abierta  === 'N')
             <div class="d-inline-block position-relative">
                 <button class="btn btn-secondary" disabled><i class="bi bi-pencil-square"></i> Editar</button>
                 <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>
                 <small class="mensaje-cambio text-danger">
-                    ⚠️ {!! $pedido ? 'Ya tiene un pedido creado.' : 'Contacte a soporte: no existen tipos de cambio registrados para hoy.' !!}
+                    ⚠️ {!! $pedido ? 'Ya tiene un pedido creado.' : 'Contacte a soporte: no existen tipos de cambio registrados para hoy o Se Cerro la Cotizacion.' !!}
                 </small>
             </div>
         @else

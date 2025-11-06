@@ -41,6 +41,9 @@ class Sincronizar extends Command
                 'Descuentos_Detalle' => 'SBO_Grupos_Descuentos_EDG1',
                 'Cambios_Monedas' => 'SBO_Tipo_Cambio_ORTT',
                 'Vendedores' => 'SBO_Agrega_Todo_Vendedores_OSLP',
+                'DocNum' => 'SBO_No_Coti_SAP_OQUT_TODAS',
+                //'DocNumP' => '',
+
             ];
 
             if (!isset($metodo[$tipo])) {
@@ -60,6 +63,8 @@ class Sincronizar extends Command
                 'Grupo_Descuentos' => 'SBO_Grupos_Actualiza_Descuentos_OEDG',
                 'Descuentos_Detalle' => 'SBO_Grupos_Actualiza_Descuentos_EDG1',
                 'Cambios_Monedas' => 'SBO_Actualiza_Tipo_Cambio_ORTT',
+                'DocNum' => 'SBO_No_Coti_SAP_OQUT',
+                //'DocNumP' => '',
             ];
         }
         else

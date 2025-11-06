@@ -23,6 +23,7 @@ const IVA = JSON.parse(selectMoneda.dataset.iva);
 // ================================
 $(document).ready(function() {
     const $select = $('#selectCliente');
+
     $('#selectCliente').select2({
         placeholder: "Selecciona un cliente",
         allowClear: true,
@@ -33,77 +34,108 @@ $(document).ready(function() {
             delay: 250,
             data: function(params) {
                 return {
-                    q: params.term || '', // texto buscado (vacío = mostrar todos)
-                    page: params.page || 1 // número de página
+                    q: params.term || '',
+                    page: params.page || 1
                 };
             },
-             processResults: function(data, params) {
-            params.page = params.page || 1;
-            // 🔹 Aseguramos que cada cliente tenga todos los campos
+            processResults: function(data, params) {
+                params.page = params.page || 1;
+
                 const items = data.items.map(cli => ({
                     id: cli.id,
                     text: cli.text,
-                    cardname: cli.cardName,
+                    cardname: cli.cardname,
                     phone: cli.phone || 'Sin teléfono',
                     email: cli.email || 'Sin correo',
+                    descuentos: cli.descuentos || [],
                     active: cli.active
                 }));
+
+                // Crear manualmente <option> para cada resultado, con data-descuentos
+                items.forEach(cli => {
+                    const opt = new Option(cli.text, cli.id);
+                    $(opt).attr('data-phone', cli.phone);
+                    $(opt).attr('data-email', cli.email);
+                    $(opt).attr('data-cardname', cli.cardname);
+                    $(opt).attr('data-descuentos', JSON.stringify(cli.descuentos));
+                    $select.append(opt);
+                });
+
                 return {
-                    results: data.items,
-                    pagination: {
-                        more: data.more
-                    }
+                    results: items,
+                    pagination: { more: data.more }
                 };
             },
             cache: true
         },
-        minimumInputLength: 0, // permite abrir sin escribir
-        templateResult: function(repo) {
-            if (repo.loading) return "Cargando...";
-            return repo.text;
-        },
-        templateSelection: function(repo) {
-            return repo.text || repo.id;
-        }
+        minimumInputLength: 0,
+        templateResult: repo => repo.loading ? "Cargando..." : repo.text,
+        templateSelection: repo => repo.text || repo.id
     });
 
-     // 🔹 Preselección correcta con todos los datos
     if (window.preseleccionadoCliente) {
-        const option = new Option(
-            window.preseleccionadoClienteText,
-            window.preseleccionadoCliente,
-            true,
-            true
-        );
-        $select.append(option).trigger('change');
+        const $select = $('#selectCliente');
+        
+        // 🔹 Primero, pedimos los datos reales del cliente al backend
+        $.ajax({
+            url: '/clientes/buscar',
+            data: { q: window.preseleccionadoCliente },
+            dataType: 'json'
+        }).then(function(data) {
+            // Buscamos el cliente exacto en los resultados
+            const cliente = data.items.find(c => String(c.id) === String(window.preseleccionadoCliente));
 
-        // Guardar datos extra en Select2
-        const select2Data = $select.select2('data');
-        if (select2Data.length) {
-            select2Data[0].cardname = window.preseleccionadoClienteCardName;
-            select2Data[0].phone = window.preseleccionadoClientePhone || 'Sin teléfono';
-            select2Data[0].email = window.preseleccionadoClienteEmail || 'Sin correo';
-            select2Data[0].descuentos = window.preseleccionadoClienteDescuentos;
-            select2Data[0].direccionFiscal = window.preseleccionadoClienteDireccionFiscal;
-            select2Data[0].direccionEntrega = window.preseleccionadoClienteDireccionEntrega;
-            $select.select2('data', select2Data);
-        }
+            // Si no lo encontró (por si el backend paginó), usamos los valores de respaldo
+            const descuentosData = cliente ? (cliente.descuentos || []) : (window.preseleccionadoClienteDescuentos || []);
 
-        // Llenar teléfono, correo y direcciones
-        actualizarDatosCliente();
+            // Crear opción con datos reales
+            const option = new Option(
+                window.preseleccionadoClienteText,
+                window.preseleccionadoCliente,
+                true,
+                true
+            );
+
+            // Guardar todos los atributos
+            $(option).attr({
+                'data-phone': cliente?.phone || window.preseleccionadoClientePhone || '',
+                'data-email': cliente?.email || window.preseleccionadoClienteEmail || '',
+                'data-cardname': cliente?.cardname || window.preseleccionadoClienteCardName || '',
+                'data-descuentos': JSON.stringify(descuentosData),
+                'data-direccionFiscal': window.preseleccionadoClienteDireccionFiscal || '',
+                'data-direccionEntrega': window.preseleccionadoClienteDireccionEntrega || ''
+            });
+
+            // Agregar al select y actualizar Select2
+            $select.append(option).trigger('change.select2');
+
+            // Refrescar datos internos de Select2
+            $select.select2('data', [{
+                id: window.preseleccionadoCliente,
+                text: window.preseleccionadoClienteText,
+                cardname: cliente?.cardname || window.preseleccionadoClienteCardName,
+                phone: cliente?.phone || window.preseleccionadoClientePhone || 'Sin teléfono',
+                email: cliente?.email || window.preseleccionadoClienteEmail || 'Sin correo',
+                descuentos: descuentosData,
+                direccionFiscal: window.preseleccionadoClienteDireccionFiscal || '',
+                direccionEntrega: window.preseleccionadoClienteDireccionEntrega || ''
+            }]);
+
+            // 🔹 Actualiza la vista y aplica descuentos
+            actualizarDatosCliente();
+            setTimeout(() => {
+                $('#selectCliente').trigger('change');
+            }, 150);
+        });
     }
 
-    // Esto permite que al abrir el select (sin escribir) cargue la primera página
+    // Cargar primera página al abrir sin escribir
     $('#selectCliente').on('select2:open', function() {
         if (!$('.select2-results__option').length) {
-            $(this).data('select2').trigger('query', {
-                term: '',
-                page: 1
-            });
+            $(this).data('select2').trigger('query', { term: '', page: 1 });
         }
     });
 });
-
 
 
 // ================================
@@ -208,10 +240,7 @@ $('#selectCliente').on('change', function() {
         const detalle = descuentosCliente.find(det => String(det.ObjKey) === String(itmsGrpCod));
         const descuento = detalle ? parseFloat(detalle.Discount) : 0;
 
-        // Actualizar columna de porcentaje
         fila.querySelector('.descuentoporcentaje').textContent = `${descuento} %`;
-
-        // Recalcular totales
         calcularTotales();
     });
 });
@@ -339,48 +368,72 @@ function conversionesMonedas(precioOriginal, monedaOriginal, monedaConvertir) {
 }
 
 // Calcular totales generales de la tabla
+// Limpia texto para obtener solo números con punto decimal (por si hay símbolos $ o espacios)
+function limpiarNumero(texto) {
+    return texto.replace(/[^\d.-]/g, '').trim() || '0';
+}
+
+// Calcular totales generales de la tabla
 function calcularTotales() {
     const filas = document.querySelectorAll("#tablaArticulos tbody tr");
-    let totalAntesDescuento = 0, totalDescuento = 0, totalFinalGeneral = 0;
-    const moneda = filas[0]?.querySelector('td.moneda')?.textContent || '';
+    let totalAntesDescuento = new Decimal(0);
+    let totalDescuento = new Decimal(0);
+    let totalFinalGeneral = new Decimal(0);
+    const moneda = filas[0]?.querySelector('td.moneda')?.textContent?.trim() || '';
 
     filas.forEach(fila => {
-        const cantidad = parseFloat(fila.querySelector(".cantidad")?.value) || 0;
-        const precio = parseFloat(fila.querySelector(".precio")?.textContent) || 0;
-        const descuentoP = parseFloat(fila.querySelector(".descuentoporcentaje")?.textContent.replace('%', '')) || 0;
+        const cantidad = new Decimal(fila.querySelector(".cantidad")?.value || 0);
 
-        const subtotal = cantidad * precio;
-        const descuentoMoney = subtotal * (descuentoP / 100);
-        const totalConDescuento = subtotal - descuentoMoney;
+        const precioRaw = fila.querySelector(".precio")?.textContent || '0';
+        const precio = new Decimal(limpiarNumero(precioRaw));
 
-        totalAntesDescuento += subtotal;
-        totalDescuento += descuentoMoney;
-        totalFinalGeneral += totalConDescuento;
+        const descuentoRaw = fila.querySelector(".descuentoporcentaje")?.textContent.replace('%', '') || '0';
+        const descuentoP = new Decimal(limpiarNumero(descuentoRaw));
 
+        // Calculos con decimal.js y redondeo a 2 decimales
+        const subtotalRaw = cantidad.times(precio);
+        const subtotal = subtotalRaw.toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
+
+        const descuentoMoneyRaw = subtotalRaw.times(descuentoP.dividedBy(100));
+        const descuentoMoney = descuentoMoneyRaw.toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
+
+        const totalLineaRaw = subtotalRaw.minus(descuentoMoneyRaw);
+        const totalLinea = totalLineaRaw.toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
+
+        // Suma solo valores redondeados
+        totalAntesDescuento = totalAntesDescuento.plus(subtotal);
+        totalDescuento = totalDescuento.plus(descuentoMoney);
+        totalFinalGeneral = totalFinalGeneral.plus(totalLinea);
+
+        // Actualizar celdas en tabla con formato de 2 decimales
         const cells = {
             subtotal: fila.querySelector('.subtotal'),
             desMoney: fila.querySelector('.desMoney'),
             totalFinal: fila.querySelector('.totalFinal')
         };
 
-        if (cells.subtotal) cells.subtotal.textContent = subtotal.toFixed(2);
-        if (cells.desMoney) cells.desMoney.textContent = descuentoMoney.toFixed(2);
-        if (cells.totalFinal) cells.totalFinal.textContent = totalConDescuento.toFixed(2);
+        if (cells.subtotal) cells.subtotal.textContent = `$${subtotal.toFixed(2)}`;
+        if (cells.desMoney) cells.desMoney.textContent = `$${descuentoMoney.toFixed(2)}`;
+        if (cells.totalFinal) cells.totalFinal.textContent = `$${totalLinea.toFixed(2)}`;
     });
 
-    const iva = totalFinalGeneral * (IVA.Rate / 100);
-    const totalConIva = totalFinalGeneral + iva;
+    // Calcular IVA y total con base en totales redondeados
+    const ivaRate =  new Decimal(IVA.Rate);
+    const ivaRaw = totalFinalGeneral.times(ivaRate.dividedBy(100));
+    const iva = ivaRaw.toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
+    const totalConIva = totalFinalGeneral.plus(iva).toDecimalPlaces(2, Decimal.ROUND_HALF_UP);
 
+    // Actualizar totales generales en el DOM
     const setTotal = (id, value) => {
         const el = document.getElementById(id);
-        if (el) el.textContent = `$${value} ${moneda}`;
+        if (el) el.textContent = `$${value.toFixed(2)} ${moneda}`;
     };
 
-    setTotal('totalAntesDescuento', totalAntesDescuento.toFixed(2));
-    setTotal('DescuentoD', totalDescuento.toFixed(2));
-    setTotal('totalConDescuento', totalFinalGeneral.toFixed(2));
-    setTotal('iva', iva.toFixed(2));
-    setTotal('total', totalConIva.toFixed(2));
+    setTotal('totalAntesDescuento', totalAntesDescuento);
+    setTotal('DescuentoD', totalDescuento);
+    setTotal('totalConDescuento', totalFinalGeneral);
+    setTotal('iva', iva);
+    setTotal('total', totalConIva);
 }
 
 // Eliminar fila y recalcular totales
@@ -425,22 +478,28 @@ $(document).ready(function() {
 $("#guardarCotizacion").on("click", function() {
     // Llenar inputs ocultos con valores de la página
     const cliente = $('#selectCliente').select2('data')[0] || {};
-     // Llenar inputs ocultos con valores de la página
+    const $option = $('#selectCliente').find(`option[value="${cliente.id}"]`);
+
+    const cardname = cliente.cardname || $option.data('cardname') || '';
+    const phone = cliente.phone || $option.data('phone') || '';
+    const email = cliente.email || $option.data('email') || '';
+
+    $("#DocEntry_AuxH").val($("h3[data-DocEntryAux]").data("docentryaux"));
     $("#clienteH").val(cliente.id || '');
     $("#fechaCreacionH").val($("#fechaCreacion").val());
     $("#fechaEntregaH").val($("#fechaEntrega").val());
-    $("#CardNameH").val(cliente.cardname || '');
+    $("#CardNameH").val(cardname);
     $("#SlpCodeH").val($("#selectVendedor").val());
-    $("#phone1H").val(cliente.phone || '');
-    $("#emailH").val(cliente.email || '');
+    $("#phone1H").val(phone);
+    $("#emailH").val(email);
     $("#DocCurH").val($("#selectMoneda").val());
     $("#direccionFiscalH").val($("#direccionFiscal").text());
     $("#direccionEntregaH").val($("#direccionEntrega").text());
-    $("#TotalSinPromoH").val($("#totalAntesDescuento").text().replace('$',''));
-    $("#DescuentoH").val($("#DescuentoD").text().replace('$',''));
-    $("#SubtotalH").val($("#totalConDescuento").text().replace('$',''));
-    $("#ivaH").val($("#iva").text().replace('$',''));
-    $("#totalH").val($("#total").text().replace('$',''));
+    $("#TotalSinPromoH").val($("#totalAntesDescuento").text().replace('$', ''));
+    $("#DescuentoH").val($("#DescuentoD").text().replace('$', ''));
+    $("#SubtotalH").val($("#totalConDescuento").text().replace('$', ''));
+    $("#ivaH").val($("#iva").text().replace('$', ''));
+    $("#totalH").val($("#total").text().replace('$', ''));
     $("#comentariosH").val($('#comentarios').val());
 
 
@@ -455,7 +514,10 @@ $("#guardarCotizacion").on("click", function() {
             descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
             cantidad: $(this).find(".cantidad").val(),
             imagen: $(this).find(".imagen").data("imagen"),
-            ivaPorcentaje:IVA.Code
+            ivaPorcentaje:IVA.Code,
+            subtotal:  $(this).find(".subtotal").text().replace('$', ''),
+            descuento:  $(this).find(".desMoney").text().replace('$', ''),
+            total:  $(this).find(".totalFinal").text().replace('$', '')
         });
     });
 
@@ -467,15 +529,21 @@ $("#guardarCotizacion").on("click", function() {
 // GUARDAR PEDIDO
 // ================================
 $("#btnPedido").on("click", function() {
+    // Llenar inputs ocultos con valores de la página
     const cliente = $('#selectCliente').select2('data')[0] || {};
+    const $option = $('#selectCliente').find(`option[value="${cliente.id}"]`);
+
+    const cardname = cliente.cardname || $option.data('cardname') || '';
+    const phone = cliente.phone || $option.data('phone') || '';
+    const email = cliente.email || $option.data('email') || '';
 
     $("#clienteP").val(cliente.id || '');
     $("#fechaCreacionP").val($("#fechaCreacion").val());
     $("#fechaEntregaP").val($("#fechaEntrega").val());
-    $("#CardNameP").val(cliente.cardname || '');
+    $("#CardNameP").val(cardname || '');
     $("#SlpCodeP").val($("#selectVendedor").val());
-    $("#phone1P").val(cliente.phone || '');
-    $("#emailP").val(cliente.email || '');
+    $("#phone1P").val(phone || '');
+    $("#emailP").val(email || '');
     $("#DocCurP").val($("#selectMoneda").val());
     $("#direccionFiscalP").val($("#direccionFiscal").text());
     $("#direccionEntregaP").val($("#direccionEntrega").text());
@@ -496,7 +564,10 @@ $("#btnPedido").on("click", function() {
             descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
             cantidad: $(this).find(".cantidad").val(),
             imagen: $(this).find(".imagen").data("imagen"),
-            ivaPorcentaje:IVA.Code
+            ivaPorcentaje:IVA.Code,
+            subtotal:  $(this).find(".subtotal").text().replace('$', ''),
+            descuento:  $(this).find(".desMoney").text().replace('$', ''),
+            total:  $(this).find(".totalFinal").text().replace('$', '')
         });
     });
     

@@ -6,7 +6,7 @@
 
 <script>
 window.preseleccionadoCliente = @json($preseleccionados['cliente'] ?? null);
-window.preseleccionadoClienteText = @json( $preseleccionados['cliente'] ? ($clienteBase->CardCode.'-'.$clienteBase->CardName) : null );
+window.preseleccionadoClienteText = @json( $preseleccionados['cliente'] ? ($clienteBase->CardCode.' - '.$clienteBase->CardName) : null );
 window.preseleccionadoClientePhone = @json($cotizacion->Phone1 ?? $pedido->Phone1 ?? '');
 window.preseleccionadoClienteEmail = @json($cotizacion->E_Mail ?? $pedido->E_Mail ?? '');
 window.preseleccionadoClienteCardName = @json($clienteBase?->CardName ?? '');

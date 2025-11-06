@@ -21,6 +21,8 @@
 
     <!--  Swal.fire alertas con estilos -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/decimal.js@10.4.3/decimal.min.js"></script>
     
 
     <!-- Importación de CSS -->

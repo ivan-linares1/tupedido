@@ -54,12 +54,12 @@
                         @endif
                     </td>
                     <td class="ivaPorcentaje">IVA {{ number_format($linea->impuesto->Rate, 0) }} %</td> 
-                    <td><span>{{ number_format($linea->Quantity ?? 0, 0) }}</span></td>
+                    <td><span>{{ number_format($linea->Quantity, 0) }}</span></td>
                     <td class="promocion">Promociones</td>
-                    <td class="subtotal">{{ number_format(($linea->Price ?? 0) * ($linea->Quantity ?? 0), 2) }}</td>
-                    <td class="descuentoporcentaje" readonly>{{ number_format($linea->DiscPrcnt ?? 0, 0) }} %</td>
-                    <td class="desMoney" readonly>{{ number_format((($linea->Price ?? 0) * ($linea->Quantity ?? 0)) * (($linea->DiscPrcnt ?? 0) / 100), 2) }}</td>
-                    <td class="totalFinal" readonly>{{ number_format((($linea->Price ?? 0) * ($linea->Quantity ?? 0)) - ((($linea->Price ?? 0) * ($linea->Quantity ?? 0)) * (($linea->DiscPrcnt ?? 0) / 100)), 2) }}</td>
+                    <td class="subtotal">${{ number_format($linea->Subtotal, 2)}}</td>
+                    <td class="descuentoporcentaje" readonly>{{ number_format($linea->DiscPrcnt, 0) }} %</td>
+                    <td class="desMoney" readonly>${{ number_format($linea->Descuento, 2) }}</td>
+                    <td class="totalFinal" readonly>${{ number_format($linea->Total, 2) }}</td>
                 </tr>
             @endforeach
 
@@ -102,7 +102,7 @@
                 <th>Total antes del descuento</th>
                 <td id="totalAntesDescuento">
                     @if($modo == 1)
-                        {{ number_format($cotizacion->TotalSinPromo ?? $pedido->TotalSinPromo ?? 0, 2) }} 
+                        {{ number_format($cotizacion->TotalSinPromo ?? $pedido->TotalSinPromo, 2) }} 
                         @if(isset($cotizacion))
                             {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
                         @elseif(isset($pedido))
@@ -132,7 +132,7 @@
                 <th>Total con el descuento</th>
                 <td id="totalConDescuento">
                     @if($modo == 1)
-                        {{ number_format(($cotizacion->TotalSinPromo ?? $pedido->TotalSinPromo ?? 0) - ($cotizacion->Descuento ?? $pedido->Descuento ?? 0), 2) }} 
+                        {{ number_format($cotizacion->SubTotal ?? $pedido->SubTotal ?? 0, 2) }} 
                         @if(isset($cotizacion))
                             {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
                         @elseif(isset($pedido))

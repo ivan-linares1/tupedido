@@ -334,24 +334,39 @@ class PedidosController extends Controller
             // Guardar líneas del pedido (RDR1)
             $lineNum = 0;
             foreach ($articulos as $art) {
-                $lineNum++;
+                
 
                 LineasPedidos::create([
-                    'DocEntry'   => $pedido->DocEntry,
-                    'LineNum'    => $lineNum,
-                    'ItemCode'   => $art['itemCode'],
-                    'U_Dscr'     => $art['descripcion'] ?? '',
-                    'unitMsr2'   => $art['unidad'] ?? '',
-                    'Price'      => floatval(str_replace(',', '', $art['precio'] ?? 0)),
-                    'DiscPrcnt'  => floatval(str_replace(['%', ','], '', $art['descuentoPorcentaje'] ?? 0)),
-                    'Quantity'   => floatval($art['cantidad'] ?? 0),
-                    'Id_imagen'  => $art['imagen'] ?? null,
-                    'BaseEntry'  => $request->BaseEntry ?? null,
-                    'TargetType' => $art['TargetType'] ?? null,
-                    'TrgetEntry' => $art['TrgetEntry'] ?? null,
-                    'BaseRef'    => $art['BaseRef'] ?? null,
+                    'DocEntry'      => $pedido->DocEntry,
+                    'LineNum'       => $lineNum,
+                    'ItemCode'      => $art['itemCode'],
+                    'U_Dscr'        => $art['descripcion'] ?? '',
+                    'unitMsr2'      => $art['unidad'] ?? '',
+                    'Price'         => floatval(str_replace(',', '', $art['precio'] ?? 0)),
+                    'DiscPrcnt'     => floatval(str_replace(['%', ','], '', $art['descuentoPorcentaje'] ?? 0)),
+                    'Quantity'      => floatval($art['cantidad'] ?? 0),
+                    'Id_imagen'     => $art['imagen'] ?? null,
+                    'BaseEntry'     => $request->BaseEntry ?? null,
+                    'TargetType'    => $art['TargetType'] ?? null,
+                    'TrgetEntry'    => $art['TrgetEntry'] ?? null,
+                    'BaseRef'       => $art['BaseRef'] ?? null,
                     'ivaPorcentaje' => $art['ivaPorcentaje'] ?? null,
+                    'Subtotal'      => $art['subtotal'],  
+                    'Descuento'     => $art['descuento'],
+                    'Total'         => $art['total'],
                 ]);
+                $lineNum++;
+            }
+
+            if ($request->BaseEntry != '') {
+                // Buscar la cotización por su DocEntry
+                $cotizacion = Cotizacion::where('DocEntry', $request->BaseEntry)->first();
+
+                if ($cotizacion) {
+                    // Cambiar su estado a inactiva
+                    $cotizacion->abierta = 'N';
+                    $cotizacion->save();
+                }
             }
 
             // Retornar detalles del pedido

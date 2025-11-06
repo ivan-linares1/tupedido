@@ -45,12 +45,12 @@ class ClienteController extends Controller
     public function buscar(Request $request)
     {
         $search = trim($request->get('q', ''));
-        $page = $request->get('page', 1);
+        $page = (int) $request->get('page', 1);
         $perPage = 20;
 
-        $query = Clientes::query();
+        $query = Clientes::with('descuentos.detalles.marca')
+            ->where('Active', 'Y');
 
-        // Si hay texto, busca por nombre o código
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('CardName', 'like', "%{$search}%")
@@ -74,16 +74,28 @@ class ClienteController extends Controller
         return response()->json([
             'items' => $clientes->map(function ($c) {
                 return [
-                    'id'       => $c->CardCode,
-                    'text'     => "{$c->CardCode} - {$c->CardName}",
-                    'cardname' => $c->CardName,
-                    'phone'    => $c->phone1,
-                    'email' => $c->{'e-mail'},
-                    'groupNum' => $c->GroupNum,
-                    'active'   => $c->Active,
+                    'id'         => $c->CardCode,
+                    'text'       => "{$c->CardCode} - {$c->CardName}",
+                    'cardname'   => $c->CardName,
+                    'phone'      => $c->phone1,
+                    'email'      => $c->{'e-mail'},
+                    'groupNum'   => $c->GroupNum,
+                    'active'     => $c->Active,
+                    // 🔹 aquí vuelven los descuentos
+                    'descuentos' => $c->descuentos
+                        ->flatMap(fn($d) => 
+                            $d->detalles->map(fn($dd) => [
+                                'ObjKey'   => $dd->ObjKey,
+                                'Discount' => $dd->Discount,
+                                'Marca'    => optional($dd->marca)->Name ?? null
+                            ])
+                        )
+                        ->values()
+                        ->toArray(),
                 ];
             }),
             'more' => ($page * $perPage) < $total
         ]);
     }
+
 }

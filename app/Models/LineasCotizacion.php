@@ -24,7 +24,10 @@ class LineasCotizacion extends Model
         'DiscPrcnt', 
         'Quantity', 
         'Id_imagen',
-        'ivaPorcentaje'
+        'ivaPorcentaje',
+        'Subtotal',
+        'Descuento',
+        'Total'
     ];
 
     public function cotizacion()

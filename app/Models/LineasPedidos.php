@@ -30,7 +30,10 @@ class LineasPedidos extends Model
         'BaseRef',
         'BaseType',
         'BaseEntry',
-        'ivaPorcentaje'
+        'ivaPorcentaje',
+        'Subtotal',
+        'Descuento',
+        'Total'
     ];
 
 

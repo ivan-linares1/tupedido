@@ -185,7 +185,6 @@ class CotizacionesController extends Controller
     public function GuardarCotizacion(Request $request)
     {
         try {
-
             //Validaciones
             $request->validate([
                 'cliente'          => 'required',
@@ -258,20 +257,35 @@ class CotizacionesController extends Controller
             $lineNum = 0;
 
             foreach ($articulos as $art) {
-                $lineNum++;
+                
                 LineasCotizacion::create([
-                    'DocEntry'   => $cotizacion->DocEntry,
-                    'fecha' => Carbon::today()->format('Y-m-d'),
-                    'LineNum'    => $lineNum,
-                    'ItemCode'   => $art['itemCode'],
-                    'U_Dscr'     => $art['descripcion'],
-                    'unitMsr2'   => $art['unidad'],
-                    'Price'      => floatval(str_replace(',', '', $art['precio'])),
-                    'DiscPrcnt'  => floatval(str_replace(['%', ','], '', $art['descuentoPorcentaje'])),
-                    'Quantity'   => floatval($art['cantidad']),
-                    'Id_imagen'  => $art['imagen'] ?? null,
+                    'DocEntry'      => $cotizacion->DocEntry,
+                    'fecha'         => Carbon::today()->format('Y-m-d'),
+                    'LineNum'       => $lineNum,
+                    'ItemCode'      => $art['itemCode'],
+                    'U_Dscr'        => $art['descripcion'],
+                    'unitMsr2'      => $art['unidad'],
+                    'Price'         => floatval(str_replace(',', '', $art['precio'])),
+                    'DiscPrcnt'     => floatval(str_replace(['%', ','], '', $art['descuentoPorcentaje'])),
+                    'Quantity'      => floatval($art['cantidad']),
+                    'Id_imagen'     => $art['imagen'] ?? null,
                     'ivaPorcentaje' => $art['ivaPorcentaje'] ?? null,
+                    'Subtotal'      => $art['subtotal'],  
+                    'Descuento'     => $art['descuento'],
+                    'Total'         => $art['total'],
                 ]);
+                $lineNum++;
+            }
+
+            if ($request->DocEntry_Aux != '') {
+                // Buscar la cotización por su DocEntry
+                $cotizacion = Cotizacion::where('DocEntry', $request->DocEntry_Aux)->first();
+
+                if ($cotizacion) {
+                    // Cambiar su estado a inactiva
+                    $cotizacion->abierta = 'N';
+                    $cotizacion->save();
+                }
             }
 
             return redirect()->route('cotizaciones')->with('success', 'Cotización guardada correctamente.');
