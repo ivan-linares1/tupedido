@@ -482,6 +482,8 @@
                     <th>Cantidad</th>
                     <th>Precio Unitario</th>
                     <th>Importe</th>
+                    <th>Descuento</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody class="articulos-lista">
@@ -491,7 +493,10 @@
                         <td>{{ $linea['descripcion'] }}</td>
                         <td class="text-center" style="text-align: center">{{ number_format($linea['cantidad'],0) }}</td>
                         <td class="text-right">${{ number_format($linea['precio'], 2) }}</td>
-                        <td class="text-right">${{ number_format($linea['cantidad'] * $linea['precio'], 2) }}</td>
+                        <td class="text-right">${{ number_format($linea['importe'], 2) }}</td>
+                        <td class="text-right" style="text-align: center">{{ number_format($linea['descuetos'], 0) }}%</td>
+                        <td class="text-right">${{ number_format($linea['total'], 2) }}</td>
+
                     </tr>
                 @endforeach
             </tbody>

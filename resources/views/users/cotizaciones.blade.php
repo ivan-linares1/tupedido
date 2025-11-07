@@ -56,6 +56,16 @@
             </select>
         </div>
 
+        {{-- Select para filtrar por estatus abierto o cerradas --}}
+        <div class="d-flex gap-2">
+            <label for="Estatus" class="form-label fw-semibold">Estatus</label>
+            <select id="Estatus" name="Estatus" class="form-select form-select-sm rounded-3">
+                <option value="">Todos</option>
+                <option value="Y" {{ request('Estatus') == 'Y' ? 'selected' : '' }}>Abiertas</option>
+                <option value="N" {{ request('Estatus') == 'N' ? 'selected' : '' }}>Cerradas</option>
+            </select>
+        </div>
+
         {{-- Filtros de búsqueda y paginación --}}
         <div class="d-flex gap-2">
             <input type="text" id="buscarCotizacion" class="form-control" placeholder="Buscar...">
@@ -78,11 +88,13 @@ $(document).ready(function() {
         const buscar = $('#buscarCotizacion').val();
         const fecha = $('#fechaCotizacion').val();
         const mostrar = $('#mostrar').val();
+        const Estatus = $('#Estatus').val();
+
 
         $.ajax({
             url: url,
             method: 'GET',
-            data: { buscar, fecha, mostrar },
+            data: { buscar, fecha, mostrar, Estatus },
             success: function(data) {
                 $('#tablaCotizacionesContainer').html(data);
             },
@@ -100,6 +112,8 @@ $(document).ready(function() {
     // Búsqueda y filtros
     $('#buscarCotizacion').on('keyup', function() { fetchCotizaciones(); });
     $('#fechaCotizacion, #mostrar').on('change', function() { fetchCotizaciones(); });
+    $('#Estatus').on('change', function() { fetchCotizaciones(); });
+
 
     // Paginación AJAX
     $(document).on('click', '#tablaCotizacionesContainer .pagination a', function(e) {

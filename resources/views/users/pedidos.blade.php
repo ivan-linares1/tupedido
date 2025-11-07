@@ -52,7 +52,16 @@
                 <option value="100" {{ request('mostrar') == 100 ? 'selected' : '' }}>100</option>
             </select>
         </div>
-        
+
+        {{-- Select para filtrar por estatus abierto o cerradas --}}
+        <div class="d-flex gap-2">
+            <label for="Estatus" class="form-label fw-semibold">Estatus</label>
+            <select id="Estatus" name="Estatus" class="form-select form-select-sm rounded-3">
+                <option value="">Todos</option>
+                <option value="Y" {{ request('Estatus') == 'Y' ? 'selected' : '' }}>Abiertas</option>
+                <option value="N" {{ request('Estatus') == 'N' ? 'selected' : '' }}>Cerradas</option>
+            </select>
+        </div>
         
         
         {{-- Filtros de búsqueda --}}
@@ -74,11 +83,12 @@ $(document).ready(function() {
         const buscar = $('#buscarPedido').val();
         const fecha = $('#fechaPedido').val();
         const mostrar = $('#mostrar').val();
+        const Estatus = $('#Estatus').val();
 
         $.ajax({
             url: url,
             method: 'GET',
-            data: { buscar, fecha, mostrar },
+            data: { buscar, fecha, mostrar, Estatus },
             success: function(data) {
                 $('#tablaPedidosContainer').html(data);
             },
@@ -91,6 +101,7 @@ $(document).ready(function() {
     // Eventos de búsqueda y filtros
     $('#buscarPedido').on('keyup', function() { fetchPedidos(); });
     $('#fechaPedido, #mostrar').on('change', function() { fetchPedidos(); });
+    $('#Estatus').on('change', function() { fetchPedidos(); });
 
     // Paginación AJAX
     $(document).on('click', '#tablaPedidosContainer .pagination a', function(e) {

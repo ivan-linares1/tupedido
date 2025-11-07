@@ -15,6 +15,7 @@ class Cotizacion extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'DocNum',
         'CardCode', 
         'DocDate', 
         'DocDueDate', 
@@ -33,6 +34,7 @@ class Cotizacion extends Model
         'IVA', 
         'Total',
         'comment',
+        'abierta',
     ];
 
     // Relación con las líneas de cotización

@@ -15,6 +15,12 @@
                     <a href="{{ route('detalles', $cotizacion->DocEntry) }}" style="cursor:pointer;color:blue;text-decoration:underline;" data-loading="true">
                         CO - {{ $cotizacion->DocEntry }}
                     </a>
+                    @if(Auth::user()->rol_id != 3)
+                    @if($cotizacion->abierta == 'Y')
+                        <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
+                    @else
+                        <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
+                    @endif @endif 
                 </td>
                 <td>{{ \Carbon\Carbon::parse($cotizacion->DocDate)->format('d-m-Y') }}</td>
                 <td>{{ $cotizacion->CardName }}</td>

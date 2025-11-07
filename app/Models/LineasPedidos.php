@@ -17,6 +17,7 @@ class LineasPedidos extends Model
      protected $fillable = [
         'DocEntry',
         'LineNum',
+        'BaseLine',
         'ObjType',
         'ItemCode',
         'U_Dscr',
@@ -30,7 +31,10 @@ class LineasPedidos extends Model
         'BaseRef',
         'BaseType',
         'BaseEntry',
-        'ivaPorcentaje'
+        'ivaPorcentaje',
+        'Subtotal',
+        'Descuento',
+        'Total'
     ];
 
 

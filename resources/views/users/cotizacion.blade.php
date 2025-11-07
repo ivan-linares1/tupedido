@@ -6,7 +6,7 @@
 
 <script>
 window.preseleccionadoCliente = @json($preseleccionados['cliente'] ?? null);
-window.preseleccionadoClienteText = @json( $preseleccionados['cliente'] ? ($clienteBase->CardCode.'-'.$clienteBase->CardName) : null );
+window.preseleccionadoClienteText = @json( $preseleccionados['cliente'] ? ($clienteBase->CardCode.' - '.$clienteBase->CardName) : null );
 window.preseleccionadoClientePhone = @json($cotizacion->Phone1 ?? '');
 window.preseleccionadoClienteEmail = @json($cotizacion->E_Mail ?? '');
 window.preseleccionadoClienteCardName = @json($clienteBase->CardName ?? '');
@@ -14,6 +14,7 @@ window.preseleccionadoClienteDescuentos = @json($cotizacion->descuentos ?? []);
 window.preseleccionadoClienteDireccionFiscal = @json($cotizacion->Address ?? '');
 window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '');
 </script>
+
 
 <!-- Importación de JS y CSS -->
 @vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
@@ -26,11 +27,17 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
 @endphp
 
 <div class="container my-4">
-    <h3 class="mb-3 fw-bold">
+    <h3 class="mb-3 fw-bold" data-DocEntryAux='@json($cotizacion->DocEntry ?? "")'>
         @if($modo == 0)
             Nueva Cotización
         @else
             CO - {{ $cotizacion->DocEntry ?? '' }}
+            @if(Auth::user()->rol_id != 3)
+            @if($cotizacion->abierta == 'Y')
+                <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
+            @else
+                <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
+            @endif @endif
         @endif
     </h3>
 
@@ -90,7 +97,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
                 </div>
                 <div class="col-md-4">
                     <label>Válido Entrega</label>
-                    <input type="date" id="fechaEntrega" class="form-control" value="{{ $fechaEntrega }}" @if($modo == 1) readonly @endif>
+                    <input type="date" id="fechaEntrega" class="form-control" value="{{ $fechaEntrega }}" @if($modo == 1 || Auth::user()->rol_id > 2) readonly @endif>
                 </div>
             </div>
 
@@ -154,6 +161,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
 <!-- Form para guardar cotización -->
 <form id="formCotizacion" action="{{ route('cotizacionSave') }}" method="POST">
     @csrf
+    <input type="hidden" name="DocEntry_Aux" id="DocEntry_AuxH">
     <input type="hidden" name="cliente" id="clienteH">
     <input type="hidden" name="fechaCreacion" id="fechaCreacionH">
     <input type="hidden" name="fechaEntrega" id="fechaEntregaH">
@@ -174,6 +182,32 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
     <input type="hidden" name="comentarios" id="comentariosH">
     <input type="hidden" name="articulos" id="articulosH">
 </form>
+
+<!-- formulario para guardar la cotizacion -->
+<form id="formCotizacionPedido" action="{{ route('PedidoSave') }}" method="POST">
+    @csrf
+    <input type="hidden" name="BaseEntry" id="BaseEntryP" value="{{ $cotizacion->DocEntry ?? ''}}">
+    <input type="hidden" name="cliente" id="clienteP">
+    <input type="hidden" name="fechaCreacion" id="fechaCreacionP">
+    <input type="hidden" name="fechaEntrega" id="fechaEntregaP">
+    <input type="hidden" name="CardName" id="CardNameP">
+    <input type="hidden" name="SlpCode" id="SlpCodeP">
+    <input type="hidden" name="phone1" id="phone1P">
+    <input type="hidden" name="email" id="emailP">
+    <input type="hidden" name="DocCur" id="DocCurP">
+    <input type="hidden" name="ShipToCode" id="ShipToCodeP">
+    <input type="hidden" name="PayToCode" id="PayToCodeH">
+    <input type="hidden" name="direccionFiscal" id="direccionFiscalP">
+    <input type="hidden" name="direccionEntrega" id="direccionEntregaP">
+    <input type="hidden" name="TotalSinPromo" id="TotalSinPromoP">
+    <input type="hidden" name="Descuento" id="DescuentoP">
+    <input type="hidden" name="Subtotal" id="SubtotalP">
+    <input type="hidden" name="iva" id="ivaP">
+    <input type="hidden" name="total" id="totalP">
+    <input type="hidden" name="comentarios" id="comentariosP">
+    <input type="hidden" name="articulos" id="articulosP">
+</form>
+
 
 <div class="container my-4 d-flex justify-content-start gap-2">
     @if($modo == 0)
@@ -196,21 +230,24 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
         <button type="button" class="btn btn-danger" onclick="window.open('{{ route('cotizacion.pdf', $cotizacion->DocEntry ?? 0) }}','_blank')">
             <i class="bi bi-filetype-pdf"></i> PDF
         </button>
-        @if($moneda->cambios->isEmpty() || $pedido)
+        @if($moneda->cambios->isEmpty() || $pedido || $cotizacion->abierta  === 'N')
             <div class="d-inline-block position-relative">
                 <button class="btn btn-secondary" disabled><i class="bi bi-pencil-square"></i> Editar</button>
                 <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>
                 <small class="mensaje-cambio text-danger">
-                    ⚠️ {!! $pedido ? 'Ya tiene un pedido creado.' : 'Contacte a soporte: no existen tipos de cambio registrados para hoy.' !!}
+                    ⚠️ {!! $pedido ? 'Ya tiene un pedido creado.' : 'Contacte a soporte: no existen tipos de cambio registrados para hoy o Se Cerro la Cotizacion.' !!}
                 </small>
             </div>
         @else
             <a href="{{ route('NuevaCotizacion', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-secondary">
                 <i class="bi bi-pencil-square"></i> Editar
             </a>
-            <a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-success">
+            {{--<a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-success">
                 <i class="bi bi-bag"></i> Pedido
-            </a>
+            </a>--}}
+             <button type="button" id="btnPedido" class="btn btn-success">
+                <i class="bi bi-save"></i> Crear Pedido
+            </button>
         @endif
     @endif
 </div>

@@ -26,6 +26,7 @@
         </thead>
 
         <tbody>
+             @if(isset($modo) && $modo == 1)
             @php
                 // Determinar qué líneas usar: cotización o pedido
                 $lineas = collect(); // colección vacía por defecto
@@ -38,10 +39,10 @@
             @endphp
 
             @foreach($lineas as $linea)
-                <tr>
+                <tr data-BaseLine="{{ $linea->BaseLine }}"> {{--Para cotizaciones existentes manden el BaseLine--}}
                     <td class="itemcode">{{ $linea->ItemCode }}</td>
                     <td class="frgnName">{{ $linea->U_Dscr ?? '' }}</td>
-                    <td class="imagen">
+                    <td class="imagen" data-imagen="{{$linea->Id_imagen}}">
                         <img src="{{ $linea->imagen?->Ruta_imagen ?? asset('images/default.png') }}" alt="Imagen" style="width: 50px; height: auto;">
                     </td>
                     <td class="medida">{{ $linea->unitMsr2 ?? '' }}</td>
@@ -54,14 +55,16 @@
                         @endif
                     </td>
                     <td class="ivaPorcentaje">IVA {{ number_format($linea->impuesto->Rate, 0) }} %</td> 
-                    <td><span>{{ number_format($linea->Quantity ?? 0, 0) }}</span></td>
+                    <td>{{number_format($linea->Quantity,0)}} <input type="hidden" value="{{number_format($linea->Quantity,0)}}" min="1" class="form-control form-control-sm cantidad"></td>
                     <td class="promocion">Promociones</td>
-                    <td class="subtotal">{{ number_format(($linea->Price ?? 0) * ($linea->Quantity ?? 0), 2) }}</td>
-                    <td class="descuentoporcentaje" readonly>{{ number_format($linea->DiscPrcnt ?? 0, 0) }} %</td>
-                    <td class="desMoney" readonly>{{ number_format((($linea->Price ?? 0) * ($linea->Quantity ?? 0)) * (($linea->DiscPrcnt ?? 0) / 100), 2) }}</td>
-                    <td class="totalFinal" readonly>{{ number_format((($linea->Price ?? 0) * ($linea->Quantity ?? 0)) - ((($linea->Price ?? 0) * ($linea->Quantity ?? 0)) * (($linea->DiscPrcnt ?? 0) / 100)), 2) }}</td>
+                    <td class="subtotal">${{ number_format($linea->Subtotal, 2)}}</td>
+                    <td class="descuentoporcentaje" readonly>{{ number_format($linea->DiscPrcnt, 0) }} %</td>
+                    <td class="desMoney" readonly>${{ number_format($linea->Descuento, 2) }}</td>
+                    <td class="totalFinal" readonly>${{ number_format($linea->Total, 2) }}</td>
                 </tr>
             @endforeach
+            <tr hidden > </tr>
+            @endif
 
             {{-- Modo 0: agregar artículos automáticamente desde lineasComoArticulos --}}
             @if(isset($modo) && $modo == 0 && isset($lineasComoArticulos) && count($lineasComoArticulos) > 0)
@@ -102,7 +105,7 @@
                 <th>Total antes del descuento</th>
                 <td id="totalAntesDescuento">
                     @if($modo == 1)
-                        {{ number_format($cotizacion->TotalSinPromo ?? $pedido->TotalSinPromo ?? 0, 2) }} 
+                        {{ number_format($cotizacion->TotalSinPromo ?? $pedido->TotalSinPromo, 2) }} 
                         @if(isset($cotizacion))
                             {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
                         @elseif(isset($pedido))
@@ -132,7 +135,7 @@
                 <th>Total con el descuento</th>
                 <td id="totalConDescuento">
                     @if($modo == 1)
-                        {{ number_format(($cotizacion->TotalSinPromo ?? $pedido->TotalSinPromo ?? 0) - ($cotizacion->Descuento ?? $pedido->Descuento ?? 0), 2) }} 
+                        {{ number_format($cotizacion->Subtotal ?? $pedido->Subtotal ?? 0, 2) }} 
                         @if(isset($cotizacion))
                             {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
                         @elseif(isset($pedido))

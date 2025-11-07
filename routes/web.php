@@ -107,10 +107,9 @@ Route::middleware('auth')->group(function () {
         // Clientes
         Route::get('/Clientes', [ClienteController::class, 'index'])->name('clientes');
     });
-/*****************************************************************************************************************************************************/
-/*****************************************************************************************************************************************************/
-/*****************************************************************************************************************************************************/
-/*****************************************************************************************************************************************************/
+
+
+
     //ADMINISTRACIÓN (Roles 1 y 2)
     Route::middleware(['role:1,2'])->group(function () {
 
@@ -150,6 +149,8 @@ Route::middleware('auth')->group(function () {
         Route::post('ServiciosWEB_Aux/{servicio}/{metodo}/{modo}', [ SincronizacionController::class, 'ServicioWebAux'])->name('SincronizarAux');
     });
 
+
+    
     // USUARIOS NORMALES Y VENDEDORES (Roles 3 y 4)
     Route::middleware(['role:3,4'])->group(function () { });
 });

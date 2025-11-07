@@ -119,7 +119,7 @@ CREATE TABLE ITM1(
 /* Cotizaciones */
 CREATE TABLE OQUT(
     DocEntry INT AUTO_INCREMENT PRIMARY KEY,
-    DocEntry_SAP INT,
+    DocNum INT,
     CardCode VARCHAR(15) NOT NULL,
     DocDate DATE,
     DocDueDate DATE,
@@ -138,6 +138,7 @@ CREATE TABLE OQUT(
     IVA DECIMAL(19,6),
     Total DECIMAL(19,6),
     comment VARCHAR(254),
+    abierta VARCHAR(1) DEFAULT 'Y',
     FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
     FOREIGN KEY (SlpCode) REFERENCES OSLP(SlpCode)
 );
@@ -146,6 +147,7 @@ CREATE TABLE OQUT(
 CREATE TABLE QUT1(
   DocEntry INT NOT NULL,
   LineNum INT NOT NULL,
+  BaseLine INT NOT NULL,
   ObjType VARCHAR(20) default 23,
   ItemCode VARCHAR(50) NOT NULL,
   U_Dscr VARCHAR(250),
@@ -155,6 +157,9 @@ CREATE TABLE QUT1(
   Quantity DECIMAL(19,6),
   Id_imagen BIGINT,
   ivaPorcentaje VARCHAR(10),
+  Subtotal DECIMAL(19,6),
+  Descuento DECIMAL(19.9),
+  Total DECIMAL(19,6),
   PRIMARY KEY (DocEntry, LineNum),
   FOREIGN KEY (DocEntry) REFERENCES OQUT(DocEntry),
   FOREIGN KEY (ItemCode) REFERENCES OITM(ItemCode),
@@ -164,7 +169,7 @@ CREATE TABLE QUT1(
 /*Pedidos*/
 CREATE TABLE ORDR(
     DocEntry INT AUTO_INCREMENT PRIMARY KEY,
-    DocEntry_SAP INT,
+    DocNum INT,
     CardCode VARCHAR(15) NOT NULL,
     DocDate DATE,
     DocDueDate DATE,
@@ -183,6 +188,7 @@ CREATE TABLE ORDR(
     IVA DECIMAL(19,6),
     Total DECIMAL(19,6),
     comment VARCHAR(254),
+    abierta VARCHAR(1) DEFAULT 'Y',
     FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
     FOREIGN KEY (SlpCode) REFERENCES OSLP(SlpCode)
 );
@@ -191,6 +197,7 @@ CREATE TABLE ORDR(
 CREATE TABLE RDR1 (
   DocEntry INT NOT NULL,
   LineNum INT NOT NULL,
+  BaseLine INT NOT NULL,
   ObjType VARCHAR(20) default 23,
   ItemCode VARCHAR(50) NOT NULL,
   U_Dscr VARCHAR(250),
@@ -205,6 +212,9 @@ CREATE TABLE RDR1 (
   BaseType INT default 23,
   BaseEntry INT,
   ivaPorcentaje VARCHAR(10),
+  Subtotal DECIMAL(19,6) NOT NULL,
+  Descuento DECIMAL(19.9) NOT NULL,
+  Total DECIMAL(19,6) NOT NULL,
   PRIMARY KEY (DocEntry, LineNum),
   FOREIGN KEY (DocEntry) REFERENCES ORDR(DocEntry),
   FOREIGN KEY (ItemCode) REFERENCES OITM(ItemCode),
