@@ -15,6 +15,12 @@
                     <a href="{{ route('detallesP', $pedido->DocEntry) }}" style="cursor: pointer; color: blue; text-decoration: underline;" data-loading="true">
                         PE - {{ $pedido->DocEntry }}
                     </a>
+                    @if(Auth::user()->rol_id != 3)
+                    @if($pedido->abierta == 'Y')
+                        <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
+                    @else
+                        <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
+                    @endif @endif 
                 </td>
                 <td>{{ \Carbon\Carbon::parse($pedido->DocDate)->format('d-m-Y') }}</td>
                 <td>{{ $pedido->CardName }}</td>

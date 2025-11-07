@@ -27,6 +27,7 @@ class CotizacionesController extends Controller
         $buscar = $request->input('buscar');
         $fecha = $request->input('fecha');
         $mostrar = $request->input('mostrar', 10);
+        $Estatus = $request->input('Estatus');
 
         $query = Cotizacion::with(['vendedor', 'moneda'])
                     ->orderBy('DocEntry', 'desc');
@@ -54,6 +55,14 @@ class CotizacionesController extends Controller
         // Filtro por fecha
         if ($fecha) {
             $query->whereDate('DocDate', $fecha);
+        }
+
+        if($Estatus == 'N')
+        {
+            $query->where('abierta', 'N');
+        }
+        else if($Estatus == 'Y'){
+             $query->where('abierta', 'Y');
         }
 
         $cotizaciones = $query->paginate($mostrar)->withQueryString();
@@ -262,6 +271,7 @@ class CotizacionesController extends Controller
                     'DocEntry'      => $cotizacion->DocEntry,
                     'fecha'         => Carbon::today()->format('Y-m-d'),
                     'LineNum'       => $lineNum,
+                    'BaseLine'      => $lineNum,
                     'ItemCode'      => $art['itemCode'],
                     'U_Dscr'        => $art['descripcion'],
                     'unitMsr2'      => $art['unidad'],
@@ -389,10 +399,13 @@ class CotizacionesController extends Controller
             'lineas' => array_chunk(
                 $cotizacion->lineas->map(function($l) {
                     return [
-                        'codigo'      => $l->ItemCode,
-                        'descripcion' => $l->U_Dscr,
-                        'cantidad'    => $l->Quantity,
-                        'precio'      => $l->Price,
+                        'codigo'      => $l->ItemCode,//clave
+                        'descripcion' => $l->U_Dscr, //descripcion
+                        'cantidad'    => $l->Quantity, //cantidad
+                        'precio'      => $l->Price,//precio unitario
+                        'importe'     => $l->Subtotal, //subtotal
+                        'descuetos'   => $l->DiscPrcnt,//descuetos
+                        'total'       => $l->Total,//total
                     ];
                 })->toArray(),25 //25 arituclos por pagina para poder paginarlos
             ),

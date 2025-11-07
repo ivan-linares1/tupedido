@@ -554,20 +554,29 @@ $("#btnPedido").on("click", function() {
     $("#totalP").val($("#total").text().replace('$',''));
     $("#comentariosP").val($('#comentarios').val());
 
+    const $filas = $("#tablaArticulos tbody tr");
     let articulos = [];
-    $("#tablaArticulos tbody tr:not(:last)").each(function() {
+    $filas.each(function(index) {
+        // Si hay más de una fila y esta es la última → saltar
+        if ($filas.length > 1 && index === $filas.length - 1) return;
+
+        const itemCode = $(this).find(".itemcode").text().trim();
+        const baseLine = $(this).data('baseline') ?? null;
+        if (!itemCode) return; // ignorar filas vacías o plantillas
+
         articulos.push({
-            itemCode: $(this).find(".itemcode").text(),
+            baseLine,
+            itemCode,
             descripcion: $(this).find(".frgnName").text(),
             unidad: $(this).find(".medida").text(),
             precio: $(this).find(".precio").text(),
             descuentoPorcentaje: $(this).find(".descuentoporcentaje").text(),
             cantidad: $(this).find(".cantidad").val(),
             imagen: $(this).find(".imagen").data("imagen"),
-            ivaPorcentaje:IVA.Code,
-            subtotal:  $(this).find(".subtotal").text().replace('$', ''),
-            descuento:  $(this).find(".desMoney").text().replace('$', ''),
-            total:  $(this).find(".totalFinal").text().replace('$', '')
+            ivaPorcentaje: IVA.Code,
+            subtotal: $(this).find(".subtotal").text().replace('$', ''),
+            descuento: $(this).find(".desMoney").text().replace('$', ''),
+            total: $(this).find(".totalFinal").text().replace('$', '')
         });
     });
     

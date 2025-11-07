@@ -37,6 +37,12 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
             Nuevo Pedido
         @else
             PE - {{ $pedido->DocEntry }}
+            @if(Auth::user()->rol_id != 3)
+             @if($pedido->abierta == 'Y')
+                <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
+            @else
+                <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
+            @endif @endif
         @endif
     </h3>
 
@@ -152,11 +158,11 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
         </div>
     </div>
 
-    @if(isset($cotizacion) && $modo == 1)
+    @if($modo == 1 &&  isset($pedido->lineas[0]->BaseEntry))
         <span>
             Este pedido tiene relación con la
-            <a href="{{ route('detalles', ['id' => $cotizacion->DocEntry]) }}">
-                Cotización {{ $cotizacion->DocEntry }}
+            <a href="{{ route('detalles', ['id' => $pedido->lineas[0]->BaseEntry]) }}">
+                Cotización {{ $pedido->lineas[0]->BaseEntry }}
             </a>
         </span>
     @endif

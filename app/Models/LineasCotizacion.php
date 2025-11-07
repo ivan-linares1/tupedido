@@ -17,6 +17,7 @@ class LineasCotizacion extends Model
     protected $fillable = [
         'DocEntry',
         'LineNum', 
+        'BaseLine',
         'ItemCode',
         'U_Dscr', 
         'unitMsr2',

@@ -17,6 +17,7 @@ class LineasPedidos extends Model
      protected $fillable = [
         'DocEntry',
         'LineNum',
+        'BaseLine',
         'ObjType',
         'ItemCode',
         'U_Dscr',

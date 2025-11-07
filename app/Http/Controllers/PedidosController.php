@@ -27,6 +27,7 @@ class PedidosController extends Controller
         $buscar = $request->input('buscar');
         $fecha = $request->input('fecha');
         $mostrar = $request->input('mostrar', 10);
+        $Estatus = $request->input('Estatus');
 
         $query = Pedido::with(['vendedor', 'moneda'])
             ->orderBy('DocEntry', 'desc');
@@ -58,6 +59,14 @@ class PedidosController extends Controller
         //Filtro por fecha
         if ($fecha) {
             $query->whereDate('DocDate', $fecha);
+        }
+
+        if($Estatus == 'N')
+        {
+            $query->where('abierta', 'N');
+        }
+        else if($Estatus == 'Y'){
+             $query->where('abierta', 'Y');
         }
 
         //Paginación
@@ -210,10 +219,6 @@ class PedidosController extends Controller
 
         // Ver si este pedido tiene base en una cotización
         $cotizacion = null;
-        $baseEntryLinea = $pedido->lineas->first()?->BaseEntry;
-        if ($baseEntryLinea) {
-            $cotizacion = Cotizacion::find($baseEntryLinea);
-        }
 
         // Datos adicionales para la vista
         $configuracion = Configuracion::with('impuesto')->firstOrFail();
@@ -251,6 +256,7 @@ class PedidosController extends Controller
         if(!empty($preseleccionados['cliente'])){
             $clienteBase = Clientes::where('CardCode', $preseleccionados['cliente'])->first();
         }
+        
         // Retornar la vista
         return view('users.Pedido', compact('clienteBase', 'cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados', 'pedido'));
     }
@@ -334,11 +340,10 @@ class PedidosController extends Controller
             // Guardar líneas del pedido (RDR1)
             $lineNum = 0;
             foreach ($articulos as $art) {
-                
-
                 LineasPedidos::create([
                     'DocEntry'      => $pedido->DocEntry,
                     'LineNum'       => $lineNum,
+                    'BaseLine'      => $art['baseLine'] === null ? $lineNum : $art['baseLine'],
                     'ItemCode'      => $art['itemCode'],
                     'U_Dscr'        => $art['descripcion'] ?? '',
                     'unitMsr2'      => $art['unidad'] ?? '',
@@ -383,35 +388,35 @@ class PedidosController extends Controller
         // Buscamos el pedido
         $pedido = Pedido::with('lineas')->findOrFail($id);
 
-        // Si tiene cotización base
-        $cotizacion = Cotizacion::with('lineas')->find($pedido->BaseEntry);
-
         $data = [
            'logo' => resource_path('views/pdf/logo.png'),
             'titulo'  => 'PEDIDO',
             'subtitulo'  => 'Pedido',
             'numero'  => $pedido->DocEntry,
             'fecha'   => $pedido->DocDate,
-            'vendedor' => $pedido->vendedor->SlpName ?? ($cotizacion->vendedor->SlpName ?? ''),
-            'moneda'   => $pedido->moneda->Currency ?? ($cotizacion->moneda->Currency ?? ''),
-            'comentario' => $pedido->comment ?? ($cotizacion->comment ?? ''),
+            'vendedor' => $pedido->vendedor->SlpName ?? '',
+            'moneda'   => $pedido->moneda->Currency ?? '',
+            'comentario' => $pedido->comment ,
 
             'cliente' => [
-                'codigo'     => $pedido->CardCode ?? ($cotizacion->CardCode ?? ''),
-                'nombre'     => $pedido->CardName ?? ($cotizacion->CardName ?? ''),
-                'dir_fiscal' => $pedido->Address ?? ($cotizacion->Address ?? ''),
-                'dir_envio'  => $pedido->Address2 ?? ($cotizacion->Address2 ?? ''),
-                'email'      => $pedido->E_Mail ?? ($cotizacion->E_Mail ?? ''),
-                'telefono'   => $pedido->Phone1 ?? ($cotizacion->Phone1 ?? ''),
+                'codigo'     => $pedido->CardCode,
+                'nombre'     => $pedido->CardName,
+                'dir_fiscal' => $pedido->Address,
+                'dir_envio'  => $pedido->Address2,
+                'email'      => $pedido->E_Mail,
+                'telefono'   => $pedido->Phone1,
             ],
 
             'lineas' => array_chunk(
                 $pedido->lineas->map(function($l) {
                     return [
-                        'codigo'      => $l->ItemCode,
-                        'descripcion' => $l->U_Dscr,
-                        'cantidad'    => $l->Quantity,
-                        'precio'      => $l->Price,
+                        'codigo'      => $l->ItemCode,//clave
+                        'descripcion' => $l->U_Dscr, //descripcion
+                        'cantidad'    => $l->Quantity, //cantidad
+                        'precio'      => $l->Price,//precio unitario
+                        'importe'     => $l->Subtotal, //subtotal
+                        'descuetos'   => $l->DiscPrcnt,//descuetos
+                        'total'       => $l->Total,//total
                     ];
                 })->toArray(), 25
             ),
