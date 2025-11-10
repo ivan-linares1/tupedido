@@ -48,10 +48,9 @@
             <table id="tablaMarcas" class="table table-hover table-striped align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th>ItmsGrpCod</th>
-                        <th>ItmsGrpNam</th>
+                        <th>Codigo</th>
+                        <th>nombre de la Marca</th>
                         <th>Estatus</th>
-                        <th>Object</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,8 +58,17 @@
                         <tr>
                             <td>{{ $item->ItmsGrpCod }}</td>
                             <td>{{ $item->ItmsGrpNam }}</td>
-                            <td class="status-text">{{ $item->Locked == 'N' ? 'Activo' : 'Inactivo' }}</td>
-                            <td>{{ $item->Object }}</td>
+                            <td class="status-text">
+                                @if ($item->Locked === 'N')
+                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                        <i class="bi bi-check-circle me-1"></i> Activo
+                                    </span>
+                                @else
+                                    <span class="badge bg-danger rounded-pill px-3 py-2">
+                                        <i class="bi bi-x-circle me-1"></i> Inactivo
+                                    </span>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
