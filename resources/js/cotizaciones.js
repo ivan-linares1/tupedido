@@ -145,9 +145,11 @@ function actualizarDatosCliente() {
     const cliente = $('#selectCliente').select2('data')[0]; // obtiene el cliente seleccionado
     if (!cliente) return;
 
-    const phone = cliente.phone || 'Sin teléfono';
-    const email = cliente.email || 'Sin correo';
-    const cardCode = cliente.id;
+    // Si es un <option>, saca los data-* desde dataset
+    const el = cliente.element || cliente; // soporte por si viene del objeto interno
+    const phone = el.dataset?.phone || 'Sin teléfono';
+    const email = el.dataset?.email || 'Sin correo';
+    const cardCode = cliente.id || el.value;
 
     let emailFormatted = email.split(',').join('<br>');
     if (email !== 'Sin correo') {
@@ -473,9 +475,65 @@ $(document).ready(function() {
 });
 
 // ================================
+// Validar campos
+// ================================
+function validar(e) {
+    let camposInvalidos = [];
+
+    const $cliente = $("#selectCliente");
+    const $moneda = $("#selectMoneda");
+    const $vendedor = $("#selectVendedor");
+
+    const clienteVal = $cliente.val();
+    const monedaVal = $moneda.val();
+
+    // Validar Cliente
+    if (!clienteVal) {
+        $cliente.next('.select2').find('.select2-selection').addClass('is-invalid');
+        camposInvalidos.push("Cliente");
+    } else {
+        $cliente.next('.select2').find('.select2-selection').removeClass('is-invalid');
+    }
+
+    // Validar Moneda
+    if (!monedaVal) {
+        $moneda.addClass('is-invalid');
+        camposInvalidos.push("Moneda");
+    } else {
+        $moneda.removeClass('is-invalid');
+    }
+
+    // Validar Vendedor (si no está oculto)
+    if ($vendedor.is(":visible") && !$vendedor.val()) {
+        $vendedor.addClass('is-invalid');
+        camposInvalidos.push("Vendedor");
+    } else {
+        $vendedor.removeClass('is-invalid');
+    }
+
+    //  Mostrar alerta si hay campos vacíos
+    if (camposInvalidos.length > 0) {
+        e.preventDefault();
+
+        Swal.fire({
+            icon: "warning",
+            title: "Campos incompletos",
+            html: `Por favor completa los siguientes campos:<br><b>${camposInvalidos.join(", ")}</b>`,
+            confirmButtonText: "Entendido",
+            confirmButtonColor: "#d33"
+        });
+
+        return false;
+    }
+
+    return true; 
+}
+// ================================
 // GUARDAR COTIZACIÓN
 // ================================
-$("#guardarCotizacion").on("click", function() {
+$("#guardarCotizacion").on("click", function(e) {
+    if (!validar(e)) return;
+
     // Llenar inputs ocultos con valores de la página
     const cliente = $('#selectCliente').select2('data')[0] || {};
     const $option = $('#selectCliente').find(`option[value="${cliente.id}"]`);
@@ -528,7 +586,9 @@ $("#guardarCotizacion").on("click", function() {
 // ================================
 // GUARDAR PEDIDO
 // ================================
-$("#btnPedido").on("click", function() {
+$("#btnPedido").on("click", function(e) {
+    if (!validar(e)) return;
+
     // Llenar inputs ocultos con valores de la página
     const cliente = $('#selectCliente').select2('data')[0] || {};
     const $option = $('#selectCliente').find(`option[value="${cliente.id}"]`);
