@@ -47,7 +47,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
             <h4>CLIENTES</h4>
             <div class="mb-3">
                 <label>Cliente</label>
-                <select class="form-select" name="cliente" id="selectCliente" @if($modo == 1 || in_array(Auth::user()->rol_id, [3])) disabled @endif >
+                <select class="form-select" name="cliente" id="selectCliente" @if($modo == 1 || in_array(Auth::user()->rol_id, [3])) disabled @endif required>
                     <option value="" selected disabled>Selecciona un cliente...</option>
                 </select>
             </div>
@@ -242,12 +242,16 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
             <a href="{{ route('NuevaCotizacion', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-secondary">
                 <i class="bi bi-pencil-square"></i> Editar
             </a>
-            {{--<a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-success">
-                <i class="bi bi-bag"></i> Pedido
-            </a>--}}
-             <button type="button" id="btnPedido" class="btn btn-success">
-                <i class="bi bi-save"></i> Crear Pedido
-            </button>
+            @if($preseleccionados['crearPedido'] === false)
+                <div class="d-inline-block position-relative">
+                <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Crear Pedido</button>
+                <small class="mensaje-cambio text-danger">⚠️ La cotizacion ya caduco editala</small>
+            </div>
+            @else
+                <button type="button" id="btnPedido" class="btn btn-success">
+                    <i class="bi bi-save"></i> Crear Pedido
+                </button>
+            @endif
         @endif
     @endif
 </div>

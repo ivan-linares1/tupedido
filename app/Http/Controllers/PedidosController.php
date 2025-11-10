@@ -145,7 +145,6 @@ class PedidosController extends Controller
                     // Clonamos el objeto artículo y agregamos los datos de la cotización
                     $artClone = clone $articulo;
                     $artClone->Quantity  = $linea->Quantity;
-
                     $lineasComoArticulos[] = $artClone;
                 }
             }
@@ -336,6 +335,7 @@ class PedidosController extends Controller
             if (!$pedido || !$pedido->DocEntry) {
                 return back()->with('error', 'No se pudo generar el pedido.');
             }
+            
 
             // Guardar líneas del pedido (RDR1)
             $lineNum = 0;
