@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Ivan-Linares1/kombishop/main/public/kombishop-logo.png" width="300" alt="KombiShop Logo" />
+  <img src="https://raw.githubusercontent.com/ivan-linares1/kombishop/main/resources/views/pdf/logo.png" width="200" alt="Logo" />
 </p>
 
 <h1 align="center">KombiShop</h1>
