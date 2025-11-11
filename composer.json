@@ -20,7 +20,8 @@
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
         "pestphp/pest": "^3.8",
-        "pestphp/pest-plugin-laravel": "^3.2"
+        "pestphp/pest-plugin-laravel": "^3.2",
+        "renatomarinho/laravel-page-speed": "^4.3"
     },
     "autoload": {
         "psr-4": {

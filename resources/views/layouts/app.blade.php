@@ -1,3 +1,4 @@
+{{--RECORDAR E IR AL BODY PARA QUE PUEDAMOS DAR ISPECCIONAR E IR AL JAVASCRIPT DE VALIDACIONES PARA PODER DAR CLICK EN F12--}}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -28,7 +29,7 @@
     <!-- Importación de CSS -->
     @vite(['resources/css/variables.css', 'resources/css/style.css', 'resources/js/validaciones.js', 'resources/css/catalogos.css'])
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     {{-- Sidebar --}}
     @include('components.sidebar')

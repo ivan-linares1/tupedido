@@ -51,3 +51,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+
+
+//Bloquea la tecla f12 del navegador
+document.onkeydown = function(e) {
+    // Bloquea F12
+    if (e.keyCode === 123) {
+        return false;
+    }
+    // Bloquea la combinación Ctrl+Shift+I
+    if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+        return false;
+    }
+    // Bloquea la combinación Ctrl+U (ver código fuente)
+    if (e.ctrlKey && e.keyCode === 85) {
+        return false;
+    }
+    if (
+        e.keyCode == 123 || // F12
+        (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || // Ctrl+Shift+I / J
+        (e.ctrlKey && e.keyCode == 85) // Ctrl+U
+    ) {
+        e.preventDefault();
+        return false;
+    }
+
+};
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+
+
