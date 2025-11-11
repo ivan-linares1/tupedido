@@ -46,7 +46,7 @@
                         <img src="{{ $linea->imagen?->Ruta_imagen ?? asset('images/default.png') }}" alt="Imagen" style="width: 50px; height: auto;">
                     </td>
                     <td class="medida">{{ $linea->unitMsr2 ?? '' }}</td>
-                    <td class="precio">{{ number_format($linea->Price ?? 0, 2) }}</td>
+                    <td class="precio">{{ number_format($linea->Price ?? 0, 2, '.', '') }}</td>
                     <td class="moneda">
                         @if(isset($cotizacion))
                             {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
@@ -54,13 +54,13 @@
                             {{ $monedas->firstWhere('Currency_ID', $pedido->DocCur)->Currency ?? '' }}
                         @endif
                     </td>
-                    <td class="ivaPorcentaje">IVA {{ number_format($linea->impuesto->Rate, 0) }} %</td> 
-                    <td>{{number_format($linea->Quantity,0)}} <input type="hidden" value="{{number_format($linea->Quantity,0)}}" min="1" class="form-control form-control-sm cantidad"></td>
+                    <td class="ivaPorcentaje">IVA {{ number_format($linea->impuesto->Rate, 0, '.', '') }} %</td> 
+                    <td>{{number_format($linea->Quantity,0)}} <input type="hidden" value="{{number_format($linea->Quantity,0 , '.', '')}}" min="1" class="form-control form-control-sm cantidad"></td>
                     <td class="promocion">Promociones</td>
-                    <td class="subtotal">${{ number_format($linea->Subtotal, 2)}}</td>
-                    <td class="descuentoporcentaje" readonly>{{ number_format($linea->DiscPrcnt, 0) }} %</td>
-                    <td class="desMoney" readonly>${{ number_format($linea->Descuento, 2) }}</td>
-                    <td class="totalFinal" readonly>${{ number_format($linea->Total, 2) }}</td>
+                    <td class="subtotal">${{ number_format($linea->Subtotal, 2, '.', '')}}</td>
+                    <td class="descuentoporcentaje" readonly>{{ number_format($linea->DiscPrcnt, 0, '.', '') }} %</td>
+                    <td class="desMoney" readonly>${{ number_format($linea->Descuento, 2, '.', '') }}</td>
+                    <td class="totalFinal" readonly>${{ number_format($linea->Total, 2, '.', '') }}</td>
                 </tr>
             @endforeach
             <tr hidden > </tr>
