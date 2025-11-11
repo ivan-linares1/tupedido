@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/ivan-linares1/tupedido/main/resources/views/pdf/logo.png" width="300" alt="Logo" />
 </p>
 
-<h1 align="center">KombiShop</h1>
+<h1 align="center"> KombiShop </h1>
 <p align="center">
   <strong>Tu tienda online eficiente y moderna construida con Laravel y tecnologías punteras.</strong>
 </p>
