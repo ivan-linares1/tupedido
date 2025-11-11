@@ -12,64 +12,11 @@ use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\SincronizacionController;
 use App\Models\configuracion;
 
-//****************************************************************************************************************************************** */
-/*
-// Enviar monedas
-Route::post('/enviar-monedas', [App\Http\Controllers\EnvioDatosController::class, 'enviarMonedasExternas'])->withoutMiddleware('web');
-
-// Receptor de prueba
-Route::post('/receptor', [App\Http\Controllers\EnvioDatosController::class, 'receptor'])->withoutMiddleware('web');
-
-
- Route::get('/Cotizaciones/EnviarTodas', [CotizacionesController::class, 'enviarTodas'])
-    ->name('cotizaciones.enviarTodas');
-
-Route::get('/probar-xml', function () {
-    $cotizacion = (object)[
-        'CardCode' => 'C0001',
-        'CardName' => 'Cliente Demo',
-        'DocDate' => '2025-10-27',
-        'DocDueDate' => '2025-11-05',
-        'Total' => '12500.50'
-    ];
-
-    $articulos = [
-        [
-            'itemCode' => 'A100',
-            'descripcion' => 'Producto A',
-            'cantidad' => 2,
-            'precio' => '5000'
-        ],
-        [
-            'itemCode' => 'B200',
-            'descripcion' => 'Producto B',
-            'cantidad' => 1,
-            'precio' => '2500.50'
-        ]
-    ];
-
-    $controller = new App\Http\Controllers\CotizacionesController();
-    $resultado = $controller->enviarCotizacionASMX($cotizacion, $articulos);
-
-    return "<pre>$resultado</pre>";
-});
-
-
-//Route::get('/enviar-cotizaciones', [App\Http\Controllers\CotizacionesController::class, 'enviarCotizacionesReales']);
-
-
-
-Route::get('/enviar-cotizaciones', [CotizacionesController::class, 'enviarCotizacionesReales']);
-
-
-*/
-
-//Route::get('/enviar-cotizaciones', [CotizacionesController::class, 'enviarTodasLasCotizaciones']);
-//****************************************************************************************************************************************** */
 Route::get('/', fn() => redirect()->route('dashboard'));
 
-// RUTAS PROTEGIDAS POR AUTENTICACIÓN
+//TODAS LAS RUTAS PROTEGIDAS POR AUTENTICACIÓN 
 Route::middleware('auth')->group(function () {
+//RUTAS A LAS QUE TODOS EN EL SISTEMA TIENEN ACCESO 
     //DASHBOARD
     Route::get('/Dashboard', function () {
         $configuracionVacia = configuracion::count() === 0;//Variable booleana si es true significa que no tenemos configuracion y si es false si exite la configuracion
@@ -96,20 +43,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfPedido'])->name('pedido.pdf');
     });
 
+    //Ruta para la consulta AJAX de los clientes con su paginacion correspondiente
     Route::get('/clientes/buscar', [ClienteController::class, 'buscar'])->name('clientes.buscar');  
-
 
     //CATÁLOGOS (Artículos, Clientes)
     Route::prefix('Catalogos')->group(function () {
         // Artículos
         Route::get('/Articulos', [ArticuloController::class, 'index'])->name('articulos');
-
         // Clientes
         Route::get('/Clientes', [ClienteController::class, 'index'])->name('clientes');
     });
 
 
-
+//TODAS LAS RUTAS PROTEGIDAS POR ROLES SON RUTAS QUE UNICAMENTE ESTOS ROLES PUEDEN ACCEDER
     //ADMINISTRACIÓN (Roles 1 y 2)
     Route::middleware(['role:1,2'])->group(function () {
 
@@ -151,7 +97,7 @@ Route::middleware('auth')->group(function () {
 
 
     
-    // USUARIOS NORMALES Y VENDEDORES (Roles 3 y 4)
+    // USUARIOS CLIENTES Y VENDEDORES (Roles 3 y 4) PENDIENTES*****
     Route::middleware(['role:3,4'])->group(function () { });
 });
 require __DIR__ . '/auth.php';

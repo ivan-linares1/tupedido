@@ -51,7 +51,7 @@
         </div>
     </div>
 </div>
-
+<!-- ****************************************************************************************************************************************************** -->
 <!-- MODAL NUEVO CLIENTE -->
 <div class="modal fade" id="modalNuevoUsuario" tabindex="-1" aria-labelledby="modalNuevoUsuarioLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -141,7 +141,7 @@
         </div>
     </div>
 </div>
-
+<!-- ****************************************************************************************************************************************************** -->
 <!-- MODAL NUEVO VENDEDOR -->
 <div class="modal fade" id="modalNuevoVendedor" tabindex="-1" aria-labelledby="modalNuevoVendedorLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

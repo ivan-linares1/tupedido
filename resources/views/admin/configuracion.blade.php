@@ -68,7 +68,7 @@
         </div>
     </div>
 </div>
-
+<!-- *********************************************************************************************************************************** -->
 <!-- Modal para editar -->
 <div class="modal fade" id="editarConfigModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">

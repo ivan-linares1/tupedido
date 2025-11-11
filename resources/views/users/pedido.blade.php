@@ -4,6 +4,7 @@
 
 @section('contenido')
 
+<!-- Importación de datos de preseleccionados entre la vista y el javascript -->
 <script>
 window.preseleccionadoCliente = @json($preseleccionados['cliente'] ?? null);
 window.preseleccionadoClienteText = @json( $preseleccionados['cliente'] ? ($clienteBase->CardCode.' - '.$clienteBase->CardName) : null );
@@ -168,7 +169,8 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
     @endif
 </div>
 
-<!-- FORMULARIO -->
+
+{{--FORMULARIO para mnadar los valores a guarda el pedido --}}  
 <form id="formCotizacionPedido" action="{{ route('PedidoSave') }}" method="POST">
     @csrf
     <input type="hidden" name="BaseEntry" id="BaseEntryP" value="{{ $cotizacion->DocEntry ?? ''}}">
@@ -194,28 +196,29 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
 </form>
 
 <div class="container my-4 d-flex justify-content-start gap-2">
-    @if($modo == 0)
+    @if($modo == 0){{--Cuando es modo nuevo que es de creacion del pedido se tiene los botones de cancelar y crear pedido--}}
         <button type="button" class="btn btn-danger" onclick="window.location='{{ url('/') }}'">
             <i class="bi bi-x-circle"></i> Cancelar
         </button>
 
-        @php
+        @php //se verifica si existen modenas con su respectivo combio del dia 
             $monedaSinCambio = collect($monedas)->every(fn($m) => $m->cambios->isEmpty());
         @endphp
 
-        @if($monedaSinCambio)
+        @if($monedaSinCambio) {{--verificamos la existencia de monedas del dia si es verdadero no existen monedas y se procede a deshabilñitar el boton de crear pedido y se muestra un mensaje
+        con el error --}}
             <div class="d-inline-block position-relative">
-                <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>
+                <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Crear Pedido</button>
                 <small class="mensaje-cambio text-danger">
                     ⚠️ No existen tipos de cambio registrados para hoy. Contacte a soporte.
                 </small>
             </div>
-        @else
+        @else {{--si si existen monedas se habilita el boton de crear pedido--}}
             <button type="button" id="btnPedido" class="btn btn-success">
                 <i class="bi bi-save"></i> Crear Pedido
             </button>
         @endif
-    @else
+    @else {{--Cuando es modo 1 que es de detalles solo se tiene disponible el boton de pdf--}}
         <button type="button" class="btn btn-danger" onclick="window.open('{{ route('pedido.pdf', $pedido->DocEntry) }}', '_blank')">
             <i class="bi bi-filetype-pdf"></i> PDF
         </button>
@@ -223,28 +226,28 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
 </div>
 
 <style>
-.mensaje-cambio {
-    position: absolute;
-    top: 105%;
-    left: 0;
-    background: rgba(255, 245, 245, 0.95);
-    border: 1px solid #dc3545;
-    border-radius: 10px;
-    padding: 6px 10px;
-    font-size: 0.85rem;
-    color: #dc3545;
-    font-weight: 500;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    white-space: nowrap;
-    z-index: 10;
-    opacity: 0;
-    transform: translateY(5px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.d-inline-block:hover .mensaje-cambio {
-    opacity: 1;
-    transform: translateY(0);
-}
+    .mensaje-cambio {
+        position: absolute;
+        top: 105%;
+        left: 0;
+        background: rgba(255, 245, 245, 0.95);
+        border: 1px solid #dc3545;
+        border-radius: 10px;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        color: #dc3545;
+        font-weight: 500;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        white-space: nowrap;
+        z-index: 10;
+        opacity: 0;
+        transform: translateY(5px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .d-inline-block:hover .mensaje-cambio {
+        opacity: 1;
+        transform: translateY(0);
+    }
 </style>
 
 @endsection
