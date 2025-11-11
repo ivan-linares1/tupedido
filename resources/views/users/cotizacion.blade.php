@@ -4,6 +4,7 @@
 
 @section('contenido')
 
+<!-- Importación de datos de preseleccionados entre la vista y el javascript -->
 <script>
 window.preseleccionadoCliente = @json($preseleccionados['cliente'] ?? null);
 window.preseleccionadoClienteText = @json( $preseleccionados['cliente'] ? ($clienteBase->CardCode.' - '.$clienteBase->CardName) : null );
@@ -183,7 +184,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
     <input type="hidden" name="articulos" id="articulosH">
 </form>
 
-<!-- formulario para guardar la cotizacion -->
+<!-- formulario para guardar el pedido de cotizacion hacia pedido -->
 <form id="formCotizacionPedido" action="{{ route('PedidoSave') }}" method="POST">
     @csrf
     <input type="hidden" name="BaseEntry" id="BaseEntryP" value="{{ $cotizacion->DocEntry ?? ''}}">
@@ -210,30 +211,31 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
 
 
 <div class="container my-4 d-flex justify-content-start gap-2">
-    @if($modo == 0)
+    @if($modo == 0){{--Cuando es modo nuevo que es de creacion de la cotizacion se tiene los botones de cancelar y guardar--}}
         <button type="button" class="btn btn-danger" onclick="window.location='{{ url('/') }}'">
             <i class="bi bi-x-circle"></i> Cancelar
         </button>
 
-        @if($moneda->cambios->isEmpty())
+        @if($moneda->cambios->isEmpty()){{--verificamos la existencia de monedas del dia si no existen se procede a deshabilñitar el boton de guardar y se muestra un mensaje
+        con el error --}}
             <div class="d-inline-block position-relative">
                 <button class="btn btn-primary" disabled><i class="bi bi-save"></i> Guardar</button>
-                <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>
+                {{--<button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>--}}
                 <small class="mensaje-cambio text-danger">⚠️ Contacte a soporte: no existen tipos de cambio registrados para hoy.</small>
             </div>
-        @else
+        @else {{--si si existen monedas se habilita el boton de guardar--}}
             <button type="button" id="guardarCotizacion" class="btn btn-primary Save">
                 <i class="bi bi-save"></i> Guardar
             </button>
         @endif
-    @else
+    @else 
         <button type="button" class="btn btn-danger" onclick="window.open('{{ route('cotizacion.pdf', $cotizacion->DocEntry ?? 0) }}','_blank')">
             <i class="bi bi-filetype-pdf"></i> PDF
         </button>
         @if($moneda->cambios->isEmpty() || $pedido || $cotizacion->abierta  === 'N')
             <div class="d-inline-block position-relative">
                 <button class="btn btn-secondary" disabled><i class="bi bi-pencil-square"></i> Editar</button>
-                <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Pedido</button>
+                <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Crear Pedido</button>
                 <small class="mensaje-cambio text-danger">
                     ⚠️ {!! $pedido ? 'Ya tiene un pedido creado.' : 'Contacte a soporte: no existen tipos de cambio registrados para hoy o Se Cerro la Cotizacion.' !!}
                 </small>

@@ -1,20 +1,22 @@
+{{-- Version actual de la barra de navegacion vertical--}}
 <nav class="sidebar d-flex flex-column">
-    <!-- Botón cerrar sidebar (icono flecha) -->
+<!-- Botón cerrar sidebar (icono flecha) para menu hamburguesa-->
     <button id="sidebarClose" class="d-md-none">
         <i class="bi bi-arrow-left"></i>
     </button>
 
+{{-- titulo y logo --}}
     <div class="logo-section text-center">
         <a href="{{ route('dashboard') }}"><img src="{{ asset('storage/logos/logocarrito.jpg') }}" alt="Logo" class="logo-img mb-2"></a>
         <a href="https://www.kombitec.com.mx/" class="brand-text d-block">KOMBITEC</a>
     </div>
-
+{{-- Dashboard --}}
     <ul class="nav flex-column px-2">
         <li class="nav-item">
             <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
         </li>
 
-        {{-- Ventas con submenu --}}
+{{-- Ventas con submenu --}}
         <li class="nav-item">
             <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuVentas" role="button" aria-expanded="false" aria-controls="submenuVentas">
                 Ventas
@@ -43,7 +45,7 @@
             </div>
         </li>
 
-        {{-- Productos/Servicios con submenu --}}
+{{-- Productos/Servicios con submenu --}}
         <li class="nav-item">
             <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuProductos" role="button" aria-expanded="false" aria-controls="submenuProductos">
             Productos/Servicios
@@ -67,7 +69,7 @@
             </div>
         </li>
 
-        {{-- Configuracion general --}}
+{{-- Configuracion general --}}
         @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
         <li class="nav-item">
             <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionGeneral" role="button" aria-expanded="false" aria-controls="submenuConfiguracionGeneral">

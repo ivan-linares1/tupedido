@@ -26,47 +26,50 @@
         </thead>
 
         <tbody>
+            {{-- Modo 1: Esto es solo para poder ver los detalles de una cotizacion o pedido y se muestran todos los datos de la base de datos--}}
              @if(isset($modo) && $modo == 1)
-            @php
-                // Determinar qué líneas usar: cotización o pedido
-                $lineas = collect(); // colección vacía por defecto
+                @php
+                    // Determinar qué líneas usar: cotización o pedido
+                    $lineas = collect(); // colección vacía por defecto
+                    
+                    if(isset($cotizacion) && $cotizacion->lineas) {
+                        $lineas = $cotizacion->lineas;
+                    } elseif( isset($pedido) && $pedido->lineas) {
+                        $lineas = $pedido->lineas;
+                    }
+                @endphp
 
-                if(isset($modo) && $modo == 1 && isset($cotizacion) && $cotizacion->lineas) {
-                    $lineas = $cotizacion->lineas;
-                } elseif(isset($modo) && $modo == 1 && isset($pedido) && $pedido->lineas) {
-                    $lineas = $pedido->lineas;
-                }
-            @endphp
-
-            @foreach($lineas as $linea)
-                <tr data-BaseLine="{{ $linea->BaseLine }}"> {{--Para cotizaciones existentes manden el BaseLine--}}
-                    <td class="itemcode">{{ $linea->ItemCode }}</td>
-                    <td class="frgnName">{{ $linea->U_Dscr ?? '' }}</td>
-                    <td class="imagen" data-imagen="{{$linea->Id_imagen}}">
-                        <img src="{{ $linea->imagen?->Ruta_imagen ?? asset('images/default.png') }}" alt="Imagen" style="width: 50px; height: auto;">
-                    </td>
-                    <td class="medida">{{ $linea->unitMsr2 ?? '' }}</td>
-                    <td class="precio">{{ number_format($linea->Price ?? 0, 2, '.', '') }}</td>
-                    <td class="moneda">
-                        @if(isset($cotizacion))
-                            {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
-                        @elseif(isset($pedido))
-                            {{ $monedas->firstWhere('Currency_ID', $pedido->DocCur)->Currency ?? '' }}
-                        @endif
-                    </td>
-                    <td class="ivaPorcentaje">IVA {{ number_format($linea->impuesto->Rate, 0, '.', '') }} %</td> 
-                    <td>{{number_format($linea->Quantity,0)}} <input type="hidden" value="{{number_format($linea->Quantity,0 , '.', '')}}" min="1" class="form-control form-control-sm cantidad"></td>
-                    <td class="promocion">Promociones</td>
-                    <td class="subtotal">${{ number_format($linea->Subtotal, 2, '.', '')}}</td>
-                    <td class="descuentoporcentaje" readonly>{{ number_format($linea->DiscPrcnt, 0, '.', '') }} %</td>
-                    <td class="desMoney" readonly>${{ number_format($linea->Descuento, 2, '.', '') }}</td>
-                    <td class="totalFinal" readonly>${{ number_format($linea->Total, 2, '.', '') }}</td>
-                </tr>
-            @endforeach
-            <tr hidden > </tr>
+                @foreach($lineas as $linea)
+                    <tr data-BaseLine="{{ $linea->BaseLine }}"> {{--Para cotizaciones existentes manden el BaseLine--}}
+                        <td class="itemcode">{{ $linea->ItemCode }}</td>
+                        <td class="frgnName">{{ $linea->U_Dscr ?? '' }}</td>
+                        <td class="imagen" data-imagen="{{$linea->Id_imagen}}">
+                            <img src="{{ $linea->imagen?->Ruta_imagen ?? asset('images/default.png') }}" alt="Imagen" style="width: 50px; height: auto;">
+                        </td>
+                        <td class="medida">{{ $linea->unitMsr2 ?? '' }}</td>
+                        <td class="precio">{{ number_format($linea->Price ?? 0, 2, '.', '') }}</td> {{--con '.', '' se forza al formato de numero a que se use . para serapar decimales y ''para quitar  ,--}}
+                        <td class="moneda">
+                            @if(isset($cotizacion))
+                                {{ $monedas->firstWhere('Currency_ID', $cotizacion->DocCur)->Currency ?? '' }}
+                            @elseif(isset($pedido))
+                                {{ $monedas->firstWhere('Currency_ID', $pedido->DocCur)->Currency ?? '' }}
+                            @endif
+                        </td>
+                        <td class="ivaPorcentaje">IVA {{ number_format($linea->impuesto->Rate, 0, '.', '') }} %</td> 
+                        <td>{{number_format($linea->Quantity,0)}} <input type="hidden" value="{{number_format($linea->Quantity,0 , '.', '')}}" min="1" class="form-control form-control-sm cantidad"></td>
+                        <td class="promocion">Promociones</td>
+                        <td class="subtotal">${{ number_format($linea->Subtotal, 2, '.', '')}}</td>
+                        <td class="descuentoporcentaje" readonly>{{ number_format($linea->DiscPrcnt, 0, '.', '') }} %</td>
+                        <td class="desMoney" readonly>${{ number_format($linea->Descuento, 2, '.', '') }}</td>
+                        <td class="totalFinal" readonly>${{ number_format($linea->Total, 2, '.', '') }}</td>
+                    </tr>
+                @endforeach
+                {{--Se agrega este renglon oculto porque cuando se hace nueva se omite el renglo ultimo que es donde esta el botn de agregar articulo y en esta parte se simula ese renglon--}}
+                <tr hidden > </tr> 
             @endif
 
-            {{-- Modo 0: agregar artículos automáticamente desde lineasComoArticulos --}}
+            {{-- Modo 0: agregar artículos automáticamente desde lineasComoArticulos cuando se cuenta con preseleccionados 
+            aqui es cuando se abre en modo detalles una cotizacion y se va a editar que se recalculan los datos--}}
             @if(isset($modo) && $modo == 0 && isset($lineasComoArticulos) && count($lineasComoArticulos) > 0)
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
@@ -76,6 +79,7 @@
                 </script>
             @endif
 
+            {{-- Modo 0: agregar artículos desde cero cuando es una cotizacion o nuevo pedido--}}
             @if(isset($modo) && $modo == 0)
                 <!-- Botón para agregar nuevos artículos -->
                 <tr>
@@ -90,6 +94,7 @@
     </table>
 </div>
 
+<!-- *************************************************************************************************************************************************** -->
 <!-- Totales y comentarios-->
 <div class="row mt-3">
     <div class="col-md-6">
@@ -180,6 +185,7 @@
     </div>
 </div>
 
+<!-- *************************************************************************************************************************************************** -->
 <!-- Modal Artículos -->
 <div class="modal fade" id="modalArticulos" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">

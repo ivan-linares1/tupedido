@@ -1,3 +1,6 @@
+//NO MOVERLE SI FUNCIONA Y NO SE COMO, CUALQUIER INTENTO DE MOVERLE VAS A LLORAR POR 1 CENTAVO.
+//Aqui se maneja todo lo que tiene que ver con cotizaciones y pedidos ya que comparten misma logica esta parte es muy sensible ya que hace las cuentas matematicas
+
 // ================================
 // FECHA MÍNIMA PARA ENTREGA
 // ================================

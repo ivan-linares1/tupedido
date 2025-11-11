@@ -1,3 +1,5 @@
+//Aqui se validan los alerts, los imputs y la animacion de cargando
+
 //solo permite que se escriban numeros en los inputs
 $(document).on('input', '.cantidad, #telefono', function() {
     this.value = this.value.replace(/[^0-9]/g, ''); 
@@ -9,6 +11,7 @@ $(document).on('keydown', '.cantidad, #telefono', function(e) {
         e.preventDefault();
     }
 });
+
 
 //acciones de las alerts 
 document.addEventListener('DOMContentLoaded', function() {
@@ -26,6 +29,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }, 6000);
 });
+
+
 
 //valida las animaciones de cargando...
 document.addEventListener('DOMContentLoaded', function() {

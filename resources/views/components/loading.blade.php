@@ -1,4 +1,6 @@
-<!-- Componente Loading Mejorado -->
+<!-- Componente Loading Mejorado se agrego de intenet solo se modifico el numero de pelotas y el overlay de pantalla completa
+https://www.cadabullos.com/blog/como-crear-loader-anmimado-usando-solo-css-ejemplos -->
+
 <div id="loading" style="display:none;">
     <div class="loading-overlay">
         <div class="cargando">

@@ -1,4 +1,4 @@
-{{-- resources/views/components/navbar-horizontal.blade.php --}}
+{{-- resources/views/components/navbar-horizontal.blade.php para una proxima version donde quieran el menu de navegacion arriba--}}
 <nav class="navbar-horizontal shadow-sm">
     <div class="container">
         <!-- Logo izquierdo -->

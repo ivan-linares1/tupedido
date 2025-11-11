@@ -4,14 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ config('app.title') }}</title>
+    <title>@yield('title', config('app.name'))</title>
 
     <!-- jQuery (obligatorio para Select2) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> {{--Estilos--}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"> {{--Iconos--}}
 
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -22,9 +22,9 @@
     <!--  Swal.fire alertas con estilos -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!--  decimal.js importacion de la libreria que ayuda con los decimales limpios -->
     <script src="https://cdn.jsdelivr.net/npm/decimal.js@10.4.3/decimal.min.js"></script>
     
-
     <!-- Importación de CSS -->
     @vite(['resources/css/variables.css', 'resources/css/style.css', 'resources/js/validaciones.js', 'resources/css/catalogos.css'])
 </head>
@@ -60,35 +60,39 @@
     <div class="overlay" id="overlay"></div>
 
     @stack('scripts')
+        <!-- Bootstrap JS Bundle -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Script toggle sidebar para cuando es responsivo que se convierte en hamburguesa-->
+        <script>
+            //El "overlay" es una capa semitransparente que se muestra detrás del sidebar (o cualquier panel flotante) para oscurecer el resto de la pantalla
+            // Espera a que el DOM esté completamente cargado antes de ejecutar el código
+            document.addEventListener('DOMContentLoaded', function () {
+                // Referencias a los elementos del DOM
+                const sidebar = document.querySelector('.sidebar'); // El panel lateral
+                const toggleBtn = document.getElementById('sidebarToggle'); // Botón para abrir el sidebar
+                const closeBtn = document.getElementById('sidebarClose'); // Botón para cerrarlo (si existe)
+                const overlay = document.getElementById('overlay'); // Capa oscura detrás del sidebar
 
-    
-    <!-- Script toggle sidebar -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.querySelector('.sidebar');
-        const toggleBtn = document.getElementById('sidebarToggle');
-        const closeBtn = document.getElementById('sidebarClose');
-        const overlay = document.getElementById('overlay');
+                // Función para mostrar el sidebar y activar el overlay
+                const openSidebar = () => {
+                    sidebar.classList.add('sidebar-show'); // Añade la clase que lo hace visible
+                    overlay.classList.add('active'); // Muestra el fondo oscuro
+                };
 
-        const openSidebar = () => {
-            sidebar.classList.add('sidebar-show');
-            overlay.classList.add('active');
-        };
+                // Función para ocultar el sidebar y desactivar el overlay
+                const closeSidebar = () => {
+                    sidebar.classList.remove('sidebar-show'); // Oculta el sidebar
+                    overlay.classList.remove('active'); // Oculta el fondo oscuro
+                };
 
-        const closeSidebar = () => {
-            sidebar.classList.remove('sidebar-show');
-            overlay.classList.remove('active');
-        };
+                // Asigna eventos de clic para abrir y cerrar el sidebar
+                if (toggleBtn) toggleBtn.addEventListener('click', openSidebar); // Abre al hacer clic
+                if (closeBtn) closeBtn.addEventListener('click', closeSidebar); // Cierra al hacer clic
+                if (overlay) overlay.addEventListener('click', closeSidebar); // Cierra si se hace clic fuera
+            });
+        </script>
 
-        if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
-        if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-        if (overlay) overlay.addEventListener('click', closeSidebar);
-    });
-    </script>
-
-@stack('scripts')
+    @stack('scripts')
 </body>
 </html>
