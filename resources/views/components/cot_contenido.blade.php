@@ -201,6 +201,8 @@
                         <tr>
                             <th>Código</th>
                             <th>Descripción</th>
+                            <th>Modelo</th>
+                            <th>Marca</th>
                             <th>Precio</th>
                             <th>Imagen</th>
                             <th></th>
@@ -211,6 +213,8 @@
                             <tr>
                                 <td>{{ $articuloM->ItemCode }}</td>
                                 <td>{{ $articuloM->FrgnName }}</td>
+                                <td>{{ $articuloM->ItemName }}</td>
+                                <td>{{ $articuloM->marca->ItmsGrpNam }}</td>
                                 <td class="precio-celda" data-precio="{{ $articuloM->precio->Price }}" data-moneda='@json($articuloM->precio->moneda)'> </td>
                                 <td><img src="{{ asset($articuloM->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px;height:auto;"></td>
                                 <td>

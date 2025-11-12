@@ -113,6 +113,7 @@ class PedidosController extends Controller
             ->with(['precio.moneda.cambios' => function($query) use ($hoy) {
                 $query->whereDate('RateDate', $hoy);
             }, 'imagen'])
+            ->with('marca')
             ->get();
 
         $modo = 0;
