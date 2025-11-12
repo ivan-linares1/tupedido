@@ -2,9 +2,9 @@
     <thead class="table-dark text-center">
         <tr>
             <th style="width: 100px !important">Clave</th>
-            <th style="width: 200px !important">Producto / Servicio</th>
+            <th style="width: 200px !important">Modelo</th>
             <th style="width: 350px !important">Descripción</th>
-            <th style="width: 200px !important">Grupo de Productos</th>
+            <th style="width: 200px !important">Marca</th>
             <th style="text-align:center; width: 150px !important;">Imagen</th>
             @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
                 <th style="width: 220px !important; text-align:center;">Precio Original</th>

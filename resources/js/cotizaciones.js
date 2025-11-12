@@ -451,6 +451,7 @@ function eliminarFila(boton) {
 // FILTROS Y MODAL DE ARTÍCULOS
 // ================================
 $(document).ready(function() {
+    //configuracion 
     var tablaModal = $('#tablaModalArticulos').DataTable({
         pageLength: 25,
         language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' },
@@ -458,6 +459,7 @@ $(document).ready(function() {
         searching: true
     });
 
+    //cuando se cambia de pagina regresa al inicio del modal
     function scrollModalAlInicio() {
         setTimeout(() => $('#modalArticulos .modal-body').scrollTop(0), 50);
     }

@@ -23,7 +23,7 @@ class SincronizacionController extends Controller
     // Conexión al Web Service con manejo de errores
     private function ConexionWBS()
     {
-        $url = "http://10.10.1.47:8083/KombiService.asmx?wsdl";
+        $url = "http://10.10.1.33:8083/KombiService.asmx?wsdl";
         $token = "12345678";
 
         try {
