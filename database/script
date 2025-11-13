@@ -100,6 +100,7 @@ CREATE TABLE OITM(
   Id_imagen BIGINT NOT NULL,
   Active CHAR(1) NOT NULL,
   ItmsGrpCod VARCHAR(50),
+  OnHand int DEFAULT 0,
   FOREIGN KEY (ItmsGrpCod) REFERENCES OITB(ItmsGrpCod),
   FOREIGN KEY (Id_imagen) REFERENCES Imagenes(Id_imagen)
 );
@@ -138,7 +139,7 @@ CREATE TABLE OQUT(
     IVA DECIMAL(19,6),
     Total DECIMAL(19,6),
     comment VARCHAR(254),
-    abierta VARCHAR(1) DEFAULT 'Y',
+    DocStatus VARCHAR(1) DEFAULT 'A',
     FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
     FOREIGN KEY (SlpCode) REFERENCES OSLP(SlpCode)
 );
@@ -188,7 +189,7 @@ CREATE TABLE ORDR(
     IVA DECIMAL(19,6),
     Total DECIMAL(19,6),
     comment VARCHAR(254),
-    abierta VARCHAR(1) DEFAULT 'Y',
+    DocStatus VARCHAR(1) DEFAULT 'A',
     FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
     FOREIGN KEY (SlpCode) REFERENCES OSLP(SlpCode)
 );

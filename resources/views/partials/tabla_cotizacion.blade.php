@@ -16,7 +16,7 @@
                         CO - {{ $cotizacion->DocEntry }}
                     </a>
                     @if(Auth::user()->rol_id != 3)
-                    @if($cotizacion->abierta == 'Y')
+                    @if($cotizacion->DocStatus == 'A')
                         <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
                     @else
                         <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>

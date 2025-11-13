@@ -98,7 +98,10 @@ class SincronizacionController extends Controller
                 case 'Cambios_Monedas': $valor = $this->CambiosMoneda($xmlResponse, $modo, $cli); break;
                 case 'Vendedores': $valor = $this->Vendedores($xmlResponse, $modo, $cli); break;
                 case 'DocNum': $valor = $this->CotizacionUpdate($xmlResponse, $modo, $cli); break;
-                //case 'DocNumP': $valor = $this->PedidoUpdate($xmlResponse, $modo, $cli); break;
+                case 'DocNumP': $valor = $this->PedidoUpdate($xmlResponse, $modo, $cli); break;
+                case 'stock': $valor = $this->stock($xmlResponse, $modo, $cli); break;
+                case 'CotizacionEstatus': $valor = $this->CotizacionEstatus($xmlResponse, $modo, $cli); break;
+
 
                 default:
                     $valor = ['tipo' => 'warning', 'msg' => "Servicio no reconocido: {$servicio}"];
@@ -630,7 +633,7 @@ class SincronizacionController extends Controller
         return $this->aux('Cambios de Monedas', $total, $insertados, $errores, $warnings, $modo);
     }
 
-    private function CotizacionUpdate($xmlResponse, $modo, $cli)
+    private function CotizacionUpdate($xmlResponse, $modo, $cli) //OQUT coloca el DocNum en la cotizaciones o sea trae el numero de SAP de cada cotizacion 
     {
         //Aqui valido si existen datos en el xml antes de procesarlo
         if (!isset($xmlResponse->No_Cotizacion_OQUT)) 
@@ -660,35 +663,98 @@ class SincronizacionController extends Controller
          return $this->aux('Actualizacion de Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
     }
 
-    /*private function PedidoUpdate($xmlResponse, $modo, $cli)
+    private function CotizacionEstatus($xmlResponse, $modo, $cli) //OQUT coloca el estado de cada cotizacion en abierto o cerrado desde SAP
     {
         //Aqui valido si existen datos en el xml antes de procesarlo
-        if (!isset($xmlResponse->***)) 
+        if (!isset($xmlResponse->No_Estatus_Cotizacion_OQUT)) 
         {
             if($cli){ echo "Datos no disponibles por el momento!!! \n"; return ; }
             else{ return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ]; }
         }
         //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
-        if ($xmlResponse->*** instanceof \stdClass) { $xmlResponse->*** = [$xmlResponse->***]; }
+        if ($xmlResponse->No_Estatus_Cotizacion_OQUT instanceof \stdClass) { $xmlResponse->No_Estatus_Cotizacion_OQUT = [$xmlResponse->No_Estatus_Cotizacion_OQUT]; }
 
-        $total = count($xmlResponse->***); // Total elementos del XML
+        $total = count($xmlResponse->No_Estatus_Cotizacion_OQUT); // Total elementos del XML
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
         $warnings = 0;
 
-        foreach ($xmlResponse->*** as $pedido) {
+        foreach ($xmlResponse->No_Estatus_Cotizacion_OQUT as $cotizacion) {
             try {
                 // actualizar registro
-                $registro = Pedido::find($pedido->***);
+                $registro = Cotizacion::find($cotizacion->ID_COT_KombiShop);
+                $registro->update([ 'DocStatus' => $cotizacion->DocStatus ]);
+
+                if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
+            } catch (\Throwable $e) {
+                $errores++; Log::channel('sync')->error("OQUT: " . "Error al actualizar la cotizacion: ".$cotizacion->ID_COT_KombiShop. "=> " . $e->getMessage());
+            }           
+        }
+         return $this->aux('Actualizacion de Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
+    }
+
+    private function PedidoUpdate($xmlResponse, $modo, $cli)//ORDR coloca el DocNum en el pedido o sea trae el numero de SAP de cada pedido
+    {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->No_Pedido_ORDR)) 
+        {
+            if($cli){ echo "Datos no disponibles por el momento!!! \n"; return ; }
+            else{ return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ]; }
+        }
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->No_Pedido_ORDR instanceof \stdClass) { $xmlResponse->No_Pedido_ORDR = [$xmlResponse->No_Pedido_ORDR]; }
+
+        $total = count($xmlResponse->No_Pedido_ORDR); // Total elementos del XML
+        $insertados = 0; // Contador de inserciones/actualizaciones exitosas
+        $errores = 0;   // Contador de errores
+        $warnings = 0;
+
+        foreach ($xmlResponse->No_Pedido_ORDR as $pedido) {
+            try {
+                // actualizar registro
+                $registro = Pedido::find($pedido->ID_COT_KombiShop);
                 $registro->update([ 'DocNum' => $pedido->DocNum ]);
 
                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
             } catch (\Throwable $e) {
-                $errores++; Log::channel('sync')->error("OQUT: " . "Error al actualizar la cotizacion: ".$pedido->***. "=> " . $e->getMessage());
+                $errores++; Log::channel('sync')->error("ORDR: " . "Error al actualizar la cotizacion: ".$pedido->ID_COT_KombiShop. "=> " . $e->getMessage());
             }           
         }
          return $this->aux('Actualizacion de Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
-    }*/
+    }
+
+
+    private function stock($xmlResponse, $modo, $cli)
+    {
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->Stock)) 
+        {
+            if($cli){ echo "Datos no disponibles por el momento!!! \n"; return ; }
+            else{ return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ]; }
+        }
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->Stock instanceof \stdClass) { $xmlResponse->Stock = [$xmlResponse->Stock]; }
+
+        $total = count($xmlResponse->Stock); // Total elementos del XML
+        $insertados = 0; // Contador de inserciones/actualizaciones exitosas
+        $errores = 0;   // Contador de errores
+        $warnings = 0;
+
+        foreach ($xmlResponse->Stock as $Stock) {
+            try {
+                // actualizar registro
+                $registro = Articulo::find($Stock->ItemCode);
+                $registro->update([ 'OnHand' => $Stock->OnHand ]);
+
+                if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
+            } catch (\Throwable $e) {
+                $errores++; Log::channel('sync')->error("OITM: " . "Error al actualizar el stock: ".$Stock->ItemCode. "=> " . $e->getMessage());
+            }           
+        }
+         return $this->aux('Actualizacion de Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
+    }
+
+
 
     //esta funcion se encarga de retornar los mensajes 
     //$servicio = nombre del servicio que se esta trabajando

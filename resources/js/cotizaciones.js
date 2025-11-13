@@ -591,6 +591,14 @@ $("#guardarCotizacion").on("click", function(e) {
 // ================================
 // GUARDAR PEDIDO
 // ================================
+$(document).ready(function() {
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+});
+
 $("#btnPedido").on("click", function(e) {
     if (!validar(e)) return;
 
@@ -646,6 +654,48 @@ $("#btnPedido").on("click", function(e) {
     });
     
     $("#articulosP").val(JSON.stringify(articulos));
-    $("#BaseEntry").val("{{ $cotizacion->DocEntry ?? '' }}");
-    $("#formCotizacionPedido").submit();
+    const baseEntry = document.getElementById('aux').value;
+    //$("#formCotizacionPedido").submit();
+    // === Verificar stock antes de enviar ===
+    $.ajax({
+        url: `/Pedidos/Articulo/stock`, // ruta al controlador
+        type: "POST",
+        data: {
+            articulos: articulos
+        },
+        success: function(response) {
+            if (response.success) {
+                // Todo bien → enviamos el formulario
+                $("#formCotizacionPedido").submit();
+            } else {
+                // Si hay BaseEntry, mostrar botón adicional
+                let config = {
+                    icon: 'warning',
+                    title: 'Stock insuficiente',
+                    html: response.mensaje,
+                    confirmButtonColor: '#05564f',
+                    confirmButtonText: baseEntry ? 'Ir al pedido' : 'Aceptar'
+                };
+
+                if (baseEntry) {
+                    config.showCancelButton = true;
+                    config.cancelButtonColor = '#fc0202ff',
+                    config.cancelButtonText = 'Cancelar';
+                }
+
+                Swal.fire(config).then(result => {
+                    if (result.isConfirmed && baseEntry) {
+                        window.location.href = `/Pedidos/NuevoPedido/${baseEntry}`;
+                    }
+                });
+            }
+        },
+        error: function(xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo verificar el stock. Intenta nuevamente.'
+            });
+        }
+    });
 });

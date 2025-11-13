@@ -52,4 +52,39 @@ class ArticuloController extends Controller
 
         return view('users.catalogo_productos', compact('articulos', 'marcas'));
     }
+
+    public function stock (Request $request)
+    {
+        $errores = [];
+        $articulos = $request->input('articulos', []);
+
+        foreach($articulos as $articulo)
+        {
+            $art = Articulo::where('ItemCode', $articulo['itemCode'])->first();
+            if( $articulo['cantidad'] > $art->OnHand)
+            {
+                $errores[] = [
+                    'itemCode' => $articulo['itemCode'],
+                    'descripcion' => $articulo['descripcion'],
+                    'modelo' => $art->ItemName,
+                ];
+            }
+        }
+        
+        if(count($errores)>0)
+        {
+            $mensaje = "Los siguientes artículos exceden el stock disponible:<br>";
+            foreach ($errores as $err) {
+                $mensaje .= "<li><b>{$err['itemCode']}</b> - {$err['descripcion']} - {$err['modelo']}<br></li>";
+            }
+
+            return response()->json([
+                'success' => false,
+                'mensaje' => $mensaje,
+                'errores' => $errores
+            ]);
+        }
+
+        return response()->json([ 'success' => true, ]);
+    }
 }

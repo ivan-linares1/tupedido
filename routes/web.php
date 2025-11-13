@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/GuardarPedido', [PedidosController::class, 'guardarPedido'])->name('PedidoSave');
         Route::get('/Pedido/{id}', [PedidosController::class, 'detallesPedido'])->name('detallesP');
         Route::get('/Pedido/pdf/{id}', [PedidosController::class, 'pdfPedido'])->name('pedido.pdf');
+        Route::post('/Articulo/stock', [ArticuloController::class, 'stock'])->name('verificarStock');
     });
 
     //Ruta para la consulta AJAX de los clientes con su paginacion correspondiente

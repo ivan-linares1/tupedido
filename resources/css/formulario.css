@@ -158,7 +158,11 @@ span.form-control {
 /* =================== MODAL ARTÍCULOS =================== */
 .modal-content {
     border-radius: 12px;
-    max-width: 90%;
+    max-width: 95%; /* un poco más ancho */
+}
+
+.modal-dialog.modal-lg {
+    max-width: 1000px; /* más ancho para que no se vea amontonado */
 }
 
 .modal-header {
@@ -167,18 +171,33 @@ span.form-control {
 }
 
 .modal-header h5 {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     letter-spacing: 0.5px;
     color: #fff;
 }
 
-#tablaModalArticulos th, #tablaModalArticulos td {
+/* === TABLA === */
+#tablaModalArticulos {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 4px; /* deja respirar las filas */
+}
+
+#tablaModalArticulos th, 
+#tablaModalArticulos td {
     text-align: center;
     vertical-align: middle;
     font-family: var(--fuente-secundaria);
-    font-size: 0.95rem;
-    padding: 0.45rem 0.6rem;
+    font-size: 0.98rem;
+    padding: 0.65rem 0.9rem; /* más espacio interno */
     box-sizing: border-box;
+}
+
+#tablaModalArticulos thead th {
+    background-color: #05564f;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
 }
 
 #tablaModalArticulos tbody tr:nth-of-type(odd) {
@@ -190,19 +209,21 @@ span.form-control {
     transition: background-color 0.25s ease;
 }
 
+/* === COLUMNAS === */
 #tablaModalArticulos img {
-    max-width: 50px;
+    max-width: 65px; /* imagen más visible */
     height: auto;
-    border-radius: 4px;
+    border-radius: 6px;
+    object-fit: cover;
 }
 
 #tablaModalArticulos td.descripcion,
 #tablaModalArticulos td.nombre {
     white-space: normal;
     word-break: break-word;
-    max-width: 250px;
+    max-width: 260px; /* más ancho para textos largos */
     text-align: left;
-    padding: 0.4rem 0.6rem;
+    padding: 0.5rem 0.75rem;
 }
 
 #tablaModalArticulos td.precio-celda,
@@ -212,26 +233,31 @@ span.form-control {
     text-overflow: ellipsis;
 }
 
+/* === BOTONES === */
 #tablaModalArticulos button {
     font-family: var(--fuente-secundaria);
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
+    padding: 6px 14px;
+    border-radius: 6px;
 }
 
 #tablaModalArticulos button:hover {
     opacity: 0.85;
 }
 
+/* === SELECT DE PAGINACIÓN === */
 #tablaModalArticulos_length select {
-    width: 80px;          /* más ancho para que se vea el número */
+    width: 90px;          /* más ancho para que se vea el número */
     display: inline-block;
-    padding: 0.35rem 0.5rem; /* más espacio interno */
+    padding: 0.4rem 0.5rem; /* más espacio interno */
     border-radius: 6px;
     font-size: 0.95rem;    /* más legible */
     border: 1px solid #ced4da;
     box-sizing: border-box;
 }
+
 
 /* =================== RESPONSIVIDAD LIMITADA =================== */
 /* Solo ajustes menores, Bootstrap maneja todo lo demás */

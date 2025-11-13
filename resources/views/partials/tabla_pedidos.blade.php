@@ -16,7 +16,7 @@
                         PE - {{ $pedido->DocEntry }}
                     </a>
                     @if(Auth::user()->rol_id != 3)
-                    @if($pedido->abierta == 'Y')
+                    @if($pedido->DocStatus == 'A')
                         <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
                     @else
                         <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>

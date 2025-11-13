@@ -107,6 +107,7 @@ class PedidosController extends Controller
 
         // Artículos activos que tengan cambios en su moneda para hoy
         $articulos = Articulo::where('Active', 'Y')
+            ->where('OnHand', '>', 0)
             ->whereHas('precio.moneda.cambios', function($query) use ($hoy) {
                 $query->whereDate('RateDate', $hoy);
             })
@@ -261,6 +262,14 @@ class PedidosController extends Controller
         return view('users.Pedido', compact('clienteBase', 'cotizacion', 'IVA', 'clientes', 'vendedores', 'monedas', 'articulos', 'modo', 'fechaCreacion', 'fechaEntrega', 'preseleccionados', 'pedido'));
     }
 
+    private function BajarStock($ItemCode, $cantidad)
+    {
+        $articulo = Articulo::find($ItemCode);
+        $stockNew = $articulo->OnHand - $cantidad;
+        $articulo->update([ 'OnHand' => $stockNew ]);
+        return;
+    }
+
 
     public function guardarPedido(Request $request)
     {
@@ -362,6 +371,7 @@ class PedidosController extends Controller
                     'Total'         => $art['total'],
                 ]);
                 $lineNum++;
+                $this->BajarStock($art['itemCode'], floatval($art['cantidad']));
             }
 
             if ($request->BaseEntry != '') {
@@ -370,7 +380,7 @@ class PedidosController extends Controller
 
                 if ($cotizacion) {
                     // Cambiar su estado a inactiva
-                    $cotizacion->abierta = 'N';
+                    $cotizacion->DocStatus = 'C';
                     $cotizacion->save();
                 }
             }

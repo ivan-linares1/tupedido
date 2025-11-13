@@ -39,7 +39,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
         @else
             PE - {{ $pedido->DocEntry }}
             @if(Auth::user()->rol_id != 3)
-             @if($pedido->abierta == 'Y')
+             @if($pedido->DocStatus == 'A')
                 <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
             @else
                 <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
@@ -173,6 +173,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
 {{--FORMULARIO para mnadar los valores a guarda el pedido --}}  
 <form id="formCotizacionPedido" action="{{ route('PedidoSave') }}" method="POST">
     @csrf
+    <input type="hidden" name="cliente" id="aux" value="">
     <input type="hidden" name="BaseEntry" id="BaseEntryP" value="{{ $cotizacion->DocEntry ?? ''}}">
     <input type="hidden" name="cliente" id="clienteP">
     <input type="hidden" name="fechaCreacion" id="fechaCreacionP">
