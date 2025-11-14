@@ -58,11 +58,11 @@
 
         {{-- Select para filtrar por estatus abierto o cerradas --}}
         <div class="d-flex gap-2">
-            <label for="Estatus" class="form-label fw-semibold">Estatus</label>
-            <select id="Estatus" name="Estatus" class="form-select form-select-sm rounded-3">
+            <label for="DocStatus" class="form-label fw-semibold">Estatus</label>
+            <select id="DocStatus" name="DocStatus" class="form-select form-select-sm rounded-3">
                 <option value="">Todos</option>
-                <option value="Y" {{ request('Estatus') == 'Y' ? 'selected' : '' }}>Abiertas</option>
-                <option value="N" {{ request('Estatus') == 'N' ? 'selected' : '' }}>Cerradas</option>
+                <option value="A" {{ request('DocStatus') == 'A' ? 'selected' : '' }}>Abiertas</option>
+                <option value="C" {{ request('DocStatus') == 'C' ? 'selected' : '' }}>Cerradas</option>
             </select>
         </div>
 
@@ -88,18 +88,17 @@ $(document).ready(function() {
         const buscar = $('#buscarCotizacion').val();
         const fecha = $('#fechaCotizacion').val();
         const mostrar = $('#mostrar').val();
-        const Estatus = $('#Estatus').val();
+        const DocStatus = $('#DocStatus').val();
 
 
         $.ajax({
             url: url,
             method: 'GET',
-            data: { buscar, fecha, mostrar, Estatus },
+            data: { buscar, fecha, mostrar, DocStatus },
             success: function(data) {
                 $('#tablaCotizacionesContainer').html(data);
             },
             error: function(xhr) {
-                console.error(xhr);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -112,7 +111,7 @@ $(document).ready(function() {
     // Búsqueda y filtros
     $('#buscarCotizacion').on('keyup', function() { fetchCotizaciones(); });
     $('#fechaCotizacion, #mostrar').on('change', function() { fetchCotizaciones(); });
-    $('#Estatus').on('change', function() { fetchCotizaciones(); });
+    $('#DocStatus').on('change', function() { fetchCotizaciones(); });
 
 
     // Paginación AJAX
