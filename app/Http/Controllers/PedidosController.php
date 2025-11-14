@@ -27,7 +27,7 @@ class PedidosController extends Controller
         $buscar = $request->input('buscar');
         $fecha = $request->input('fecha');
         $mostrar = $request->input('mostrar', 10);
-        $Estatus = $request->input('Estatus');
+         $DocStatus = $request->input('DocStatus');
 
         $query = Pedido::with(['vendedor', 'moneda'])
             ->orderBy('DocEntry', 'desc');
@@ -61,12 +61,12 @@ class PedidosController extends Controller
             $query->whereDate('DocDate', $fecha);
         }
 
-        if($Estatus == 'N')
+        if($DocStatus == 'C')
         {
-            $query->where('abierta', 'N');
+            $query->where('DocStatus', 'C');
         }
-        else if($Estatus == 'Y'){
-             $query->where('abierta', 'Y');
+        else if($DocStatus == 'A'){
+             $query->where('DocStatus', 'A');
         }
 
         //Paginación
