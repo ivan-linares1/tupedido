@@ -16,10 +16,10 @@
                         PE - {{ $pedido->DocEntry }}
                     </a>
                     @if(Auth::user()->rol_id != 3)
-                    @if($pedido->abierta == 'Y')
-                        <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
+                    @if($pedido->DocStatus == 'A')
+                        <i class="bi bi-unlock-fill text-success ms-2" title="Pedido abierto"></i>
                     @else
-                        <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
+                        <i class="bi bi-lock-fill text-danger ms-2" title="Pedido cerrado"></i>
                     @endif @endif 
                 </td>
                 <td>{{ \Carbon\Carbon::parse($pedido->DocDate)->format('d-m-Y') }}</td>

@@ -1,4 +1,4 @@
-/*Estos estilos se aplican en las tablas donde se listan todos las cotizaciones
+/*Estos estilos se aplican en las tablas donde se listan todos las cotizaciones y pedidos
 y todos los pedido unicamente en esas 2 vistas*/
 
 /* ======== TÍTULOS ======== */
@@ -109,6 +109,17 @@ h3 {
 }
 
 /* ======== RESPONSIVIDAD ======== */
+@media (max-width: 1200px) {
+    .table th, .table td {
+        font-size: 0.9rem;
+        padding: 0.55rem;
+    }
+
+    .btn-primary {
+        font-size: 0.9rem;
+    }
+}
+
 @media (max-width: 992px) {
     h3 {
         font-size: 1.5rem;
@@ -119,12 +130,78 @@ h3 {
         padding: 0.5rem;
     }
 
+    /* Hace que los filtros y selects se apilen */
+    .d-flex.justify-content-between.align-items-center {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .d-flex.gap-2 {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    #buscarCotizacion, #fechaCotizacion {
+        width: 100%;
+        font-size: 0.85rem;
+    }
+
+    #mostrar, #Estatus {
+        width: 100%;
+    }
+
     .btn-primary {
+        width: 100%;
         font-size: 0.9rem;
         padding: 0.45rem 1rem;
     }
 
-    #buscarCotizacion, #fechaCotizacion {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Ajuste del ancho mínimo para las tablas */
+    .table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 576px) {
+    h3 {
+        font-size: 1.3rem;
+    }
+
+    .table th, .table td {
+        font-size: 0.8rem;
+        padding: 0.4rem;
+    }
+
+    .btn-primary {
+        padding: 0.4rem 0.9rem;
         font-size: 0.85rem;
+    }
+
+    /* El contenedor de filtros se apila verticalmente */
+    .d-flex.justify-content-between.align-items-center {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.8rem;
+    }
+
+    .d-flex.gap-2 {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    /* Hace que el scroll horizontal se vea fluido */
+    .table-responsive {
+        border-radius: 8px;
+        overflow-x: auto;
+    }
+
+    .table {
+        min-width: 700px;
     }
 }

@@ -34,6 +34,7 @@ class Pedido extends Model
         'IVA', 
         'Total',
         'comment',
+        'DocStatus',
     ];
 
     // Relación con las líneas de cotización

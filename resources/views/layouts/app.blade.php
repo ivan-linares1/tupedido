@@ -10,6 +10,7 @@
     <!-- jQuery (obligatorio para Select2) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> {{--Estilos--}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"> {{--Iconos--}}

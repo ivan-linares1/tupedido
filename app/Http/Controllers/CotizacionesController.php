@@ -105,6 +105,7 @@ class CotizacionesController extends Controller
 
         // Artículos activos que tengan cambios en su moneda para hoy
         $articulos = Articulo::where('Active', 'Y')
+            ->where('OnHand', '>', 0)
             ->whereHas('precio.moneda.cambios', function($query) use ($hoy) {
                 $query->whereDate('RateDate', $hoy);
             })

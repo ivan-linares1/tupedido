@@ -16,7 +16,6 @@ window.preseleccionadoClienteDireccionFiscal = @json($cotizacion->Address ?? '')
 window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '');
 </script>
 
-
 <!-- Importación de JS y CSS -->
 @vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
 
@@ -34,7 +33,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
         @else
             CO - {{ $cotizacion->DocEntry ?? '' }}
             @if(Auth::user()->rol_id != 3)
-            @if($cotizacion->abierta == 'Y')
+            @if($cotizacion->DocStatus == 'A')
                 <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
             @else
                 <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
@@ -187,6 +186,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
 <!-- formulario para guardar el pedido de cotizacion hacia pedido -->
 <form id="formCotizacionPedido" action="{{ route('PedidoSave') }}" method="POST">
     @csrf
+    <input type="hidden" name="cliente" id="aux" value="{{ $cotizacion->DocEntry ?? ''}} ">{{--Solo para saber que una cotizacion existey se quiere crear su pedido--}}
     <input type="hidden" name="BaseEntry" id="BaseEntryP" value="{{ $cotizacion->DocEntry ?? ''}}">
     <input type="hidden" name="cliente" id="clienteP">
     <input type="hidden" name="fechaCreacion" id="fechaCreacionP">
@@ -232,7 +232,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
         <button type="button" class="btn btn-danger" onclick="window.open('{{ route('cotizacion.pdf', $cotizacion->DocEntry ?? 0) }}','_blank')">
             <i class="bi bi-filetype-pdf"></i> PDF
         </button>
-        @if($moneda->cambios->isEmpty() || $pedido || $cotizacion->abierta  === 'N')
+        @if($moneda->cambios->isEmpty() || $pedido || $cotizacion->DocStatus == 'C')
             <div class="d-inline-block position-relative">
                 <button class="btn btn-secondary" disabled><i class="bi bi-pencil-square"></i> Editar</button>
                 <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Crear Pedido</button>
@@ -245,15 +245,15 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
                 <i class="bi bi-pencil-square"></i> Editar
             </a>
             @if($preseleccionados['crearPedido'] === false)
-                <div class="d-inline-block position-relative">
-                <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Crear Pedido</button>
-                <small class="mensaje-cambio text-danger">⚠️ La cotizacion ya caduco editala</small>
-            </div>
+                <a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-success">
+                    <i class="bi bi-bag"></i> Crear Pedido
+                </a>
             @else
                 <button type="button" id="btnPedido" class="btn btn-success">
                     <i class="bi bi-save"></i> Crear Pedido
                 </button>
             @endif
+            
         @endif
     @endif
 </div>

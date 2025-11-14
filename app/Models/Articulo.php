@@ -20,6 +20,7 @@ class Articulo extends Model
         'Id_imagen',
         'Active',
         'ItmsGrpCod',
+        'OnHand',
     ];
 
      // Relación: un artículo pertenece a una imagen (imagenes)

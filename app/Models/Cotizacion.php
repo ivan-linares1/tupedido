@@ -34,7 +34,7 @@ class Cotizacion extends Model
         'IVA', 
         'Total',
         'comment',
-        'abierta',
+        'DocStatus',
     ];
 
     // Relación con las líneas de cotización
