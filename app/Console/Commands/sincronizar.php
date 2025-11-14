@@ -44,7 +44,8 @@ class Sincronizar extends Command
                 'DocNum' => 'SBO_No_Coti_SAP_OQUT_TODAS',
                 'stock' => 'SBO_Stock',
                 'DocNumP' => 'SBO_No_Pedi_SAP_ORDR_TODAS',
-                'CotizacionEstatus' => 'SBO_Estatus_Coti_SAP_OQUT_TODAS'
+                'CotizacionEstatus' => 'SBO_Estatus_Coti_SAP_OQUT_TODAS',
+                'PedidoEstatus' => 'SBO_Estatus_Pedi_SAP_ORDR_TODAS'
             ];
 
             if (!isset($metodo[$tipo])) {
@@ -66,7 +67,8 @@ class Sincronizar extends Command
                 'Cambios_Monedas' => 'SBO_Actualiza_Tipo_Cambio_ORTT',
                 'DocNum' => 'SBO_No_Coti_SAP_OQUT',
                 'DocNumP' => 'SBO_No_Ped_SAP_ORDR',
-                'CotizacionEstatus' => 'SBO_Estatus_Coti_SAP_OQUT'
+                'CotizacionEstatus' => 'SBO_Estatus_Coti_SAP_OQUT',
+                'PedidoEstatus' => 'SBO_Estatus_Pedi_SAP_ORDR'
             ];
         }
         else
