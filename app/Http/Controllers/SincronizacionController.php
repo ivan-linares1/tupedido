@@ -23,7 +23,7 @@ class SincronizacionController extends Controller
     // Conexión al Web Service con manejo de errores
     private function ConexionWBS()
     {
-        $url = "http://10.10.1.33:8083/KombiService.asmx?wsdl";
+        $url = "http://10.10.1.24:8083/KombiService.asmx?wsdl";
         $token = "12345678";
 
         try {
@@ -684,14 +684,15 @@ class SincronizacionController extends Controller
             try {
                 // actualizar registro
                 $registro = Cotizacion::find($cotizacion->ID_COT_KombiShop);
-                $registro->update([ 'DocStatus' => $cotizacion->DocStatus ]);
-
+                if($registro->DocStatus === 'A'){
+                    $registro->update([ 'DocStatus' => $cotizacion->DocStatus ]);
+                }
                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
             } catch (\Throwable $e) {
-                $errores++; Log::channel('sync')->error("OQUT: " . "Error al actualizar la cotizacion: ".$cotizacion->ID_COT_KombiShop. "=> " . $e->getMessage());
+                $errores++; Log::channel('sync')->error("OQUT: " . "Error al actualizar el estatus de la cotizacion: ".$cotizacion->ID_COT_KombiShop. "=> " . $e->getMessage());
             }           
         }
-         return $this->aux('Actualizacion de Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
+         return $this->aux('Actualizacion del estatus de la Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
     }
 
     private function PedidoUpdate($xmlResponse, $modo, $cli)//ORDR coloca el DocNum en el pedido o sea trae el numero de SAP de cada pedido
@@ -718,10 +719,10 @@ class SincronizacionController extends Controller
 
                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
             } catch (\Throwable $e) {
-                $errores++; Log::channel('sync')->error("ORDR: " . "Error al actualizar la cotizacion: ".$pedido->ID_COT_KombiShop. "=> " . $e->getMessage());
+                $errores++; Log::channel('sync')->error("ORDR: " . "Error al actualizar el pedido: ".$pedido->ID_COT_KombiShop. "=> " . $e->getMessage());
             }           
         }
-         return $this->aux('Actualizacion de Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
+         return $this->aux('Actualizacion del Pedido', $total, $insertados, $errores, $warnings, $modo );
     }
     
     private function PedidoEstatus($xmlResponse, $modo, $cli) //OQUT coloca el estado de cada cotizacion en abierto o cerrado desde SAP
@@ -748,10 +749,10 @@ class SincronizacionController extends Controller
 
                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
             } catch (\Throwable $e) {
-                $errores++; Log::channel('sync')->error("OQUT: " . "Error al actualizar la cotizacion: ".$pedido->ID_COT_KombiShop. "=> " . $e->getMessage());
+                $errores++; Log::channel('sync')->error("ORDR: " . "Error al actualizar el estatus del pedido: ".$pedido->ID_COT_KombiShop. "=> " . $e->getMessage());
             }           
         }
-         return $this->aux('Actualizacion de Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
+         return $this->aux('Actualizacion del estatus del Pedido', $total, $insertados, $errores, $warnings, $modo );
     }
 
     private function stock($xmlResponse, $modo, $cli)//OITM agrega el stock a cada acticulo 

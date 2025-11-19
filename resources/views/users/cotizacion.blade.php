@@ -235,7 +235,8 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
         @if($moneda->cambios->isEmpty() || $pedido || $cotizacion->DocStatus == 'C')
             <div class="d-inline-block position-relative">
                 <button class="btn btn-secondary" disabled><i class="bi bi-pencil-square"></i> Editar</button>
-                <button class="btn btn-success" disabled><i class="bi bi-bag"></i> Crear Pedido</button>
+                <button class="btn btn-primary" disabled><i class="bi bi-bag"></i> Copiar a Pedido</button>
+                <button class="btn btn-success" disabled><i class="bi bi-save"></i> Crear Pedido</button>
                 <small class="mensaje-cambio text-danger">
                     ⚠️ {!! $pedido ? 'Ya tiene un pedido creado.' : 'Contacte a soporte: no existen tipos de cambio registrados para hoy o Se Cerro la Cotizacion.' !!}
                 </small>
@@ -245,13 +246,17 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
                 <i class="bi bi-pencil-square"></i> Editar
             </a>
             @if($preseleccionados['crearPedido'] === false)
-                <a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-success">
-                    <i class="bi bi-bag"></i> Crear Pedido
+                <a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-primary">
+                    <i class="bi bi-bag"></i> Copiar a Pedido
                 </a>
             @else
+                <a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-primary">
+                    <i class="bi bi-bag"></i> Copiar a Pedido
+                </a>
                 <button type="button" id="btnPedido" class="btn btn-success">
                     <i class="bi bi-save"></i> Crear Pedido
                 </button>
+                
             @endif
             
         @endif

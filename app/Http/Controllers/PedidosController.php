@@ -139,7 +139,6 @@ class PedidosController extends Controller
                 'moneda'   => $cotizacion->DocCur,
                 'comentario' =>$cotizacion->comment,
             ];
-
             foreach ($cotizacion->lineas as $linea) {
                 $articulo = $articulos->firstWhere('ItemCode', $linea->ItemCode);
 
@@ -147,6 +146,7 @@ class PedidosController extends Controller
                     // Clonamos el objeto artículo y agregamos los datos de la cotización
                     $artClone = clone $articulo;
                     $artClone->Quantity  = $linea->Quantity;
+                    $artClone->BaseLine = $linea->BaseLine;
                     $lineasComoArticulos[] = $artClone;
                 }
             }
@@ -346,14 +346,13 @@ class PedidosController extends Controller
                 return back()->with('error', 'No se pudo generar el pedido.');
             }
             
-
             // Guardar líneas del pedido (RDR1)
             $lineNum = 0;
             foreach ($articulos as $art) {
                 LineasPedidos::create([
                     'DocEntry'      => $pedido->DocEntry,
                     'LineNum'       => $lineNum,
-                    'BaseLine'      => $art['baseLine'] === null ? $lineNum : $art['baseLine'],
+                    'BaseLine'      => $art['baseLine'] === null ? null : $art['baseLine'],
                     'ItemCode'      => $art['itemCode'],
                     'U_Dscr'        => $art['descripcion'] ?? '',
                     'unitMsr2'      => $art['unidad'] ?? '',
@@ -361,7 +360,8 @@ class PedidosController extends Controller
                     'DiscPrcnt'     => floatval(str_replace(['%', ','], '', $art['descuentoPorcentaje'] ?? 0)),
                     'Quantity'      => floatval($art['cantidad'] ?? 0),
                     'Id_imagen'     => $art['imagen'] ?? null,
-                    'BaseEntry'     => $request->BaseEntry ?? null,
+                    'BaseEntry'     => $art['baseLine'] === null ? null : $request->BaseEntry,
+                    'BaseType'      => $art['baseLine'] === null ? -1 : 23,
                     'TargetType'    => $art['TargetType'] ?? null,
                     'TrgetEntry'    => $art['TrgetEntry'] ?? null,
                     'BaseRef'       => $art['BaseRef'] ?? null,
@@ -386,7 +386,8 @@ class PedidosController extends Controller
             }
 
             // Retornar detalles del pedido
-            return $this->detallesPedido($pedido->DocEntry);
+           return redirect()->route('detallesP', $pedido->DocEntry)->with('success', 'Pedido guardado correctamente.');
+
 
         } catch (\Exception $e) {
             return back()->with('error', 'Ocurrió un error al guardar el pedido: ' . $e->getMessage());
