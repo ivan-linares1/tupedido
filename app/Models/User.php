@@ -27,6 +27,7 @@ class User extends Authenticatable
         'rol_id',
         'codigo_cliente',
         'codigo_vendedor',
+        'max_sessions',
     ];
 
     /**

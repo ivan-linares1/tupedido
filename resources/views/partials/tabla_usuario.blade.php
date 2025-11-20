@@ -6,6 +6,7 @@
                 <th scope="col">Nombre</th>
                 <th scope="col">Rol</th>
                 <th scope="col">Status</th>
+                <th scope="col">Máx. Sesiones</th>
                 <th scope="col" class="text-center">Acción</th>
             </tr>
         </thead>
@@ -27,6 +28,19 @@
                             </span>
                         @endif
                     </td>
+                     {{-- NUEVO CAMPO PARA CONFIGURAR MÁXIMO --}}
+                    <td>
+                        <input 
+                            type="number" 
+                            min="1" 
+                            class="form-control max-sessions-input"
+                            value="{{ $usuario->max_sessions ?? 1 }}"
+                            data-id="{{ $usuario->id }}"
+                            data-old="{{ $usuario->max_sessions ?? 1 }}"
+                            style="width: 90px;"
+                            @if ($usuario->rol_id == 1) disabled @endif>
+                    </td>
+
                     <td class="text-center">
                         @if ($usuario->rol_id != 1)
                             <label class="switch">
@@ -44,14 +58,59 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center">No se encontraron usuarios</td>
+                    <td colspan="6" class="text-center">No se encontraron usuarios</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 
-    <!-- Paginación -->
     <div class="d-flex justify-content-end mt-2">
         {!! $usuarios->links('pagination::bootstrap-5') !!}
     </div>
 </div>
+
+
+<script>
+    $(document).on('change', '.max-sessions-input', function () {
+    let input = $(this);
+    let userId = input.data('id');
+    let oldValue = input.data('old');
+    let newValue = input.val();
+
+    Swal.fire({
+        title: "¿Actualizar valor?",
+        text: "¿Deseas cambiar el número máximo de sesiones?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, cambiar",
+        cancelButtonText: "Cancelar"
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+            // Enviar actualización
+            $.ajax({
+                url: '{{ route("usuario.update.maxSessions") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    id: userId,
+                    max_sessions: newValue
+                },
+                success: function () {
+                    Swal.fire("Actualizado", "El valor fue modificado correctamente.", "success");
+                    input.data('old', newValue);
+                },
+                error: function () {
+                    Swal.fire("Error", "No se pudo actualizar.", "error");
+                    input.val(oldValue); 
+                }
+            });
+
+        } else {
+            // Cancelado → regresamos el valor anterior
+            input.val(oldValue);
+        }
+    });
+});
+
+</script>

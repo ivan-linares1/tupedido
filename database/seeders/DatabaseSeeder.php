@@ -29,7 +29,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'SA@kombitec.com.mx',
             'password' => Hash::make('12345678'), // siempre encriptar
             'activo' => true,
-            'rol_id' => '1'
+            'rol_id' => '1',
+            'max_sessions' => '2'
         ]);
     }
 }
