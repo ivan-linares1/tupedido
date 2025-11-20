@@ -61,7 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:1,2'])->group(function () {
 
         /*---------------------- USUARIOS ----------------------*/
-        Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
+        Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios');
         Route::post('/usuarios/estado', [UsuarioController::class, 'activo_inactivo'])->name('estado.Usuario');
         Route::post('/usuario/max-sessions', [UsuarioController::class, 'updateMaxSessions'])->name('usuario.update.maxSessions');
 

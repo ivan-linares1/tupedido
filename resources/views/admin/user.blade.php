@@ -18,32 +18,46 @@
 
     <div class="card-body">
 
-        <!-- FILTROS -->
-        <div class="row mb-4 g-3">
-            <div class="col-md-2">
-                <label for="mostrar" class="form-label fw-semibold">Mostrar</label>
-                <select id="mostrar" class="form-select form-select-sm">
-                    <option>10</option>
-                    <option selected>25</option>
-                    <option>50</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label for="estatus" class="form-label fw-semibold">Estatus</label>
-                <select id="estatus" class="form-select form-select-sm">
-                    <option selected>Todos</option>
-                    <option>Activo</option>
-                    <option>Inactivo</option>
-                </select>
-            </div>
-            <div class="col-md-4 ms-auto">
-                <label for="buscar" class="form-label fw-semibold">Buscar</label>
-                <div class="input-group input-group-sm">
-                    <input type="text" id="buscar" class="form-control" placeholder="Buscar...">
-                    <button class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
+        <!-- Filtros -->
+        <form method="GET" action="usuarios">
+            <div class="row mb-3 align-items-end g-3">
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Mostrar</label>
+                    <select class="form-select form-select-sm rounded-3" name="mostrar" onchange="this.form.submit()">
+                        <option {{ request('mostrar') == 25 ? 'selected' : '' }}>25</option>
+                        <option {{ request('mostrar') == 50 ? 'selected' : '' }}>50</option>
+                        <option {{ request('mostrar') == 100 ? 'selected' : '' }}>100</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Estatus</label>
+                    <select class="form-select form-select-sm rounded-3" name="estatus" onchange="this.form.submit()">
+                        <option value="Todos" {{ request('estatus') == 'Todos' ? 'selected' : '' }}>Todos</option>
+                        <option value="Activos" {{ request('estatus') == 'Activos' ? 'selected' : '' }}>Activos</option>
+                        <option value="Inactivos" {{ request('estatus') == 'Inactivos' ? 'selected' : '' }}>Inactivos</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Tipo de Usuario</label>
+                    <select class="form-select form-select-sm rounded-3" name="rol" onchange="this.form.submit()">
+                        <option value="Todos" {{ request('rol') == 'Todos' ? 'selected' : '' }}>Todos</option>
+                        <option value="2" {{ request('rol') == 2 ? 'selected' : '' }}>Administradores</option>
+                        <option value="3" {{ request('rol') == 3 ? 'selected' : '' }}>Clientes</option>
+                        <option value="4" {{ request('rol') == 4 ? 'selected' : '' }}>Vendedores</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 ms-auto">
+                    <label for="buscarUsuario" class="form-label fw-semibold">Buscar</label>
+                    <div class="input-group input-group-sm rounded-3">
+                        <input type="text" id="buscarUsuario" name="buscar" class="form-control rounded-start" placeholder="Buscar producto...">
+                        <span class="input-group-text bg-white rounded-end"><i class="bi bi-search"></i></span>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
 
         <!-- TABLA DINÁMICA -->
         <div id="tablaUsuariosContainer">
@@ -279,43 +293,48 @@ $(document).ready(function() {
         }
     });
 
-    // ---------- Inicializar DataTable ----------
-    var table = null;
-    if ($('#tablaUsuarios').length) {
-        if ($.fn.DataTable.isDataTable('#tablaUsuarios')) {
-            $('#tablaUsuarios').DataTable().destroy();
+    // ---------- Inicializar DataTable Para Filtros----------
+    $(document).ready(function() {
+        function fetchUsuarios(url = "{{ route('usuarios') }}") {
+            const buscar = $('#buscarUsuario').val(); 
+            const estatus = $('select[name="estatus"]').val();
+            const mostrar = $('select[name="mostrar"]').val();
+            const rol = $('select[name="rol"]').val();
+
+
+            $.ajax({
+                url: url,
+                method: "GET",
+                data: { buscar, estatus, mostrar, rol },
+                success: function(data) {
+                    $('#tablaUsuariosContainer').html(data);
+                },
+                error: function() {
+                    alert('Error al cargar los usuarios.');
+                }
+            });
         }
 
-        table = $('#tablaUsuarios').DataTable({
-            pageLength: 25,
-            lengthChange: false,
-            dom: 'rtip',
-            language: {
-                url: "https://cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json"
-            }
+        // Buscar al escribir
+        $('#buscarUsuario').on('keyup', function() {
+            fetchUsuarios();
         });
 
-        // Mostrar N registros
-        $('#mostrar').on('change', function() {
-            const val = parseInt($(this).val()) || 25;
-            table.page.len(val).draw();
+        // Cambios en selects
+        $('select[name="estatus"], select[name="mostrar"], select[name="rol"]').on('change', function() {
+            fetchUsuarios();
         });
 
-        // Filtrar por estatus
-        $('#estatus').on('change', function() {
-            const raw = $(this).val();
-            let filtro = '';
-            if (!raw || raw.toLowerCase() === 'todos') filtro = '';
-            else if (raw.toLowerCase() === 'activo') filtro = '^activo$';
-            else if (raw.toLowerCase() === 'inactivo') filtro = '^inactivo$';
-            table.column(3).search(filtro, true, false, true).draw();
+        // Paginación AJAX para la tabla de usuarios
+        $(document).on('click', '#tablaUsuariosContainer .pagination a', function(e) {
+            e.preventDefault();
+            const url = $(this).attr('href');
+            fetchUsuarios(url);
+
+            $('html, body').animate({ scrollTop: 0 }, 200);
         });
 
-        // Búsqueda global
-        $('#buscar').on('keyup', function() {
-            table.search(this.value).draw();
-        });
-    }
+    });
 
     // ---------- Toggle estado con confirmación ----------
     $.ajaxSetup({
@@ -330,25 +349,27 @@ $(document).ready(function() {
     $(document).on('change', '.toggle-estado-usuarios', function() {
         var $checkbox = $(this);
         var id = $checkbox.data('id');
+        var url = $checkbox.data('url') || window.usuariosEstadoUrl; // usa data-url si existe
+        if (!url) {
+            console.error('No se encontró la URL para actualizar el estado (data-url).');
+            return;
+        }
+
+        // nuevo estado después del cambio (1 o 0)
         var newState = $checkbox.is(':checked') ? 1 : 0;
-        var prevState = $checkbox.prop('checked') ? 0 : 1;
+        // previo estado (simple y seguro): si newState = 1, prev = 0; si newState = 0, prev = 1
+        var prevState = newState ? 0 : 1;
+
         var $row = $checkbox.closest('tr');
         var $statusCell = $row.find('td').eq(3);
 
-        // Función para devolver el HTML del badge según estado
         function getEstadoBadge(activo) {
             return activo
-                ? `<span class="badge bg-success rounded-pill px-3 py-2">
-                    <i class="bi bi-check-circle me-1"></i> Activo
-                </span>`
-                : `<span class="badge bg-danger rounded-pill px-3 py-2">
-                    <i class="bi bi-x-circle me-1"></i> Inactivo
-                </span>`;
+                ? `<span class="badge bg-success rounded-pill px-3 py-2"><i class="bi bi-check-circle me-1"></i> Activo</span>`
+                : `<span class="badge bg-danger rounded-pill px-3 py-2"><i class="bi bi-x-circle me-1"></i> Inactivo</span>`;
         }
 
-        // Revertir el checkbox temporalmente mientras se confirma
-        $checkbox.prop('checked', prevState === 1);
-
+        // Mostrar confirmación
         Swal.fire({
             title: '¿Estás seguro?',
             text: "Vas a cambiar el estado del usuario a " + (newState ? "Activo" : "Inactivo"),
@@ -359,11 +380,27 @@ $(document).ready(function() {
             confirmButtonText: 'Sí, cambiar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
-            if(result.isConfirmed){
-                $checkbox.prop('disabled', true);
+            if (!result.isConfirmed) {
+                // Usuario canceló → volver al estado previo
+                $checkbox.prop('checked', prevState === 1);
+                return;
+            }
 
-                $.post(window.usuariosEstadoUrl, {id: id, field: 'activo', value: newState}, function(response){
-                    if(response.success){
+            // Deshabilitar mientras se procesa
+            $checkbox.prop('disabled', true);
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    id: id,
+                    field: 'activo',
+                    value: newState
+                    // no es necesario _token si ya configuramos X-CSRF-TOKEN en headers
+                },
+                success: function(response) {
+                    // esperar que el controlador responda { success: true } o similar
+                    if (response && response.success) {
                         $checkbox.prop('checked', newState === 1);
                         $statusCell.html(getEstadoBadge(newState));
                         Swal.fire({
@@ -375,21 +412,22 @@ $(document).ready(function() {
                             timer: 2000
                         });
                     } else {
-                        Swal.fire('Error', 'No se pudo actualizar el estado en el servidor.', 'error');
+                        // si la API indica fallo
+                        Swal.fire('Error', response.message || 'No se pudo actualizar el estado en el servidor.', 'error');
                         $checkbox.prop('checked', prevState === 1);
                         $statusCell.html(getEstadoBadge(prevState));
                     }
-                }).fail(function(){
+                },
+                error: function(xhr, status, error) {
                     Swal.fire('Error', 'Ocurrió un error de conexión.', 'error');
                     $checkbox.prop('checked', prevState === 1);
                     $statusCell.html(getEstadoBadge(prevState));
-                }).always(function(){
+                    console.error('AJAX error:', status, error, xhr.responseText);
+                },
+                complete: function() {
                     $checkbox.prop('disabled', false);
-                });
-
-            } else {
-                $checkbox.prop('checked', prevState === 1);
-            }
+                }
+            });
         });
     });
 

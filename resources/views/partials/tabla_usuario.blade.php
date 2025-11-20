@@ -16,7 +16,7 @@
                 <tr>
                     <td>{{ $usuario->email }}</td>
                     <td>{{ $usuario->nombre }}</td>
-                    <td>{{ $usuario->rol?->nombre }}</td>
+                    <td>{{ $usuario->rol->nombre }}</td>
                     <td>
                         @if ($usuario->activo === true)
                             <span class="badge bg-success rounded-pill px-3 py-2">
@@ -33,7 +33,7 @@
                         <input 
                             type="number" 
                             min="1" 
-                            class="form-control max-sessions-input"
+                            class="form-control max-sessions-input "
                             value="{{ $usuario->max_sessions ?? 1 }}"
                             data-id="{{ $usuario->id }}"
                             data-old="{{ $usuario->max_sessions ?? 1 }}"
