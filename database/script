@@ -87,7 +87,7 @@ CREATE TABLE ORTT(
 
 /* Imagenes de productos */
 CREATE TABLE Imagenes(
-  Id_imagen BIGINT PRIMARY KEY AUTO_INCREMENT,
+  Id_imagen BIGINT PRIMARY KEY,
   Ruta_imagen VARCHAR(254)
 );
 
@@ -198,8 +198,8 @@ CREATE TABLE ORDR(
 CREATE TABLE RDR1 (
   DocEntry INT NOT NULL,
   LineNum INT NOT NULL,
-  BaseLine INT NOT NULL,
-  ObjType VARCHAR(20) default 23,
+  BaseLine INT,
+  ObjType VARCHAR(20) default 17,
   ItemCode VARCHAR(50) NOT NULL,
   U_Dscr VARCHAR(250),
   unitMsr2 VARCHAR(100),
@@ -210,7 +210,7 @@ CREATE TABLE RDR1 (
   TargetType INT,
   TrgetEntry INT,
   BaseRef VARCHAR(16),
-  BaseType INT default 23,
+  BaseType INT,
   BaseEntry INT,
   ivaPorcentaje VARCHAR(10),
   Subtotal DECIMAL(19,6) NOT NULL,

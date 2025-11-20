@@ -263,6 +263,7 @@ window.agregarArticulo = function(art) {
     fila.dataset.precioOriginal = art.precio.Price;
     fila.dataset.monedaOriginal = JSON.stringify(art.precio.moneda);
     fila.dataset.itmsGrpCod = art.ItmsGrpCod;
+    fila.dataset.baseline = art.BaseLine ?? null;  
 
     const monedaCambioID = parseInt(document.querySelector('select[name="currency_id"]').value);
     const monedaCambio = monedas.find(m => m.Currency_ID == monedaCambioID);
@@ -278,7 +279,7 @@ window.agregarArticulo = function(art) {
     // Construcción del HTML de la fila
     fila.innerHTML = `
         <td><button class="btn btn-sm btn-danger">X</button></td>
-        <td class="itemcode">${art.ItemCode}</td>
+        <td class="itemcode" >${art.ItemCode}</td>
         <td class="frgnName">${art.FrgnName}</td>
         <td class="imagen" data-imagen="${art.Id_imagen}"><img src="${art.imagen?.Ruta_imagen}" alt="Imagen" style="width: 50px; height: auto;"></td>
         <td class="medida">${art.SalUnitMsr}</td>

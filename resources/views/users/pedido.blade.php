@@ -60,7 +60,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
 
             <!-- Info Cliente -->
             <div id="infoCliente" class="mt-2" style="font-size: 14px;">
-                <span id="telefono">{{ $pedido->Phone1 }}</span>
+                <span id="telefono">{{ $pedido->Phone1 }}</span><br>
                 <span id="correo">
                     @php
                         $email = $pedido->E_Mail ?: '';
