@@ -188,4 +188,19 @@ class UsuarioController extends Controller
 
         return response()->json($vendedor);
     }
+
+    public function updateMaxSessions(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:users,id',
+            'max_sessions' => 'required|integer|min:1'
+        ]);
+
+        $usuario = User::find($request->id);
+        $usuario->max_sessions = $request->max_sessions;
+        $usuario->save();
+
+        return response()->json(['success' => true]);
+    }
+
 }

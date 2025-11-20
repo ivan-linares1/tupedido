@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
         $table->string('codigo_cliente')->nullable()->after('rol_id');
         $table->string('codigo_vendedor')->nullable()->after('codigo_cliente');
+        $table->unsignedInteger('max_sessions')->default(1)->after('codigo_vendedor');
         });
     }
 
@@ -21,7 +22,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['codigo_cliente', 'codigo_vendedor']);
+            $table->dropColumn(['codigo_cliente', 'codigo_vendedor', 'max_sessions']);
         });
     }
 };

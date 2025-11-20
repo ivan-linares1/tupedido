@@ -63,6 +63,8 @@ Route::middleware('auth')->group(function () {
         /*---------------------- USUARIOS ----------------------*/
         Route::get('/Usuarios', [UsuarioController::class, 'index'])->name('usuarios');
         Route::post('/usuarios/estado', [UsuarioController::class, 'activo_inactivo'])->name('estado.Usuario');
+        Route::post('/usuario/max-sessions', [UsuarioController::class, 'updateMaxSessions'])->name('usuario.update.maxSessions');
+
 
         /*---------------------- ADMIN (prefijo /admin) ----------------------*/
         Route::prefix('admin')->group(function () {
