@@ -16,23 +16,40 @@ class UsuarioController extends Controller
 
         // Filtro por búsqueda
         if ($request->filled('buscar')) {
-            $buscar = $request->buscar;
+            $buscar = trim($request->buscar);
+
             $query->where(function ($q) use ($buscar) {
                 $q->where('email', 'like', "%{$buscar}%")
-                  ->orWhere('nombre', 'like', "%{$buscar}%");
+                ->orWhere('nombre', 'like', "%{$buscar}%");
             });
         }
 
         // Filtro por estatus
-        if ($request->estatus === 'Activo') {
+        if ($request->estatus === 'Activos') {
             $query->where('activo', 1);
-        } elseif ($request->estatus === 'Inactivo') {
+        } elseif ($request->estatus === 'Inactivos') {
             $query->where('activo', 0);
         }
+
+        // Filtro por rol
+        if ($request->filled('rol') && $request->rol !== 'Todos') {
+
+            if ($request->rol == 2) {
+                // Administradores = roles 1 y 2
+                $query->whereIn('rol_id', [1, 2]);
+            } else {
+                // Cualquier otro rol filtra solo ese
+                $query->where('rol_id', $request->rol);
+            }
+        }
+
+
+        
 
         // Cantidad de registros por página
         $mostrar = $request->mostrar ?? 25;
         $usuarios = $query->paginate($mostrar);
+
 
         // Si es AJAX, renderizamos solo la tabla
         if ($request->ajax()) {

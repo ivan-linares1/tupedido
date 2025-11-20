@@ -1,12 +1,12 @@
 //Aqui se validan los alerts, los imputs y la animacion de cargando
 
 //solo permite que se escriban numeros en los inputs
-$(document).on('input', '.cantidad, #telefono', function() {
+$(document).on('input', '.cantidad, #telefono, max-sessions-input', function() {
     this.value = this.value.replace(/[^0-9]/g, ''); 
 });
 
 //No permite que se inserten las las letras e y algunos simbolos de operacion y el punto
-$(document).on('keydown', '.cantidad, #telefono', function(e) {
+$(document).on('keydown', '.cantidad, #telefono, .max-sessions-input', function(e) {
     if (["e", "E", "+", "-", "."].includes(e.key)) {
         e.preventDefault();
     }
