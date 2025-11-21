@@ -587,6 +587,36 @@ $("#guardarCotizacion").on("click", function(e) {
 
     $("#articulosH").val(JSON.stringify(articulos));
     $("#formCotizacion").submit();
+    // === Verificar stock antes de enviar ===
+    /*$.ajax({
+        url: `/Pedidos/Articulo/stock`, // ruta al controlador para verificar el stock de articulos
+        type: "POST",
+        data: {
+            articulos: articulos
+        },
+        success: function(response) {
+            if (response.success) {
+                // Todo bien → enviamos el formulario
+                $("#formCotizacion").submit();
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Stock insuficiente',
+                    html: response.mensaje,
+                    confirmButtonColor: '#05564f',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        },
+        error: function(xhr) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo verificar el stock. Intenta nuevamente.'
+            });
+        }
+    });*/
+
 });
 
 // ================================
@@ -659,7 +689,7 @@ $("#btnPedido").on("click", function(e) {
     //$("#formCotizacionPedido").submit();
     // === Verificar stock antes de enviar ===
     $.ajax({
-        url: `/Pedidos/Articulo/stock`, // ruta al controlador
+        url: `/Pedidos/Articulo/stock`, // ruta al controlador para verificar el stock de articulos
         type: "POST",
         data: {
             articulos: articulos

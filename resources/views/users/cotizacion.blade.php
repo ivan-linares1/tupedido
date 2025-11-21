@@ -31,13 +31,31 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
         @if($modo == 0)
             Nueva Cotización
         @else
-            CO - {{ $cotizacion->DocEntry ?? '' }}
-            @if(Auth::user()->rol_id != 3)
-            @if($cotizacion->DocStatus == 'A')
-                <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
-            @else
-                <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
-            @endif @endif
+            <div class="d-flex flex-column">
+                <div class="d-flex align-items-center">
+                    {{-- CO principal --}}
+                    <span class="fw-semibold">
+                        CO - {{ $cotizacion->DocEntry ?? '' }}
+                    </span>
+
+                    {{-- Estado (solo si no es cliente) --}}
+                    @if(Auth::user()->rol_id != 3)
+                        @if($cotizacion->DocStatus == 'A')
+                            <i class="bi bi-unlock-fill text-success ms-2" title="Cotización abierta"></i>
+                        @else
+                            <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
+                        @endif
+                    @endif
+                </div>
+
+                {{-- Número SAP más pequeño, debajo, sin tocar colores --}}
+                @if(Auth::user()->rol_id != 3 && $cotizacion->DocNum)
+                    <span class="ms-1" style="font-size: 1.15rem;">
+                        SAP - {{ $cotizacion->DocNum }}
+                    </span>
+                @endif
+            </div>
+
         @endif
     </h3>
 
