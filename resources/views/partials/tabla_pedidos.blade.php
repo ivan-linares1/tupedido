@@ -2,6 +2,7 @@
         <thead class="table-info  text-center">
             <tr>
                 <th>Folio</th>
+                 @if(Auth::user()->rol_id != 3)<th>SAP</th>@endif
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Vendedor</th>
@@ -22,6 +23,7 @@
                         <i class="bi bi-lock-fill text-danger ms-2" title="Pedido cerrado"></i>
                     @endif @endif 
                 </td>
+                @if(Auth::user()->rol_id != 3)<td>{{ $pedido->DocNum ?? '---'}}</td>@endif
                 <td>{{ \Carbon\Carbon::parse($pedido->DocDate)->format('d-m-Y') }}</td>
                 <td>{{ $pedido->CardName }}</td>
                 <td>{{ $pedido->Vendedor->SlpName ?? '' }}</td>

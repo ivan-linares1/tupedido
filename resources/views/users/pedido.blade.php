@@ -37,13 +37,30 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
         @if($modo == 0)
             Nuevo Pedido
         @else
-            PE - {{ $pedido->DocEntry }}
-            @if(Auth::user()->rol_id != 3)
-             @if($pedido->DocStatus == 'A')
-                <i class="bi bi-unlock-fill text-success ms-2" title="Pedido abierto"></i>
-            @else
-                <i class="bi bi-lock-fill text-danger ms-2" title="Pedido cerrado"></i>
-            @endif @endif
+            <div class="d-flex flex-column">
+                <div class="d-flex align-items-center">
+                    {{-- PE principal --}}
+                    <span class="fw-semibold">
+                        PE - {{ $pedido->DocEntry }}
+                    </span>
+
+                    {{-- Estado (solo si no es cliente) --}}
+                    @if(Auth::user()->rol_id != 3)
+                        @if($pedido->DocStatus == 'A')
+                            <i class="bi bi-unlock-fill text-success ms-2" title="Pedido abierto"></i>
+                        @else
+                            <i class="bi bi-lock-fill text-danger ms-2" title="Pedido cerrado"></i>
+                        @endif
+                    @endif
+                </div>
+
+                {{-- Número SAP más pequeño y debajo, sin cambiar colores --}}
+                @if(Auth::user()->rol_id != 3 && $pedido->DocNum)
+                    <span class="ms-1" style="font-size: 1.15rem;">
+                        SAP - {{ $pedido->DocNum }}
+                    </span>
+                @endif
+            </div>
         @endif
     </h3>
 

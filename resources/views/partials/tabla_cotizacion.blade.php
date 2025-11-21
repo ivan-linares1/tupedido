@@ -2,6 +2,7 @@
     <thead class="text-center">
         <tr>
             <th>Folio</th>
+            @if(Auth::user()->rol_id != 3)<th>SAP</th>@endif
             <th>Fecha</th>
             <th>Cliente</th>
             <th>Vendedor</th>
@@ -22,6 +23,7 @@
                         <i class="bi bi-lock-fill text-danger ms-2" title="Cotización cerrada"></i>
                     @endif @endif 
                 </td>
+                @if(Auth::user()->rol_id != 3)<td>{{ $cotizacion->DocNum ?? '---'}}</td>@endif
                 <td>{{ \Carbon\Carbon::parse($cotizacion->DocDate)->format('d-m-Y') }}</td>
                 <td>{{ $cotizacion->CardName }}</td>
                 <td>{{ $cotizacion->vendedor->SlpName ?? '' }}</td>
