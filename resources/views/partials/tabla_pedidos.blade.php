@@ -7,7 +7,7 @@
                 <th>Cliente</th>
                 <th>Vendedor</th>
                 <th>Total</th>
-                @if(in_array(Auth::user()->rol_id, [1, 2]))<th>Estatus</th>@endif{{--Esta columna la ven solo super y administradores--}}
+                @if(in_array(Auth::user()->rol_id, [1, 2]))<th>Estatus SAP</th>@endif{{--Esta columna la ven solo super y administradores--}}
             </tr>
         </thead>
         <tbody id="tablaPedido">
@@ -30,14 +30,14 @@
                 <td>{{ $pedido->Vendedor->SlpName ?? '' }}</td>
                 <td>{{ number_format($pedido->Total,2) }} {{ $pedido->moneda->Currency ?? '' }}</td>
                 @if(in_array(Auth::user()->rol_id, [1, 2]))<td>
-                    @if( $pedido->DocNum && $pedido->DocNum != -1) Insertado en SAP 
-                    @elseif ($pedido->DocNum && $pedido->DocNum == -1) ERROR: Al insertar en SAP 
+                    @if( $pedido->DocNum ) Insertado en SAP 
+                    @else No insertado
                     @endif
                 </td>@endif{{--Esta columna la ven solo super y administradores--}}
             </tr>
         @empty
             <tr>
-                <td colspan="5" class="text-center">Sin pedidos disponibles</td>
+                <td colspan="7" class="text-center">Sin pedidos disponibles</td>
             </tr>
         @endforelse
     </tbody>

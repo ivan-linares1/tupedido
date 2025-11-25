@@ -12,12 +12,15 @@ $(document).on('keydown', '.cantidad, #telefono, .max-sessions-input', function(
     }
 });
 
-$(document).on('blur', '.cantidad', function() {
-    if (this.value === "" || this.value === "0") {
+$(document).on('blur', '.cantidad', function () {
+    const valor = parseInt(this.value, 10);
+
+    if (valor === 0 || isNaN(valor)) {
         this.value = "1";
+        alert('No se admiten cantidades en 0 (cero), elimina la línea en dicho caso');
     }
-    alert('No se admiten cantidades en 0 (cero), elimina la linea en dicho caso');
 });
+
 
 
 //acciones de las alerts 
@@ -85,8 +88,8 @@ document.onkeydown = function(e) {
     }
 
 };
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('selectstart', e => e.preventDefault());
-document.addEventListener('dragstart', e => e.preventDefault());
+//document.addEventListener('contextmenu', e => e.preventDefault());
+//document.addEventListener('selectstart', e => e.preventDefault());
+//document.addEventListener('dragstart', e => e.preventDefault());
 
 
