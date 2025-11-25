@@ -31,7 +31,7 @@
                 <td>{{ number_format($pedido->Total,2) }} {{ $pedido->moneda->Currency ?? '' }}</td>
                 @if(in_array(Auth::user()->rol_id, [1, 2]))<td>
                     @if( $pedido->DocNum && $pedido->DocNum != -1) Insertado en SAP 
-                    @elseif ($pedido->DocNum == -1) ERROR: Al insertar en SAP 
+                    @elseif ($pedido->DocNum && $pedido->DocNum == -1) ERROR: Al insertar en SAP 
                     @endif
                 </td>@endif{{--Esta columna la ven solo super y administradores--}}
             </tr>
