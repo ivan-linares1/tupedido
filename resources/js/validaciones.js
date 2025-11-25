@@ -12,6 +12,13 @@ $(document).on('keydown', '.cantidad, #telefono, .max-sessions-input', function(
     }
 });
 
+$(document).on('blur', '.cantidad', function() {
+    if (this.value === "" || this.value === "0") {
+        this.value = "1";
+    }
+    alert('No se admiten cantidades en 0 (cero), elimina la linea en dicho caso');
+});
+
 
 //acciones de las alerts 
 document.addEventListener('DOMContentLoaded', function() {
