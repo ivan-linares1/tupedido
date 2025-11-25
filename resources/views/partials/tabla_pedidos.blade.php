@@ -2,11 +2,12 @@
         <thead class="table-info  text-center">
             <tr>
                 <th>Folio</th>
-                 @if(Auth::user()->rol_id != 3)<th>SAP</th>@endif
+                 @if(Auth::user()->rol_id != 3)<th>SAP</th>@endif {{--Esta columna la ven todos menos el cliente--}}
                 <th>Fecha</th>
                 <th>Cliente</th>
                 <th>Vendedor</th>
                 <th>Total</th>
+                @if(in_array(Auth::user()->rol_id, [1, 2]))<th>Estatus</th>@endif{{--Esta columna la ven solo super y administradores--}}
             </tr>
         </thead>
         <tbody id="tablaPedido">
@@ -23,11 +24,16 @@
                         <i class="bi bi-lock-fill text-danger ms-2" title="Pedido cerrado"></i>
                     @endif @endif 
                 </td>
-                @if(Auth::user()->rol_id != 3)<td>{{ $pedido->DocNum ?? '---'}}</td>@endif
+                @if(Auth::user()->rol_id != 3)<td>{{ $pedido->DocNum ?? '---'}}</td>@endif {{--Esta columna la ven todos menos el cliente--}}
                 <td>{{ \Carbon\Carbon::parse($pedido->DocDate)->format('d-m-Y') }}</td>
                 <td>{{ $pedido->CardName }}</td>
                 <td>{{ $pedido->Vendedor->SlpName ?? '' }}</td>
                 <td>{{ number_format($pedido->Total,2) }} {{ $pedido->moneda->Currency ?? '' }}</td>
+                @if(in_array(Auth::user()->rol_id, [1, 2]))<td>
+                    @if( $pedido->DocNum && $pedido->DocNum != -1) Insertado en SAP 
+                    @elseif ($pedido->DocNum == -1) ERROR: Al insertar en SAP 
+                    @endif
+                </td>@endif{{--Esta columna la ven solo super y administradores--}}
             </tr>
         @empty
             <tr>

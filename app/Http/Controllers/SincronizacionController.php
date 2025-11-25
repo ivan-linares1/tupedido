@@ -23,7 +23,7 @@ class SincronizacionController extends Controller
     // Conexión al Web Service con manejo de errores
     private function ConexionWBS()
     {
-        $url = "http://10.10.1.25:8083/KombiService.asmx?wsdl";
+        $url = "http://10.10.1.54:8083/KombiService.asmx?wsdl";
         $token = "12345678";
 
         try {
@@ -262,7 +262,7 @@ class SincronizacionController extends Controller
                 );
                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
             } catch (\Throwable $e) {
-                $errores++; Log::channel('sync')->error("OPLN_Articulos: " . "Error con el la categoria de lista de precio: " . (string)$lista->ListName . "=> " . $e->getMessage());
+                $errores++; Log::channel('sync')->error("OPLN_Articulos: " . "Error con la categoria de lista de precio: " . (string)$lista->ListName . "=> " . $e->getMessage());
             }    
         }
         return $this->aux('Categorias de Listas de Precios', $total, $insertados, $errores, 0, $modo );
@@ -296,7 +296,7 @@ class SincronizacionController extends Controller
 
                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
             } catch (\Throwable $e) {
-                 $errores++; Log::channel('sync')->error("OITB_Marcas: " . "Error con el la marca: " . (string)$marca->ItmsGrpNam . "=> " . $e->getMessage());
+                 $errores++; Log::channel('sync')->error("OITB_Marcas: " . "Error con la marca: " . (string)$marca->ItmsGrpNam . "=> " . $e->getMessage());
             }
         }
         return $this->aux('Marcas', $total, $insertados, $errores, 0, $modo );
@@ -375,7 +375,7 @@ class SincronizacionController extends Controller
                 );
                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
             } catch (\Throwable $e) {
-                $errores++; Log::channel('sync')->error("OCRD_Clientes: " . "Error con el la marca: " . (string)$cliente->CardName . "=> " . $e->getMessage());
+                $errores++; Log::channel('sync')->error("OCRD_Clientes: " . "Error con el cliente: " . (string)$cliente->CardName . "=> " . $e->getMessage());
             }
         }
         return $this->aux('Clientes', $total, $insertados, $errores, 0, $modo );
@@ -533,7 +533,7 @@ class SincronizacionController extends Controller
                 );
                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
             } catch (\Throwable $e) {
-                $errores++; Log::channel('sync')->error("EDG1_DescuentosDetalle: Error con registro AbsEntry '{$absEntry}' ObjKey '{$objKey}' => ".$e->getMessage());
+                $errores++; Log::channel('sync')->error("EDG1_DescuentosDetalle: Error con registro AbsEntry '{$absEntry}' y la Marca ObjKey '{$objKey}' => ".$e->getMessage());
             }
         }
         return $this->aux('Descuentos Detalle', $total, $insertados, $errores, $warnings, $modo);
@@ -595,7 +595,7 @@ class SincronizacionController extends Controller
                 $currency = Moneda::where('Currency', (string)$moneda->Currency)->first();
                 if (!$currency) {
                     $warnings++; 
-                    Log::channel('sync')->warning("ORTT_CambiosMonedas: Warning: Faltan la monedas ".$moneda->Currency." Por ingresar en el sistema");
+                    Log::channel('sync')->warning("ORTT_CambiosMonedas: Warning: Faltan las monedas ".$moneda->Currency." Por ingresar en el sistema");
                     // Si no existe la moneda, puedes saltarla o manejar el error
                     continue;
                 }
@@ -661,7 +661,7 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OQUT: " . "Error al actualizar la cotizacion: ".$cotizacion->ID_COT_KombiShop. "=> " . $e->getMessage());
             }           
         }
-         return $this->aux('Actualizacion de Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
+         return $this->aux('Actualizacion del DocNum de Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
     }
 
     private function CotizacionEstatus($xmlResponse, $modo, $cli) //OQUT coloca el estado de cada cotizacion en abierto o cerrado desde SAP
@@ -722,7 +722,7 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("ORDR: " . "Error al actualizar el pedido: ".$pedido->ID_COT_KombiShop. "=> " . $e->getMessage());
             }           
         }
-         return $this->aux('Actualizacion del Pedido', $total, $insertados, $errores, $warnings, $modo );
+         return $this->aux('Actualizacion del DocNum de Pedidos', $total, $insertados, $errores, $warnings, $modo );
     }
     
     private function PedidoEstatus($xmlResponse, $modo, $cli) //OQUT coloca el estado de cada cotizacion en abierto o cerrado desde SAP
@@ -782,7 +782,7 @@ class SincronizacionController extends Controller
                 $errores++; Log::channel('sync')->error("OITM: " . "Error al actualizar el stock: ".$Stock->ItemCode. "=> " . $e->getMessage());
             }           
         }
-         return $this->aux('Actualizacion de Cotizaciones', $total, $insertados, $errores, $warnings, $modo );
+         return $this->aux('Actualizacion de Stock', $total, $insertados, $errores, $warnings, $modo );
     }
 
 
