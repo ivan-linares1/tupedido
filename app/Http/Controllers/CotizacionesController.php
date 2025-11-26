@@ -307,7 +307,7 @@ class CotizacionesController extends Controller
 
                 if ($cotizacion) {
                     // Cambiar su estado a inactiva
-                    $cotizacion->abierta = 'N';
+                    $cotizacion->DocStatus = 'C';
                     $cotizacion->save();
                 }
             }
