@@ -12,6 +12,7 @@ $(document).on('keydown', '.cantidad, #telefono, .max-sessions-input', function(
     }
 });
 
+//No deja que un contador de cantidad pueda ser cero nunca te obliga a que el usuario elimine la linea de cotizacion
 $(document).on('blur', '.cantidad', function () {
     const valor = parseInt(this.value, 10);
 
@@ -20,7 +21,6 @@ $(document).on('blur', '.cantidad', function () {
         alert('No se admiten cantidades en 0 (cero), elimina la línea en dicho caso');
     }
 });
-
 
 
 //acciones de las alerts 
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Cerrar automáticamente después de 10 segundos
+    // Cerrar automáticamente después de X segundos
     setTimeout(() => {
         document.querySelectorAll('.panel-alert').forEach(function(alert){
             alert.remove();
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-//Bloquea la tecla f12 del navegador
+//Bloquea la tecla f12 del navegador y todo lo que pueda abrir DevTools o inspeccionador o herramientas de desarrollo
 document.onkeydown = function(e) {
     // Bloquea F12
     if (e.keyCode === 123) {
@@ -88,8 +88,11 @@ document.onkeydown = function(e) {
     }
 
 };
-//document.addEventListener('contextmenu', e => e.preventDefault());
-//document.addEventListener('selectstart', e => e.preventDefault());
-//document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('contextmenu', e => e.preventDefault()); //Bloquea el click derech
+//document.addEventListener('selectstart', e => e.preventDefault()); // Evita que se seleccione el contenido 
+document.addEventListener('dragstart', e => e.preventDefault()); //bloquea el arrastre de elementos
 
 
+if (window.top !== window.self) {
+    window.location = '/403';
+}

@@ -8,7 +8,7 @@
                 <th>Cliente</th>
                 <th>Vendedor</th>
                 <th>Total</th>
-                @if(in_array(Auth::user()->rol_id, [1, 2]))<th>Estatus SAP</th>@endif{{--Esta columna la ven solo super y administradores--}}
+                @if(in_array(Auth::user()->rol_id, [1, 2, 4]))<th>Estatus SAP</th>@endif{{--Esta columna la ven solo super y administradores--}}
             </tr>
         </thead>
         <tbody id="tablaPedido">
@@ -30,9 +30,9 @@
                     <td>{{ $pedido->CardName }}</td>
                     <td>{{ $pedido->Vendedor->SlpName ?? '' }}</td>
                     <td>{{ number_format($pedido->Total,2) }} {{ $pedido->moneda->Currency ?? '' }}</td>
-                    @if(in_array(Auth::user()->rol_id, [1, 2]))<td>
+                    @if(in_array(Auth::user()->rol_id, [1, 2, 4]))<td>
                         @if( $pedido->DocNum ) Insertado en SAP 
-                        @else No insertado
+                        @else CREADO
                         @endif
                     </td>@endif{{--Esta columna la ven solo super y administradores--}}
                 </tr>
