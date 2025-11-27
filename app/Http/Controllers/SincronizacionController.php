@@ -782,7 +782,6 @@ class SincronizacionController extends Controller
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
         $warnings = 0;
-
         foreach ($xmlResponse->No_Estatus_Pedido_ORDR as $pedido) {
             try {
                 // actualizar registro

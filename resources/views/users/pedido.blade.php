@@ -49,7 +49,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
                     @if(Auth::user()->rol_id != 3)
                         @if($pedido->DocStatus == 'A')
                             <i class="bi bi-unlock-fill text-success ms-2" title="Pedido abierto"></i>
-                        @elseif($pedido->DocStatus == 'C')
+                        @else
                             <i class="bi bi-lock-fill text-danger ms-2" title="Pedido cerrado"></i>
                         @endif
                     @endif
