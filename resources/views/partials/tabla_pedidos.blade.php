@@ -21,7 +21,7 @@
                         @if(Auth::user()->rol_id != 3)
                         @if($pedido->DocStatus == 'A')
                             <i class="bi bi-unlock-fill text-success ms-2" title="Pedido abierto"></i>
-                        @else
+                        @elseif($pedido->DocStatus == 'C' )
                             <i class="bi bi-lock-fill text-danger ms-2" title="Pedido cerrado"></i>
                         @endif @endif 
                     </td>
@@ -31,9 +31,7 @@
                     <td>{{ $pedido->Vendedor->SlpName ?? '' }}</td>
                     <td>{{ number_format($pedido->Total,2) }} {{ $pedido->moneda->Currency ?? '' }}</td>
                     @if(in_array(Auth::user()->rol_id, [1, 2, 4]))<td>
-                        @if( $pedido->DocNum ) Insertado en SAP 
-                        @else CREADO
-                        @endif
+                        {{ $pedido->Status }}
                     </td>@endif{{--Esta columna la ven solo super y administradores--}}
                 </tr>
             @empty

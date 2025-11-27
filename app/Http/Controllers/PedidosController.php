@@ -49,6 +49,7 @@ class PedidosController extends Controller
         if ($buscar) {
             $query->where(function ($q) use ($buscar) {
                 $q->where('DocEntry', 'like', "%$buscar%")
+                ->orWhere('DocNum', 'like', "%$buscar%")
                 ->orWhere('CardName', 'like', "%$buscar%")
                 ->orWhereHas('vendedor', function ($sub) use ($buscar) {
                     $sub->where('SlpName', 'like', "%$buscar%");

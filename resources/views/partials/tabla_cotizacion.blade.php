@@ -31,7 +31,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="5" class="text-center">Sin cotizaciones disponibles</td>
+                <td colspan="6" class="text-center">Sin cotizaciones disponibles</td>
             </tr>
         @endforelse
     </tbody>

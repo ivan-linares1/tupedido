@@ -190,6 +190,7 @@ CREATE TABLE ORDR(
     Total DECIMAL(19,6),
     comment VARCHAR(254),
     DocStatus VARCHAR(1) DEFAULT 'A',
+    Status VARCHAR(254) DEFAULT 'Creado',
     FOREIGN KEY (CardCode) REFERENCES OCRD(CardCode),
     FOREIGN KEY (SlpCode) REFERENCES OSLP(SlpCode)
 );

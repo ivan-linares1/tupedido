@@ -16,6 +16,7 @@ window.preseleccionadoClienteDireccionFiscal = @json($cotizacion->Address ?? $pe
 window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $pedido->Address2 ?? '');
 </script>
 
+<!-- Importación de JS y CSS -->
 @vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
 
 @php
@@ -48,7 +49,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $
                     @if(Auth::user()->rol_id != 3)
                         @if($pedido->DocStatus == 'A')
                             <i class="bi bi-unlock-fill text-success ms-2" title="Pedido abierto"></i>
-                        @else
+                        @elseif($pedido->DocStatus == 'C')
                             <i class="bi bi-lock-fill text-danger ms-2" title="Pedido cerrado"></i>
                         @endif
                     @endif
