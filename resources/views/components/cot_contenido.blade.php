@@ -216,7 +216,11 @@
                                 <td>{{ $articuloM->ItemName }}</td>
                                 <td>{{ $articuloM->marca->ItmsGrpNam }}</td>
                                 <td class="precio-celda" data-precio="{{ $articuloM->precio->Price }}" data-moneda='@json($articuloM->precio->moneda)'> </td>
-                                <td><img src="{{ asset($articuloM->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px;height:auto;"></td>
+                               {{-- <td><img src="{{ asset($articuloM->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px;height:auto;"></td>--}}
+                                <td><a data-fancybox href="{{ asset($articuloM->imagen->Ruta_imagen) }}">
+                                        <img src="{{ asset($articuloM->imagen->Ruta_imagen) }}" alt="Imagen" style="width:50px; cursor:pointer;">
+                                    </a>
+                                </td>
                                 
                                 <td>@if($articuloM->OnHand > 0)<button class="btn" style="background-color: blue; color: white; border: none; padding: 10px 20px; border-radius: 5px;" onclick='agregarArticulo(@json($articuloM))'>Agregar</button>@else<button class="btn" disabled style="background-color: gray; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: not-allowed;">Sin stock</button>@endif</td>
     
@@ -230,3 +234,9 @@
         </div>
     </div>
 </div>
+
+<style>
+    .fancybox__container {
+    z-index: 20000 !important;
+}
+</style>

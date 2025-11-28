@@ -103,7 +103,6 @@ class SincronizacionController extends Controller
                 case 'CotizacionEstatus': $valor = $this->CotizacionEstatus($xmlResponse, $modo, $cli); break;
                 case 'PedidoEstatus': $valor = $this->PedidoEstatus($xmlResponse, $modo, $cli); break;
 
-
                 default:
                     $valor = ['tipo' => 'warning', 'msg' => "Servicio no reconocido: {$servicio}"];
             }
@@ -715,14 +714,57 @@ class SincronizacionController extends Controller
             try {
                 // actualizar registro
                 $registro = Pedido::find($pedido->ID_COT_KombiShop);
-                $registro->update([ 'DocNum' => $pedido->DocNum ]);
+                //$registro->update([ 'DocNum' => $pedido->DocNum ]);
+                $data = ['DocNum' => $pedido->DocNum, ];
+
+                if ($pedido->DocNum) {
+                    $data['Status'] = 'Insertado en SAP';
+                }
+
+                $registro->update($data);
 
                 if($registro){ $insertados++;}// Si se inserta un nuevo registro o se actualiza, contamos como exitoso.
             } catch (\Throwable $e) {
                 $errores++; Log::channel('sync')->error("ORDR: " . "Error al actualizar el pedido: ".$pedido->ID_COT_KombiShop. "=> " . $e->getMessage());
             }           
         }
+        $this->NoInsertados('SBO_Pedidos_NoInsertados', $modo, $cli);
          return $this->aux('Actualizacion del DocNum de Pedidos', $total, $insertados, $errores, $warnings, $modo );
+    }
+
+    private function NoInsertados($metodo, $modo, $cli) //Es un metodo aparte que se ejecuta cuando existen pedidos que no se insertaron en sap me manda todos es un complemento
+    {                                                   //del metodo de PedidoUpdate
+        $conexion = $this->ConexionWBS();
+
+        if (!$conexion['success']) {
+            Log::channel('sync')->error("Fallo de conexión con el servicio web: {$conexion['error']} en modo: {$modo}"); //Guarda el mensaje de error en los logs
+            
+            if ($cli) { echo $conexion['message'] . "\n"; return; }
+            return redirect()->back()->with($conexion['type'], $conexion['message']); //Regresa a la pantalla la alerta del error
+        }
+
+        $client = $conexion['client'];
+
+        $response = $client->$metodo(['parameters' => []]);
+        $xmlResponse = $response->{$metodo.'Result'};
+        //Aqui valido si existen datos en el xml antes de procesarlo
+        if (!isset($xmlResponse->PedidosNoInsertados)) 
+        {
+            if($cli){ echo "Datos no disponibles por el momento!!! \n"; return ; }
+            else{ return [ 'tipo' => 'warning', 'msg'  => "Datos no disponibles por el momento!!!" ]; }
+        }
+        //Esta condicion es para cuando solo llega un elemento lo pueda convertir en arreglo y poderlo procesar
+        if ($xmlResponse->PedidosNoInsertados instanceof \stdClass) { $xmlResponse->PedidosNoInsertados = [$xmlResponse->PedidosNoInsertados]; }
+
+        foreach ($xmlResponse->PedidosNoInsertados as $pedido) {
+            try {
+                // actualizar registro
+                $registro = Pedido::find($pedido->Code);
+                $registro->update([ 'Status' => $pedido->U_Estatus ]);
+            } catch (\Throwable $e) {
+                Log::channel('sync')->error("ORDR: " . "Error al actualizar el estatus de SAP del pedido: ".$pedido->Code. "=> " . $e->getMessage());
+            }           
+        }
     }
     
     private function PedidoEstatus($xmlResponse, $modo, $cli) //OQUT coloca el estado de cada cotizacion en abierto o cerrado desde SAP
@@ -740,7 +782,6 @@ class SincronizacionController extends Controller
         $insertados = 0; // Contador de inserciones/actualizaciones exitosas
         $errores = 0;   // Contador de errores
         $warnings = 0;
-
         foreach ($xmlResponse->No_Estatus_Pedido_ORDR as $pedido) {
             try {
                 // actualizar registro
@@ -754,6 +795,7 @@ class SincronizacionController extends Controller
         }
          return $this->aux('Actualizacion del estatus del Pedido', $total, $insertados, $errores, $warnings, $modo );
     }
+
 
     private function stock($xmlResponse, $modo, $cli)//OITM agrega el stock a cada acticulo 
     {

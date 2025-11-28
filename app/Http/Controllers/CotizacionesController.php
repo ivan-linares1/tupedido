@@ -45,6 +45,7 @@ class CotizacionesController extends Controller
         if ($buscar) {
             $query->where(function($q) use ($buscar) {
                 $q->where('DocEntry', 'like', "%$buscar%")
+                ->orWhere('DocNum', 'like', "%$buscar%")
                 ->orWhere('CardName', 'like', "%$buscar%")
                 ->orWhereHas('vendedor', function($v) use ($buscar) {
                     $v->where('SlpName', 'like', "%$buscar%");
@@ -307,7 +308,7 @@ class CotizacionesController extends Controller
 
                 if ($cotizacion) {
                     // Cambiar su estado a inactiva
-                    $cotizacion->abierta = 'N';
+                    $cotizacion->DocStatus = 'C';
                     $cotizacion->save();
                 }
             }

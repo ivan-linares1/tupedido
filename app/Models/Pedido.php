@@ -35,6 +35,7 @@ class Pedido extends Model
         'Total',
         'comment',
         'DocStatus',
+        'Status',
     ];
 
     // Relación con las líneas de cotización

@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@yield('title', config('app.name'))</title>
 
+
+
+
     <!-- jQuery (obligatorio para Select2) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -26,6 +29,13 @@
 
     <!--  decimal.js importacion de la libreria que ayuda con los decimales limpios -->
     <script src="https://cdn.jsdelivr.net/npm/decimal.js@10.4.3/decimal.min.js"></script>
+
+    <!--  fancybox importacion de la libreria que ayuda con la ampliacion de las imagenes -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" />
+
+    <!--  fancybox importacion de la libreria que ayuda con la ampliacion de las imagenes -->
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js">
+</script>
     
     <!-- Importación de CSS -->
     @vite(['resources/css/variables.css', 'resources/css/style.css', 'resources/js/validaciones.js', 'resources/css/catalogos.css'])

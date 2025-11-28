@@ -16,6 +16,7 @@ window.preseleccionadoClienteDireccionFiscal = @json($cotizacion->Address ?? $pe
 window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? $pedido->Address2 ?? '');
 </script>
 
+<!-- Importación de JS y CSS -->
 @vite(['resources/js/cotizaciones.js', 'resources/css/formulario.css'])
 
 @php

@@ -26,6 +26,8 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
     $fechaEntrega ??= $cotizacion->DocDueDate ?? \Carbon\Carbon::tomorrow()->format('Y-m-d');
 @endphp
 
+<x-loading /> {{--animacion de cargando cuando se de click en un boton--}}
+
 <div class="container my-4">
     <h3 class="mb-3 fw-bold" data-DocEntryAux='@json($cotizacion->DocEntry ?? "")'>
         @if($modo == 0)
@@ -260,7 +262,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
                 </small>
             </div>
         @else
-            <a href="{{ route('NuevaCotizacion', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-secondary">
+            <a href="{{ route('NuevaCotizacion', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-secondary" data-loading="true">
                 <i class="bi bi-pencil-square"></i> Editar
             </a>
             @if($preseleccionados['crearPedido'] === false)
@@ -268,10 +270,10 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
                     <i class="bi bi-bag"></i> Copiar a Pedido
                 </a>
             @else
-                <a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-primary">
+                <a href="{{ route('NuevaPedido', ['DocEntry' => $cotizacion->DocEntry ?? '']) }}" class="btn btn-primary" data-loading="true">
                     <i class="bi bi-bag"></i> Copiar a Pedido
                 </a>
-                <button type="button" id="btnPedido" class="btn btn-success">
+                <button type="button" id="btnPedido" class="btn btn-success" >
                     <i class="bi bi-save"></i> Crear Pedido
                 </button>
                 
@@ -279,6 +281,7 @@ window.preseleccionadoClienteDireccionEntrega = @json($cotizacion->Address2 ?? '
             
         @endif
     @endif
+    
 </div>
 
 <style>
