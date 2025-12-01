@@ -3,7 +3,7 @@
 @section('title', 'Panel de Sincronizadores')
 
 @section('contenido')
-    @vite(['resources/css/sincronizadores.css'])
+@vite(['resources/css/sincronizadores.css'])
 
 <div class="container mt-5 sincronizadores-panel">
     <h1>Panel de Control de Sincronizadores Manuales</h1>

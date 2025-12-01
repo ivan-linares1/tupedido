@@ -117,7 +117,6 @@ class CotizacionesController extends Controller
             ->get();*/
 
         $articulos = Articulo::where('Active', 'Y')
-        
         ->whereHas('precio.moneda.cambios', function($query) use ($hoy) {
             $query->whereDate('RateDate', $hoy);
         })
