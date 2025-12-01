@@ -87,4 +87,70 @@ class ArticuloController extends Controller
 
         return response()->json([ 'success' => true, ]);
     }
+
+    public function vistaStock() //funcion que solo hace el cambio de vista puede tambien hacerce directamente en el menu pero por el middleaware decidi dejarlo asi
+    {
+        return view('admin.consultaStock');
+    }
+
+    public function buscarArticulos(Request $request)
+    {
+        $search = $request->input('search');
+        $page = $request->input('page', 1);
+        $cantidad = 10;
+
+        $query = Articulo::select('ItemCode', 'ItemName', 'FrgnName')
+            ->where('Active', 'Y');
+
+        if ($search) {
+            $query->where(function($q) use ($search){
+                $q->where('ItemCode', 'LIKE', "%$search%")
+                ->orWhere('ItemName', 'LIKE', "%$search%")
+                ->orWhere('FrgnName', 'LIKE', "%$search%");
+            });
+        }
+
+        $articulos = $query->paginate($cantidad, ['*'], 'page', $page);
+
+        // Formato que Select2 requiere
+        $results = [];
+        foreach ($articulos as $a) {
+            $results[] = [
+                "id"   => $a->ItemCode,
+                "text" => "{$a->ItemCode} - {$a->FrgnName} - {$a->ItemName}"
+            ];
+        }
+
+        return response()->json([
+            "results" => $results,
+            "pagination" => [
+                "more" => $articulos->hasMorePages()
+            ]
+        ]);
+    }
+
+    public function verStock(Request $request)
+    {
+        $articulo = Articulo::where('ItemCode', $request->itemCode)->first();
+
+        if (!$articulo) {
+            return response()->json(['error' => 'Artículo no encontrado'], 404);
+        }
+
+        // Stock disponible
+        $stock = $articulo->OnHand;
+        $cantidad = $request->cantidad;
+
+        if ($stock >= $cantidad) {
+            return response()->json([
+                'success' => 'Suficiente stock'
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Stock insuficiente'
+            ]);
+        }
+    }
+
+    
 }

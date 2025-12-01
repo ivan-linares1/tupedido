@@ -53,6 +53,9 @@
             </a>
             <div class="collapse" id="submenuProductos" data-bs-parent=".sidebar">
             <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small ps-3">
+                @if (Auth::user()->rol_id != 3)
+                     <li><a href="{{ route('consulta_stock') }}" class="nav-link">Consulta Stock</a></li>
+                @endif
                 <li><a href="{{ route('articulos', ['estatus' => 'Activos'])}}" class="nav-link">Productos</a></li>
                 @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)<li>
                     <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#submenuConfiguracionProductos" role="button" aria-expanded="false" aria-controls="submenuConfiguracionProductos">

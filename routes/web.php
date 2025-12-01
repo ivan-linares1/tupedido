@@ -55,6 +55,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/Clientes', [ClienteController::class, 'index'])->name('clientes');
     });
 
+    Route::get('/consulta-stock', [ArticuloController::class, 'vistaStock'])->name('consulta_stock');
+    // RUTA AJAX PARA SELECT2
+    Route::get('/consulta-stock/buscar', [ArticuloController::class, 'buscarArticulos'])->name('consulta_stock.buscar');
+    Route::post('/consulta-stock/ver', [ArticuloController::class, 'verStock'])->name('consulta_stock.ver');
+
+
+
 
 //TODAS LAS RUTAS PROTEGIDAS POR ROLES SON RUTAS QUE UNICAMENTE ESTOS ROLES PUEDEN ACCEDER
     //ADMINISTRACIÓN (Roles 1 y 2)
