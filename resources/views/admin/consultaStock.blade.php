@@ -135,13 +135,20 @@ $('#btnConsultar').on('click', function() {
     let cantidad = $('#inputCantidad').val();
 
     if(!itemCode){
-        alert("Selecciona un artículo primero.");
+        mensajes("Selecciona un artículo primero.");
         return;
     }
 
-    if(!cantidad ){
-        alert("Ingresa una cantidad válida.");
+    if(!cantidad || cantidad <=0){
+        mensajes("Ingresa una cantidad válida.");
         return;
+    }
+
+    function mensajes(texto){
+        Swal.fire({
+            icon: 'error',
+            title: texto,
+        });
     }
 
     $.ajax({
