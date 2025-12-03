@@ -53,9 +53,9 @@
                 <!-- Logo -->
                 <div class="col-md-4 text-center">
                     @if($configuracion->ruta_logo)
-                        <div class="bg-light rounded-3 shadow-sm "> 
+                        <div class="bg-light rounded-3 shadow-sm "><a data-fancybox href="{{ asset('storage/' . $configuracion->ruta_logo) }}"> 
                             <img src="{{ asset('storage/' . $configuracion->ruta_logo) }}" 
-                                 alt="Logo" class="img-fluid" style="width: 100%;  height: 100%;">
+                                 alt="Logo" class="img-fluid" style="width: 100%;  height: 100%; cursor:pointer;"></a>
                         </div>
                     @else
                         <div class="border rounded-3 py-5 text-muted bg-light shadow-sm">

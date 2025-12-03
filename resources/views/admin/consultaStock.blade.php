@@ -128,6 +128,14 @@ $('#selectArticulo').select2({
     }
 });
 
+$('#inputCantidad').on('keypress', function(e) {
+    if (e.which === 13) { // 13 = Enter
+        const boton = document.getElementById('btnConsultar');
+        boton.click();
+    }
+});
+
+
 // ---- CONSULTAR STOCK ----
 $('#btnConsultar').on('click', function() {
 
