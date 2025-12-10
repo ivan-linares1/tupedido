@@ -7,7 +7,7 @@
 @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2) {{--Condicionado para que de la biendenida solo a los roles 1 y 2 que son administradores--}}
     <p>Bienvenido <b> {{Auth::user()->nombre }} </b> al panel de administración.</p>
 @else{{--Condicionado para que de la biendenida al resto que seran clientes y vendedores--}}
-    <p>Bienvenido  <b> {{Auth::user()->nombre }} </b> a KombiShop.</p>
+    <p>Bienvenido <b> {{Auth::user()->nombre }} </b> a Mi KOMBITEC.</p>
 @endif
 
 <x-loading /> {{--animacion de cargando cuando se de click en un boton--}}
