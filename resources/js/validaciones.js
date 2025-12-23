@@ -97,7 +97,7 @@ if (window.top !== window.self) {
     window.location = '/403';
 }
 
-
+//funcion que se encarga de mandar el ping de activa cada minuto para que no se marque como inactiva cuanod no se usa
 (function () {
     console.log('🫀 Heartbeat inicializado');
 
