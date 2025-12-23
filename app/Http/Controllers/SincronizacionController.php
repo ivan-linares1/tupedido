@@ -23,7 +23,7 @@ class SincronizacionController extends Controller
     // Conexión al Web Service con manejo de errores
     private function ConexionWBS()
     {
-        $url = "http://10.10.1.54:8083/KombiService.asmx?wsdl";
+        $url = "http://10.10.1.31:8083/KombiService.asmx?wsdl";
         $token = "12345678";
 
         try {
@@ -588,6 +588,8 @@ class SincronizacionController extends Controller
         $errores = 0;   // Contador de errores
         $warnings = 0;
 
+        $fechasProcesadas = [];
+
         foreach ($xmlResponse->TipoCambioORTT as $moneda) {
             try {
                 // Obtener Currency_ID desde OCRN
@@ -603,6 +605,7 @@ class SincronizacionController extends Controller
                 $fechaStr = str_replace(['a. m.', 'p. m.', 'a.m.', 'p.m.', 'A. M.', 'P. M.'], ['am', 'pm', 'am', 'pm', 'am', 'pm'], (string)$moneda->RateDate);
 
                 $fecha = Carbon::createFromFormat('d/m/Y h:i:s a', $fechaStr)->format('Y-m-d');
+                $fechasProcesadas[] = $fecha;
 
                 // Insertar o actualizar precio
                  $registro = MonedaCambio::updateOrInsert(
@@ -620,15 +623,21 @@ class SincronizacionController extends Controller
             }
         }
         $monedaMXP = Moneda::where('Currency', 'MXP')->first();
-        MonedaCambio::updateOrInsert(
-            [
-                'Currency_ID' =>  $monedaMXP->Currency_ID ,
-                'RateDate' => $fecha,
-            ],
-            [
-                'Rate' => 1,
-            ]
-        );
+        if ($monedaMXP) {
+            foreach (array_unique($fechasProcesadas) as $fechaMXP) {
+                MonedaCambio::updateOrInsert(
+                    [
+                        'Currency_ID' => $monedaMXP->Currency_ID,
+                        'RateDate'    => $fechaMXP,
+                    ],
+                    [
+                        'Rate' => 1,
+                    ]
+                );
+            }
+        } else {
+            Log::channel('sync')->warning("ORTT_CambiosMonedas: La moneda MXP no existe en OCRN");
+        }
 
         return $this->aux('Cambios de Monedas', $total, $insertados, $errores, $warnings, $modo);
     }

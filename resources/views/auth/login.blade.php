@@ -22,7 +22,7 @@
 <body>
 
     <div class="card-login p-5 col-11 col-sm-8 col-md-6 col-lg-5 col-xl-4">
-        <h2>Bienvenido a la plataforma de pedidos de Kombitec</h2>
+        <h2>Bienvenido a Mi Kombitec</h2>
 
         {{-- Mensajes de error --}}
         @if ($errors->any())

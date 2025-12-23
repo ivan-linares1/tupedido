@@ -128,6 +128,14 @@ $('#selectArticulo').select2({
     }
 });
 
+$('#inputCantidad').on('keypress', function(e) {
+    if (e.which === 13) { // 13 = Enter
+        const boton = document.getElementById('btnConsultar');
+        boton.click();
+    }
+});
+
+
 // ---- CONSULTAR STOCK ----
 $('#btnConsultar').on('click', function() {
 
@@ -135,13 +143,20 @@ $('#btnConsultar').on('click', function() {
     let cantidad = $('#inputCantidad').val();
 
     if(!itemCode){
-        alert("Selecciona un artículo primero.");
+        mensajes("Selecciona un artículo primero.");
         return;
     }
 
-    if(!cantidad ){
-        alert("Ingresa una cantidad válida.");
+    if(!cantidad || cantidad <=0){
+        mensajes("Ingresa una cantidad válida.");
         return;
+    }
+
+    function mensajes(texto){
+        Swal.fire({
+            icon: 'error',
+            title: texto,
+        });
     }
 
     $.ajax({

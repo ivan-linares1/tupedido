@@ -19,7 +19,11 @@
             <td class="text-primary fw-semibold" style="width: 200px !important">{{ $articulo->ItemName }}</td>
             <td style="width: 350px !important">{{ $articulo->FrgnName }}</td>
             <td style="width: 200px !important"> {{ $articulo->marca->ItmsGrpNam }}</td>
-            <td style="text-align:center; width:150px"><img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:70px;height:auto;"></td>
+            {{--<td style="text-align:center; width:150px"><img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:70px;height:auto;"></td>--}}
+             <td style="text-align:center; width:150px"><a data-fancybox href="{{ asset($articulo->imagen->Ruta_imagen) }}">
+                    <img src="{{ asset($articulo->imagen->Ruta_imagen) }}" alt="Imagen" style="width:70px; height:auto; cursor:pointer;">
+                </a>
+            </td>
             @if (Auth::user()->rol_id == 1 || Auth::user()->rol_id == 2)
             <td style="width: 220px !important;">
                 @if($articulo->precio)
