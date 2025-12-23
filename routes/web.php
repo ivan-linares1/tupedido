@@ -12,7 +12,14 @@ use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\SincronizacionController;
 use App\Models\configuracion;
 
+
+
 Route::get('/', fn() => redirect()->route('dashboard'));
+
+Route::post('/heartbeat', function () {
+    return response()->noContent();
+})->middleware('auth');
+
 
 //TODAS LAS RUTAS PROTEGIDAS POR AUTENTICACIÓN 
 Route::middleware('auth')->group(function () {

@@ -10,28 +10,38 @@ class LimitUserSessions
 {
     public function handle($request, Closure $next)
     {
-        if (Auth::check()) {
+        if (!Auth::check()) {
+            return $next($request);
+        }
 
-            $user = Auth::user();
+        $user = Auth::user();
+        $maxAllowed = (int) ($user->max_sessions ?? 1);
 
-            // Valor máximo permitido (directo de la columna users.max_sessions)
-            $maxAllowed = $user->max_sessions ?? 1; // por si acaso
+        // Ventana de vida real (ej: 2 minutos)
+        $activeWindow = now()->subMinutes(2)->timestamp;
 
-            // Contar sesiones activas
-            $activeSessions = DB::table('sessions')
-                ->where('user_id', $user->id)
-                ->count();
+        // Limpia sesiones muertas
+        DB::table('sessions')
+            ->where('user_id', $user->id)
+            ->where('last_activity', '<', $activeWindow)
+            ->delete();
 
-            // Si excede el límite → cerrar sesión
-            if ($activeSessions > $maxAllowed) {
+        // Cuenta sesiones realmente activas
+        $activeSessions = DB::table('sessions')
+            ->where('user_id', $user->id)
+            ->where('last_activity', '>=', $activeWindow)
+            ->count();
 
-                Auth::logout();
+        if ($activeSessions > $maxAllowed) {
 
-                return redirect()->route('login')
-                    ->withErrors([
-                        'session_limit' => 'Has alcanzado el número máximo de sesiones permitidas.'
-                    ]);
-            }
+            Auth::logout();
+
+            return redirect()
+                ->route('login')
+                ->withErrors([
+                    'session_limit' =>
+                        'Ya alcanzaste el número máximo de sesiones activas.'
+                ]);
         }
 
         return $next($request);
