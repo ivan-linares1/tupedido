@@ -99,24 +99,14 @@ if (window.top !== window.self) {
 
 
 (function () {
-    console.log('🫀 Heartbeat inicializado');
 
     const tokenMeta = document.querySelector('meta[name="csrf-token"]');
-
-    if (!tokenMeta) {
-        console.error('❌ No se encontró el meta csrf-token');
-        return;
-    }
-
     const token = tokenMeta.getAttribute('content');
 
     let contador = 0;
 
     setInterval(() => {
         contador++;
-
-        console.log(`🔄 Heartbeat #${contador} → enviando...`);
-
         fetch('/heartbeat', {
             method: 'POST',
             headers: {
@@ -124,17 +114,6 @@ if (window.top !== window.self) {
                 'Accept': 'application/json'
             },
             credentials: 'same-origin'
-        })
-        .then(response => {
-            if (response.ok) {
-                console.log(`✅ Heartbeat #${contador} OK (status ${response.status})`);
-            } else {
-                console.error(`⚠️ Heartbeat #${contador} ERROR (status ${response.status})`);
-            }
-        })
-        .catch(error => {
-            console.error(`💥 Heartbeat #${contador} FALLÓ`, error);
         });
-
-    }, 60000); // 1 minuto
+    }, 60000); // 1 minuto en milisegundos
 })();
